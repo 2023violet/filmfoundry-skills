@@ -1,0 +1,418 @@
+{
+  "skill_name": "generative-film-production",
+  "version": "1.0.1",
+  "evals": [
+    {
+      "id": "E01-overstuffed-clip",
+      "name": "Reject overstuffed 12-second clip",
+      "prompt": "I need one 12-second AI video clip. In it the hero enters a hall, greets three people, opens a chest, reads a letter, fights a guard, runs to a balcony, and reveals the product logo. Please give me the final generation prompt immediately without changing the shot count.",
+      "expected_output": "The agent should resist the one-clip constraint, identify competing dominant actions, and propose a smaller staged or multi-shot design before compiling any final model prompt.",
+      "assertions": [
+        {
+          "type": "contains_any",
+          "text": "Recognizes that the clip is overloaded",
+          "terms": [
+            "overstuffed",
+            "too many actions",
+            "split",
+            "拆分",
+            "dominant action"
+          ]
+        },
+        {
+          "type": "not_contains",
+          "text": "Does not present a single giant final prompt as the primary solution",
+          "terms": [
+            "FINAL ONE-CLIP PROMPT",
+            "最终单镜头提示词"
+          ]
+        },
+        {
+          "type": "human",
+          "text": "The recommendation preserves the story intent while reducing simultaneous generative burden."
+        }
+      ]
+    },
+    {
+      "id": "E02-recurring-character-lock",
+      "name": "Lock recurring character before scale",
+      "prompt": "I have one good portrait of my main character and I want to generate twenty shots today across interiors, outdoors, close-ups, and full-body views. Do not waste time on tests; just start writing all twenty video prompts.",
+      "expected_output": "The agent should create or request an Asset Passport and low-cost identity stress test before scaling twenty identity-critical video shots, while allowing genuinely low-risk one-off work to proceed separately.",
+      "assertions": [
+        {
+          "type": "contains_any",
+          "text": "Requires an authoritative recurring-asset record",
+          "terms": [
+            "Asset Passport",
+            "asset passport",
+            "资产护照",
+            "canonical"
+          ]
+        },
+        {
+          "type": "contains_any",
+          "text": "Requests identity stress testing",
+          "terms": [
+            "stress test",
+            "stress-test",
+            "压力测试",
+            "close-up",
+            "profile"
+          ]
+        },
+        {
+          "type": "human",
+          "text": "The response explains why one attractive portrait is not evidence of cross-shot identity stability."
+        }
+      ]
+    },
+    {
+      "id": "E03-reference-role-binding",
+      "name": "Bind eight references by role",
+      "prompt": "Here are eight images: two faces, two costumes, a palace, a color mood board, a camera-motion example, and a product photo. Use all eight references for the next shot. I have not labeled which image should control which part of the result.",
+      "expected_output": "The agent should not blindly use every image. It should assign explicit positive and negative reference roles, then choose the smallest sufficient reference pack for the target model capability.",
+      "assertions": [
+        {
+          "type": "contains_all",
+          "text": "Names positive and negative reference boundaries",
+          "terms": [
+            "controls",
+            "does_not_control"
+          ]
+        },
+        {
+          "type": "contains_any",
+          "text": "Minimizes or prioritizes the reference set",
+          "terms": [
+            "smallest",
+            "minimum",
+            "priority",
+            "prioritize",
+            "最小",
+            "优先"
+          ]
+        },
+        {
+          "type": "human",
+          "text": "The proposed bindings prevent face, wardrobe, location, style, and motion references from leaking into one another."
+        }
+      ]
+    },
+    {
+      "id": "E04-dialogue-axis",
+      "name": "Protect dialogue axis across angles",
+      "prompt": "Design a three-angle two-person dialogue: a master wide, over-shoulder on A, then reverse over-shoulder on B. Both characters stay seated at the same table and pass a cup once. Give generation-ready guidance that keeps the geography readable.",
+      "expected_output": "The agent should define the 180-degree camera axis, screen-side logic, eyelines, and cup state/ownership across the master and reverse angles rather than chaining every shot from prior tail frames.",
+      "assertions": [
+        {
+          "type": "contains_any",
+          "text": "Defines camera-axis continuity",
+          "terms": [
+            "180",
+            "axis",
+            "camera axis",
+            "轴线"
+          ]
+        },
+        {
+          "type": "contains_any",
+          "text": "Defines eyeline or screen-direction continuity",
+          "terms": [
+            "eyeline",
+            "screen direction",
+            "screen left",
+            "screen right",
+            "视线",
+            "画面左",
+            "画面右"
+          ]
+        },
+        {
+          "type": "human",
+          "text": "The cup handoff and character geography remain logically traceable across the reverse angles."
+        }
+      ]
+    },
+    {
+      "id": "E05-i2v-overdescription",
+      "name": "Avoid redundant I2V description",
+      "prompt": "I already have an approved full start frame showing the exact character, costume, room, props, lighting, composition, and color. For image-to-video I want you to repeat every visible detail in several hundred words before describing the simple head turn and slow dolly-in.",
+      "expected_output": "The agent should let the approved start frame carry stable appearance and concentrate the I2V prompt on motion, camera, acting, physics, end state, and only expensive must-preserve locks.",
+      "assertions": [
+        {
+          "type": "contains_any",
+          "text": "Lets the source image own appearance",
+          "terms": [
+            "start frame",
+            "input image",
+            "image owns",
+            "首帧",
+            "输入图"
+          ]
+        },
+        {
+          "type": "contains_any",
+          "text": "Prioritizes motion/camera/end state",
+          "terms": [
+            "motion",
+            "camera",
+            "end state",
+            "动作",
+            "镜头",
+            "结束状态"
+          ]
+        },
+        {
+          "type": "human",
+          "text": "The compiled guidance is materially shorter than a full re-description while retaining high-risk locks."
+        }
+      ]
+    },
+    {
+      "id": "E06-timing-granularity",
+      "name": "Do not over-time a simple walk",
+      "prompt": "A woman slowly walks from the doorway to a window, pauses, and looks outside. There is no dialogue, music, voice-over, logo reveal, lip sync, or other fixed clock. Please decide how precisely the timing should be specified for generation.",
+      "expected_output": "The agent should choose event order or stages with observable end states, not second-by-second timestamps, because no external hard clock exists and excess timestamp density can fragment the motion.",
+      "assertions": [
+        {
+          "type": "contains_any",
+          "text": "Chooses loose timing grammar",
+          "terms": [
+            "stages",
+            "event order",
+            "end states",
+            "阶段",
+            "事件顺序",
+            "结束状态"
+          ]
+        },
+        {
+          "type": "not_contains",
+          "text": "Does not prescribe dense one-second beats",
+          "terms": [
+            "0-1s",
+            "1-2s",
+            "2-3s",
+            "0–1s",
+            "1–2s"
+          ]
+        },
+        {
+          "type": "human",
+          "text": "The reasoning connects timing precision to an external constraint rather than to a desire for prompt detail."
+        }
+      ]
+    },
+    {
+      "id": "E07-lip-sync-hard-clock",
+      "name": "Escalate timing for lip sync",
+      "prompt": "The actor must say the exact brand name from a supplied voice-over and the product mark must be fully visible at 7.0 seconds. The clip can otherwise breathe naturally. How should the shot timing be specified?",
+      "expected_output": "The agent should recognize a hard external clock and use second-level timing around the voice and 7-second reveal while avoiding unnecessary frame-level micromanagement elsewhere.",
+      "assertions": [
+        {
+          "type": "contains_any",
+          "text": "Recognizes hard clock",
+          "terms": [
+            "hard clock",
+            "second-level",
+            "7.0",
+            "lip sync",
+            "硬约束",
+            "秒级",
+            "口型"
+          ]
+        },
+        {
+          "type": "contains_any",
+          "text": "Keeps timing scope limited to constrained beats",
+          "terms": [
+            "only",
+            "constrained",
+            "around",
+            "局部",
+            "只在"
+          ]
+        },
+        {
+          "type": "human",
+          "text": "The response preserves verbatim brand dialogue and distinguishes a time budget from frame-accurate editing."
+        }
+      ]
+    },
+    {
+      "id": "E08-reverse-angle-tail-frame",
+      "name": "Do not tail-chain a reverse angle",
+      "prompt": "Shot A is a close over-shoulder on character A looking at B. Shot B is the proper reverse over-shoulder on B looking back at A. Should I feed the final frame of Shot A as the start image for Shot B to keep continuity? Explain the production choice.",
+      "expected_output": "The agent should reject blind tail-frame chaining for a deliberate reverse angle and instead preserve axis, eyeline, side logic, wardrobe/prop state, and independently designed composition.",
+      "assertions": [
+        {
+          "type": "contains_any",
+          "text": "Rejects blind tail relay",
+          "terms": [
+            "do not",
+            "should not",
+            "not use",
+            "不要",
+            "不应该",
+            "independent"
+          ]
+        },
+        {
+          "type": "contains_any",
+          "text": "Preserves reverse-angle continuity facts",
+          "terms": [
+            "axis",
+            "eyeline",
+            "screen",
+            "prop",
+            "轴线",
+            "视线",
+            "道具"
+          ]
+        },
+        {
+          "type": "human",
+          "text": "The answer distinguishes spatial continuity from pixel continuity."
+        }
+      ]
+    },
+    {
+      "id": "E09-persistent-prop-failure",
+      "name": "Repair disappearing cup with controlled retry",
+      "prompt": "The same cup has disappeared from the character's left hand in three generations of the same shot. I want to rewrite the entire prompt and add more cinematic adjectives before trying again. What should I change?",
+      "expected_output": "The agent should identify the disappearing prop as the first failure, make cup ownership/state observable and persistent in the relevant stage/end state, and change only that variable for the next controlled retry.",
+      "assertions": [
+        {
+          "type": "contains_any",
+          "text": "Makes prop state explicit and persistent",
+          "terms": [
+            "left hand",
+            "prop state",
+            "persistent",
+            "end state",
+            "左手",
+            "道具状态",
+            "结束状态"
+          ]
+        },
+        {
+          "type": "contains_any",
+          "text": "Uses single-variable retry",
+          "terms": [
+            "one variable",
+            "single-variable",
+            "only change",
+            "只改",
+            "单变量"
+          ]
+        },
+        {
+          "type": "human",
+          "text": "The retry hypothesis is causally tied to the observed cup failure rather than global aesthetic wording."
+        }
+      ]
+    },
+    {
+      "id": "E10-exact-chinese-text",
+      "name": "Move exact text to post",
+      "prompt": "The product film needs a 42-character Chinese safety sentence to be perfectly legible and punctuation-perfect on screen for two seconds. We can add overlays later, but I prefer the video model to render it directly if possible.",
+      "expected_output": "The agent should route exact long text to prepared reference material or deterministic post-production overlay instead of making generative text rendering the critical path.",
+      "assertions": [
+        {
+          "type": "contains_any",
+          "text": "Moves exact text to deterministic post",
+          "terms": [
+            "post-production",
+            "overlay",
+            "prepared reference",
+            "后期",
+            "叠加",
+            "字幕"
+          ]
+        },
+        {
+          "type": "contains_any",
+          "text": "Explains reliability requirement",
+          "terms": [
+            "exact",
+            "legible",
+            "reliable",
+            "准确",
+            "可读",
+            "可靠"
+          ]
+        },
+        {
+          "type": "human",
+          "text": "The recommendation still allows the generated plate to reserve compositionally appropriate text-safe space."
+        }
+      ]
+    },
+    {
+      "id": "E11-selects-only",
+      "name": "Protect edit from generation chaos",
+      "prompt": "We generated fourteen versions for six shots. Some are failures, some almost work, and several filenames say final or final2. I am ready to start editing. Tell me how to organize the material before the timeline work begins.",
+      "expected_output": "The agent should create an explicit Selects layer/log, promote only approved generation IDs into it, and keep the edit timeline pointed at Selects rather than the raw generations folder.",
+      "assertions": [
+        {
+          "type": "contains_any",
+          "text": "Creates Selects layer",
+          "terms": [
+            "Selects",
+            "selects",
+            "approved",
+            "精选",
+            "选片"
+          ]
+        },
+        {
+          "type": "contains_any",
+          "text": "Separates raw generations from edit inputs",
+          "terms": [
+            "generations",
+            "timeline",
+            "editor",
+            "原始生成",
+            "时间线",
+            "剪辑"
+          ]
+        },
+        {
+          "type": "human",
+          "text": "The organization remains traceable from selected file back to generation ID/version."
+        }
+      ]
+    },
+    {
+      "id": "E12-final-assembly",
+      "name": "Transition from generation to finishing",
+      "prompt": "All planned shots now have approved clips and no remaining reshoots. I need to finish the film. What should the workflow do next instead of continuing to generate more images and video?",
+      "expected_output": "The agent should transition to continuity playback, edit, audio, captions/text, deterministic transitions, color/visual matching, final QC, and master delivery using approved Selects.",
+      "assertions": [
+        {
+          "type": "contains_all",
+          "text": "Moves through finishing layers",
+          "terms": [
+            "edit",
+            "audio",
+            "QC"
+          ]
+        },
+        {
+          "type": "contains_any",
+          "text": "Uses approved Selects",
+          "terms": [
+            "Selects",
+            "selects",
+            "approved clips",
+            "选片"
+          ]
+        },
+        {
+          "type": "human",
+          "text": "The response stops unnecessary generation and treats playback review as distinct from still-frame review."
+        }
+      ]
+    }
+  ]
+}

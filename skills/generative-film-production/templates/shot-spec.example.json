@@ -1,0 +1,35 @@
+{
+  "shot_id": "SH001",
+  "scene_id": "SC01",
+  "narrative_goal": "Reveal the map clue",
+  "dominant_action": "CHAR_A unfolds the map",
+  "timing_granularity": "stages",
+  "initial_state": "CHAR_A stands frame left holding a folded map",
+  "end_state": "The map is fully open; CHAR_A remains frame left with the left hand on the lower-left corner",
+  "transition_type": "reverse_angle",
+  "camera_axis": "table-to-CHAR_A axis, do not cross",
+  "eyeline": "CHAR_A looks screen right toward CHAR_B",
+  "reference_bindings": [
+    {
+      "ref_id": "REF_A",
+      "controls": "face identity",
+      "does_not_control": "wardrobe, background, lighting"
+    }
+  ],
+  "action_stages": [
+    {
+      "stage": 1,
+      "action": "CHAR_A places the folded map on the table",
+      "end_state": "The folded map rests centered on the table"
+    },
+    {
+      "stage": 2,
+      "action": "CHAR_A unfolds the map",
+      "end_state": "The map is fully open and both hands stop moving"
+    }
+  ],
+  "screen_direction": "CHAR_A:left|CHAR_B:right",
+  "eyeline_subject": "CHAR_A",
+  "eyeline_target": "CHAR_B",
+  "eyeline_screen_direction": "right"
+}

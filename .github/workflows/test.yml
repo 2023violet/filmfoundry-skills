@@ -1,0 +1,19 @@
+name: test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install pytest
+      - run: python -m pytest -q
+      - run: python skills/generative-film-production/scripts/validate_shot_spec.py skills/generative-film-production/templates/shot-spec.example.json
+      - run: python skills/generative-film-production/scripts/validate_asset_registry.py skills/generative-film-production/templates/asset-registry.example.csv
+      - run: python scripts/validate_evals.py evals/evals.json

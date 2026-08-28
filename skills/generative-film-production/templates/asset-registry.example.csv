@@ -1,0 +1,4 @@
+asset_id,asset_type,canonical_descriptor,state_variant,parent_asset_id,reference_id,reference_role,does_not_control
+CHAR_A,character,"middle-aged envoy; narrow face; black Han robe; red belt",CANON,,REF_A,face identity,"wardrobe; background; lighting"
+CHAR_A_WET,character-state,"same envoy; robe and hair visibly rain-wet",WET,CHAR_A,REF_A_WET,wet state only,face identity
+LOC_HALL,location,"timber audience hall; central aisle; raised throne platform",CANON,,REF_HALL,architecture,"people; time of day"

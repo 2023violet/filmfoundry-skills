@@ -1,0 +1,29 @@
+# Shot Card
+
+- Shot ID:
+- Scene ID:
+- Narrative goal:
+- Dominant action:
+- Duration target:
+- Assets + state variants:
+- Initial state:
+- Observable end state:
+- Transition type:
+- Camera axis:
+- Screen direction (canonical side map, e.g. `A:left|B:right`):
+- Eyeline subject:
+- Eyeline target:
+- Eyeline screen direction (`left` / `right` / `center`):
+- Shot size / lens:
+- Camera position / height / support:
+- Camera path / speed / stop:
+- Action stages + observable end states:
+- Acting cues:
+- Physics / persistent consequences:
+- Asset state / wardrobe state / prop state:
+- Light state / time state:
+- Dialogue / audio:
+- Edit-in / edit-out / transition:
+- Reference bindings (`controls`, `does_not_control`):
+- Failure risks:
+- Quality bar:

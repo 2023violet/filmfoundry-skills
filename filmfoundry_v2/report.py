@@ -1,4 +1,4 @@
-"""Structured validation results shared by core and adapters."""
+"""Structured validation results shared by core and provider adapters."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -6,7 +6,7 @@ import json
 from typing import Any, Iterable
 
 
-@dataclass(frozen=True, order=True)
+@dataclass(frozen=True)
 class ValidationIssue:
     severity: str
     code: str
@@ -23,27 +23,14 @@ class ValidationIssue:
 
     @property
     def sort_key(self) -> tuple[Any, ...]:
-        """Return the canonical ordering key used by validation reports."""
-        return (
-            0 if self.severity == "ERROR" else 1,
-            self.source,
-            self.json_pointer,
-            self.code,
-            self.message,
-            self.related_ids,
-            self.suggestion,
-        )
+        return (0 if self.severity == "ERROR" else 1, self.source,
+                self.json_pointer, self.code, self.message,
+                self.related_ids, self.suggestion)
 
     def to_dict(self) -> dict[str, Any]:
-        return {
-            "severity": self.severity,
-            "code": self.code,
-            "message": self.message,
-            "source": self.source,
-            "json_pointer": self.json_pointer,
-            "related_ids": list(self.related_ids),
-            "suggestion": self.suggestion,
-        }
+        return {"severity": self.severity, "code": self.code, "message": self.message,
+                "source": self.source, "json_pointer": self.json_pointer,
+                "related_ids": list(self.related_ids), "suggestion": self.suggestion}
 
 
 @dataclass
@@ -57,36 +44,6 @@ class ValidationReport:
         self.issues = sorted(self.issues, key=lambda issue: issue.sort_key)
 
     @property
-    def ok(self) -> bool:
-        return not any(issue.severity == "ERROR" for issue in self.issues)
-
-    @property
-    def exit_code(self) -> int:
-        return 0 if self.ok else 1
-
-    @property
-    def errors(self) -> list[str]:
-        return [issue.message for issue in self.issues if issue.severity == "ERROR"]
-
-    @property
-    def warnings(self) -> list[str]:
-        return [issue.message for issue in self.issues if issue.severity == "WARNING"]
-
-    def to_dict(self) -> dict[str, object]:
-        return {
-            "stage": self.stage,
-            "ok": self.ok,
-            "exit_code": self.exit_code,
-            "checked": self.checked,
-            "issues": [
-                {"severity": i.severity, "code": i.code, "message": i.message,
-                 "source": i.source, "json_pointer": i.json_pointer,
-                 "related_ids": list(i.related_ids), "suggestion": i.suggestion}
-                for i in self.issues
-            ],
-        }
-
-    @property
     def errors(self) -> list[ValidationIssue]:
         return [issue for issue in self.issues if issue.severity == "ERROR"]
 
@@ -95,8 +52,12 @@ class ValidationReport:
         return [issue for issue in self.issues if issue.severity == "WARNING"]
 
     @property
+    def ok(self) -> bool:
+        return not self.errors
+
+    @property
     def exit_code(self) -> int:
-        """Return the process status for this report (warnings remain successful)."""
+        """Return the process status; warnings do not fail validation."""
         return 0 if self.ok else 1
 
     def to_dict(self) -> dict[str, Any]:
@@ -117,7 +78,13 @@ class ValidationReport:
         return json.dumps(self.to_dict(), ensure_ascii=False, sort_keys=True)
 
     @classmethod
-    def from_messages(cls, stage: str, checked: Iterable[str], errors: Iterable[str], warnings: Iterable[str] = ()) -> "ValidationReport":
+    def from_messages(
+        cls,
+        stage: str,
+        checked: Iterable[str],
+        errors: Iterable[str],
+        warnings: Iterable[str] = (),
+    ) -> "ValidationReport":
         issues = [ValidationIssue("ERROR", "VALIDATION_ERROR", value) for value in errors]
         issues.extend(ValidationIssue("WARNING", "VALIDATION_WARNING", value) for value in warnings)
         return cls(stage, list(checked), issues)

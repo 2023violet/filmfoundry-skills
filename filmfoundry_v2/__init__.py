@@ -19,6 +19,7 @@ from .contracts import (
 from .report import ValidationIssue, ValidationReport
 from .adapters import CompiledPayload, ProviderAdapter
 from .validation import validate_workspace
+from .compiler import compile_canonical
 
 __version__ = "2.0.0"
 
@@ -40,4 +41,5 @@ __all__ = [
     "CompiledPayload",
     "ProviderAdapter",
     "validate_workspace",
+    "compile_canonical",
 ]

@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from . import parse_prompt_metadata, validate_prompt_markdown
+from .adapters import CompiledPayload, hash_text
 
 
 class PromptCompilationError(ValueError):
@@ -49,4 +50,24 @@ def compile_prompt(prompt_path: str | Path, provider: str) -> str:
     return "\n".join(lines) + "\n"
 
 
-__all__ = ["PromptCompilationError", "compile_prompt"]
+def compile_canonical(prompt_path: str | Path, provider: str, capability: dict[str, Any]) -> CompiledPayload:
+    """Return the structured, provider-neutral compilation contract."""
+    path = Path(prompt_path)
+    text = path.read_text(encoding="utf-8")
+    errors = validate_prompt_markdown(text)
+    if errors:
+        raise PromptCompilationError("; ".join(errors))
+    metadata = parse_prompt_metadata(text)
+    body = compile_prompt(path, provider)
+    return CompiledPayload(
+        provider=provider,
+        route=str(capability.get("route", "UNSPECIFIED")),
+        parameters=dict(capability.get("parameters", {})),
+        reference_slots=tuple(str(item["slot"]) for item in metadata.get("references", [])),
+        capability_snapshot_id=str(capability.get("snapshot_id", "UNVERIFIED")),
+        body=body,
+        input_hashes={"prompt": hash_text(text)},
+    )
+
+
+__all__ = ["PromptCompilationError", "compile_prompt", "compile_canonical"]

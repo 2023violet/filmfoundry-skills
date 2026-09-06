@@ -143,6 +143,8 @@ class VisualControlPlan:
             raw=dict(value),
         )
 
+    from_dict = from_mapping
+
     def to_dict(self) -> dict[str, Any]:
         if self.raw:
             return dict(self.raw)
@@ -506,6 +508,15 @@ def validate_visual_control_alignment(
 
     source = str(source) if source else ""
     issues: list[ValidationIssue] = []
+    # Accept the intuitive plan-first call shape as well as the documented
+    # shot-first shape when both arguments are plain mappings.
+    if (
+        isinstance(shot, Mapping)
+        and "visual_control_id" in shot
+        and isinstance(plan, Mapping)
+        and "shot_id" in plan
+    ):
+        shot, plan = plan, shot
     if not isinstance(shot, Mapping):
         issues.append(_issue("ERROR", "INVALID_TYPE", "shot: top-level object required"))
         return ValidationReport("visual_control_alignment", [source] if source else [], issues)

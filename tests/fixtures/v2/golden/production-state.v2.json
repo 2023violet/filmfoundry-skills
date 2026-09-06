@@ -1,0 +1,10 @@
+{
+  "units": {
+    "EP01_SH001_G01": {
+      "runtime_status": "READY_FOR_VIDEO",
+      "visual_control_state_alignment": "PASS",
+      "provider_route": "minimax-h3",
+      "provider_evidence_id": "EVID_H3_001"
+    }
+  }
+}

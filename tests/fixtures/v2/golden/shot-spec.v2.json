@@ -1,0 +1,19 @@
+{
+  "shot_id": "EP01_SH001",
+  "generation_unit_id": "EP01_SH001_G01",
+  "edit_unit_ids": ["EP01_EDIT001"],
+  "generation_duration_seconds": 10,
+  "edit_target_duration_seconds": 5,
+  "narrative_goal": "Reveal the watcher at the inn entrance",
+  "dominant_action": "The watcher turns once toward the lantern",
+  "location": {"asset_id": "LOC_INN"},
+  "initial_state": "Watcher stands in profile with lantern dark",
+  "end_state": "Watcher faces the lantern with the same wardrobe and geography",
+  "shot_size": "medium_wide",
+  "composition": "Watcher frame right, entrance frame left",
+  "camera": {"movement": "one slow push in", "axis": "screen-left"},
+  "transition_type": "hard_cut",
+  "reference_bindings": [{"slot": "character", "asset_id": "CHAR_SHENYE", "role": "identity", "controls": "face, wardrobe, silhouette", "does_not_control": "lantern position or camera motion"}],
+  "failure_risks": ["identity drift"],
+  "quality_bar": "identity and geography remain readable"
+}

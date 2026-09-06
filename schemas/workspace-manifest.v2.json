@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filmfoundry.dev/schemas/workspace-manifest.v2.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["workspace_version", "project_id", "top_level", "authorities", "archive_boundary", "id_policy", "adapter_compatibility", "required_tools"],
+  "properties": {
+    "workspace_version": {"const": "2.0.0"},
+    "project_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"},
+    "top_level": {"type": "object", "minProperties": 1, "additionalProperties": {"type": "string"}},
+    "authorities": {"type": "object", "required": ["human", "machine", "media"], "additionalProperties": false, "properties": {"human": {"const": "markdown"}, "machine": {"type": "array", "contains": {"const": "json"}, "minItems": 2}, "media": {"const": "registry"}}},
+    "archive_boundary": {"type": "object", "required": ["path", "mode"], "additionalProperties": false, "properties": {"path": {"type": "string"}, "mode": {"const": "read_only"}}},
+    "id_policy": {"type": "object", "required": ["pattern", "charset"], "additionalProperties": false, "properties": {"pattern": {"type": "string"}, "charset": {"const": "ASCII"}}},
+    "adapter_compatibility": {"type": "object", "minProperties": 1},
+    "required_tools": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "extensions": {"type": "object"}
+  }
+}

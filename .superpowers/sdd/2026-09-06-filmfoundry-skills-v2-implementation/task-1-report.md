@@ -41,8 +41,9 @@ names without duplicating validation logic.
 
 ## Fixtures and verification
 
-Golden JSON/Markdown fixtures live under `tests/fixtures/v2/golden/` and cover
-the manifest, registry, shot, prompt, state, evidence, and reference graph.
+JSON Schemas live under `schemas/` and golden JSON/Markdown fixtures live under
+`tests/fixtures/v2/golden/`; together they cover the manifest, registry, shot,
+prompt, state, evidence, and reference graph.
 
 Command:
 
@@ -50,4 +51,4 @@ Command:
 python -m pytest -q tests/test_v2_contracts.py
 ```
 
-Result: `17 passed`.
+Result: `19 passed`.

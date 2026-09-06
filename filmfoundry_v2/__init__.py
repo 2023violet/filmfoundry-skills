@@ -17,6 +17,8 @@ from .contracts import (
     validate_workspace_manifest,
 )
 
+__version__ = "2.0.0"
+
 __all__ = [
     "LIFECYCLE_STATES",
     "parse_prompt_metadata",
@@ -29,5 +31,5 @@ __all__ = [
     "validate_shot_spec",
     "validate_state_transition",
     "validate_workspace_manifest",
+    "__version__",
 ]
-

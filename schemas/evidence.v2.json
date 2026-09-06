@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filmfoundry.dev/schemas/evidence.v2.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["evidence_id", "provider", "provider_surface", "provider_version", "capability", "route", "result", "evidence_level", "generation_ids", "scope", "observed_at", "review_due"],
+  "properties": {"evidence_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"}, "provider": {"type": "string"}, "provider_surface": {"type": "string"}, "provider_version": {"type": "string"}, "capability": {"type": "string"}, "route": {"type": "string"}, "result": {"type": "string"}, "evidence_level": {"enum": ["UNVERIFIED", "OBSERVED_ONCE", "REPEATED", "PROJECT_VERIFIED", "CROSS_PROJECT_VERIFIED"]}, "generation_ids": {"type": "array", "minItems": 1}, "scope": {"type": "string"}, "observed_at": {"type": "string"}, "review_due": {"type": "string"}, "default_behavior": {"type": "boolean"}, "extensions": {"type": "object"}}
+}

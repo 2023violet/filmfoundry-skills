@@ -1,0 +1,8 @@
+{
+  "nodes": ["CHAR_SHENYE", "LOC_INN", "EP01_SH001", "EP01_SH001_P01"],
+  "edges": [
+    {"source": "CHAR_SHENYE", "target": "EP01_SH001", "relation": "asset_to_shot"},
+    {"source": "LOC_INN", "target": "EP01_SH001", "relation": "asset_to_shot"},
+    {"source": "EP01_SH001", "target": "EP01_SH001_P01", "relation": "shot_to_prompt"}
+  ]
+}

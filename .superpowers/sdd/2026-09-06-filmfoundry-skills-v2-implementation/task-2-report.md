@@ -17,12 +17,12 @@ DONE
   root-escaping Markdown/JSON references without traversing `99_归档`.
 - Added deterministic provider-neutral Prompt Markdown compilation. The source
   Markdown is read-only; provider clients remain outside the core.
-- Migration command is conservative and dry-run by default; it emits an empty
-  change plan for Task 3's mapping engine to populate.
+- Migration command delegates to the shared archive-aware planner when present;
+  the core remains conservative and dry-run by default.
 
 ## Verification
 
-- `python -m pytest -q tests/test_v2_cli.py tests/test_v2_contracts.py`: 21 passed.
+- `python -m pytest -q tests/test_v2_cli.py tests/test_v2_contracts.py`: 22 passed.
 - `python -m pytest -q`: 188 passed.
 - `python -m compileall -q filmfoundry_v2`: passed.
 - `python -m filmfoundry_v2 --help` works from a temporary current directory

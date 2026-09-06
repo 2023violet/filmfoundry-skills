@@ -271,7 +271,7 @@ def validate_state_transition(old: str, new: str) -> list[str]:
 
 
 def validate_production_state(data: dict[str, Any]) -> list[str]:
-    errors: list[str] = []
+    errors: list[str] = _unknown(data, {"schema_version", "units"}) if isinstance(data, dict) else []
     units = data.get("units") if isinstance(data, dict) else None
     if not isinstance(units, dict):
         return ["units: object required"]
@@ -279,6 +279,17 @@ def validate_production_state(data: dict[str, Any]) -> list[str]:
         if not isinstance(unit, dict):
             errors.append(f"units.{uid}: object required")
             continue
+        errors.extend(
+            f"units.{uid}.{error}"
+            for error in _unknown(
+                unit,
+                {
+                    "runtime_status", "design_status", "visual_control_state_alignment",
+                    "provider_route", "provider_evidence_id", "select_type", "source_in",
+                    "source_out", "observed_state", "history",
+                },
+            )
+        )
         status = str(unit.get("runtime_status", "")).upper()
         if status not in STATE_RANK:
             errors.append(f"units.{uid}.runtime_status: unknown state")
@@ -313,7 +324,7 @@ def validate_evidence(data: dict[str, Any]) -> list[str]:
 
 
 def validate_reference_graph(graph: dict[str, Any]) -> list[str]:
-    errors: list[str] = []
+    errors: list[str] = _unknown(graph, {"nodes", "edges"}) if isinstance(graph, dict) else []
     nodes = graph.get("nodes") if isinstance(graph, dict) else None
     edges = graph.get("edges") if isinstance(graph, dict) else None
     if not isinstance(nodes, list):
@@ -326,6 +337,10 @@ def validate_reference_graph(graph: dict[str, Any]) -> list[str]:
         if not isinstance(edge, dict):
             errors.append(f"edges[{i}]: object required")
             continue
+        errors.extend(
+            f"edges[{i}].{error}"
+            for error in _unknown(edge, {"source", "target", "relation"})
+        )
         key = (edge.get("source"), edge.get("target"), edge.get("relation"))
         if key in seen:
             errors.append(f"edges[{i}]: duplicate edge {key}")

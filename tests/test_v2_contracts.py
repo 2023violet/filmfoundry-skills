@@ -316,6 +316,13 @@ def test_reference_graph_rejects_dangling_edges_and_duplicate_edges():
     assert any("MISSING" in error for error in errors)
 
 
+def test_state_and_graph_reject_unscoped_fields():
+    state = {"units": {}, "rogue": True}
+    assert any("rogue" in error for error in validate_production_state(state))
+    graph = {"nodes": [], "edges": [], "rogue": True}
+    assert any("rogue" in error for error in validate_reference_graph(graph))
+
+
 def test_golden_fixtures_validate_as_published_contracts():
     fixture = Path(__file__).parent / "fixtures" / "v2" / "golden"
     manifest = json.loads((fixture / "workspace-manifest.v2.json").read_text(encoding="utf-8"))

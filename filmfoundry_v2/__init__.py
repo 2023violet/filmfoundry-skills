@@ -16,6 +16,9 @@ from .contracts import (
     validate_state_transition,
     validate_workspace_manifest,
 )
+from .report import ValidationIssue, ValidationReport
+from .adapters import CompiledPayload, ProviderAdapter
+from .validation import validate_workspace
 
 __version__ = "2.0.0"
 
@@ -32,4 +35,9 @@ __all__ = [
     "validate_state_transition",
     "validate_workspace_manifest",
     "__version__",
+    "ValidationIssue",
+    "ValidationReport",
+    "CompiledPayload",
+    "ProviderAdapter",
+    "validate_workspace",
 ]

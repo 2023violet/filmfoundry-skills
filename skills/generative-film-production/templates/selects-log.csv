@@ -1,1 +1,2 @@
-shot_id,select_id,generation_id,filename,in_handle,out_handle,notes
+shot_id,select_id,generation_id,filename,in_handle,out_handle,notes,disposition,source_in_seconds,source_out_seconds,source_duration_seconds,selected_duration_seconds
+SH001,SH001_E01_SELECT,GEN001,SH001.mp4,,,late failure excluded,PARTIAL_SELECT,0,5,10.125,5

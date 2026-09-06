@@ -1,0 +1,2 @@
+unit_id,visual_control_asset,state_role,expected_state,observed_state,alignment,authority_scope,production_consequence
+SH001_G01,ASSET_KF_START,START,door closed + lantern OFF,door closed + lantern ON,FAIL_PARTIAL,environment only,create state-matched start authority

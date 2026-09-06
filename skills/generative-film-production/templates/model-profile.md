@@ -1,42 +1,42 @@
-# Model Profile
+# Model Profile v1.2
 
-- Model ID / version:
-- Provider / product surface:
-- Verified date:
-- Verified by test / project IDs:
-- Execution route:
+Record provider behavior for the exact product surface/version. Do not promote wording assumptions into workflow facts.
 
-## Capability evidence
+## Identity
+- Model ID:
+- Provider:
+- Product surface:
+- Version/build:
+- Tested date:
+- Verification status:
 
-- Text-to-video:
-- Image-to-video:
-- First / last frame:
-- Multi-reference count and addressing:
-- Storyboard interpretation:
-- Native audio:
-- Extension / editing:
-- Supported duration / resolution observed:
+## Reference-role binding
+- Evidence level: `UNVERIFIED / OBSERVED_ONCE / REPEATED / PROJECT_VERIFIED / CROSS_PROJECT_VERIFIED`
+- Evidence IDs:
 
-## Behavior evidence
+## Prompt language strategy
+- Instruction language:
+- Dialogue language:
 
-### Strengths
+## Smoke tests
+Record attempts/passes/fails and verdicts for the model-specific smoke plan.
 
-### Weaknesses
+## Behavior observations
+For every real production observation record:
 
-### Reference behavior
+- Capability: e.g. `spatial_persistence`, `identity_persistence`, `camera_hold`, `acting_amplification`
+- Context: exact route/duration/reference pattern
+- Evidence level
+- Source generation IDs
+- Observation
+- Production consequence
+- `default_adapter_behavior: true/false`
 
-### Identity behavior
+`OBSERVED_ONCE` is a hypothesis, not a default. Only `REPEATED` or stronger may set `default_adapter_behavior: true`.
 
-### Timing behavior
-
-### Camera / motion behavior
-
-### Audio behavior
-
-## Effective patterns
-
-## Failed patterns
-
-## Confidence and scope
-
-Record only behavior observed on the model/provider/version above. A missing test result means unknown, not unsupported. Do not generalize this profile to another provider surface or model revision without verification.
+## Production summary
+- Verified strengths:
+- Verified weaknesses:
+- Timing behavior:
+- Identity behavior:
+- Reference behavior:

@@ -1,35 +1,43 @@
 {
-  "shot_id": "SH001",
-  "scene_id": "SC01",
-  "narrative_goal": "Reveal the map clue",
-  "dominant_action": "CHAR_A unfolds the map",
+  "schema_version": "1.2",
+  "shot_id": "SH003",
+  "generation_unit": "SH003_G01",
+  "chapter": "CH01",
+  "generation_duration_seconds": 10.0,
+  "edit_target_duration_seconds": 5.0,
+  "narrative_goal": "Establish the child looking toward the home valley",
+  "dominant_action": "The child quietly looks toward the valley",
+  "location": {"canonical": "LOC_DEMO_OVERLOOK"},
+  "initial_state": "child stands frame right; home valley occupies frame left",
+  "end_state": "child remains frame right looking toward the same valley; identity and geography remain stable",
+  "shot_size": "medium_wide",
+  "composition": "character frame right, narrative target valley frame left, both readable",
+  "camera_move": "near-static with one subtle forward push",
   "timing_granularity": "stages",
-  "initial_state": "CHAR_A stands frame left holding a folded map",
-  "end_state": "The map is fully open; CHAR_A remains frame left with the left hand on the lower-left corner",
-  "transition_type": "reverse_angle",
-  "camera_axis": "table-to-CHAR_A axis, do not cross",
-  "eyeline": "CHAR_A looks screen right toward CHAR_B",
+  "transition_type": "hard_cut",
+  "eyeline_critical": true,
+  "eyeline_subject": "CHAR_DEMO_CHILD",
+  "eyeline_target": "LOC_DEMO_VALLEY",
+  "eyeline_screen_direction": "left",
   "reference_bindings": [
     {
-      "ref_id": "REF_A",
-      "controls": "face identity",
-      "does_not_control": "wardrobe, background, lighting"
+      "ref_id": "KF_A",
+      "controls": "primary visual composition and current scene state",
+      "does_not_control": "future motion timing"
     }
   ],
   "action_stages": [
     {
       "stage": 1,
-      "action": "CHAR_A places the folded map on the table",
-      "end_state": "The folded map rests centered on the table"
-    },
-    {
-      "stage": 2,
-      "action": "CHAR_A unfolds the map",
-      "end_state": "The map is fully open and both hands stop moving"
+      "action": "Only subtle natural micro-motion occurs while the character keeps looking toward the valley",
+      "end_state": "character identity, eyeline, geography, and composition remain stable"
     }
   ],
-  "screen_direction": "CHAR_A:left|CHAR_B:right",
-  "eyeline_subject": "CHAR_A",
-  "eyeline_target": "CHAR_B",
-  "eyeline_screen_direction": "right"
+  "failure_risks": [
+    "identity drift",
+    "eyeline mismatch",
+    "camera over-push",
+    "acting amplification"
+  ],
+  "quality_bar": "identity and eyeline before aesthetics; best contiguous five seconds may be selected from the ten-second source"
 }

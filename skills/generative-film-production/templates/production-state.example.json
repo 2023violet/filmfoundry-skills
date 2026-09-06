@@ -1,0 +1,16 @@
+{
+  "units": {
+    "SH001_G01": {
+      "design_status": "DRAFT",
+      "runtime_status": "DRAFT",
+      "spec_version": 1,
+      "asset_registry_version": 1,
+      "model_profile_version": 1,
+      "keyframe": {},
+      "video": {},
+      "observed_state_written": false,
+      "production_scope": "MVP"
+    }
+  },
+  "schema_version": "1.2"
+}

@@ -8,11 +8,11 @@ EVAL_PATH = ROOT / "evals" / "evals.json"
 VALIDATOR = ROOT / "scripts" / "validate_evals.py"
 
 
-def test_eval_file_has_twelve_realistic_cases():
+def test_eval_file_has_twenty_six_realistic_cases():
     data = json.loads(EVAL_PATH.read_text(encoding="utf-8"))
     assert data["skill_name"] == "generative-film-production"
-    assert data["version"] == "1.0.1"
-    assert len(data["evals"]) == 12
+    assert data["version"] == "1.3.3"
+    assert len(data["evals"]) == 26
     ids = [case["id"] for case in data["evals"]]
     assert len(ids) == len(set(ids))
     for case in data["evals"]:
@@ -36,7 +36,7 @@ def test_each_eval_has_machine_and_human_assertions():
 def test_eval_validator_cli_passes_schema():
     result = subprocess.run([sys.executable, str(VALIDATOR), str(EVAL_PATH)], capture_output=True, text=True)
     assert result.returncode == 0, result.stdout + result.stderr
-    assert "12 evals" in result.stdout
+    assert "26 evals" in result.stdout
 
 
 def test_no_placeholder_markers_in_evals():

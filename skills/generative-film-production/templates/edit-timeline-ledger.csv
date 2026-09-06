@@ -1,0 +1,3 @@
+episode_id,edit_unit_id,start_seconds,end_seconds,source_type,source_ids,timing_authority,status
+EP00,ED01,0,3,SELECT,GEN00_A,PROVISIONAL,PLANNED
+EP00,ED02,3,6,STATIC,ASSET00,PROVISIONAL,PLANNED

@@ -1,4 +1,4 @@
-asset_id,asset_type,canonical_descriptor,state_variant,parent_asset_id,reference_id,reference_role,does_not_control
-CHAR_A,character,"middle-aged envoy; narrow face; black Han robe; red belt",CANON,,REF_A,face identity,"wardrobe; background; lighting"
-CHAR_A_WET,character-state,"same envoy; robe and hair visibly rain-wet",WET,CHAR_A,REF_A_WET,wet state only,face identity
-LOC_HALL,location,"timber audience hall; central aisle; raised throne platform",CANON,,REF_HALL,architecture,"people; time of day"
+asset_id,asset_type,asset_class,file_name,canonical_descriptor,state_variant,parent_asset_id,version,sha256,status,reference_id,reference_role,does_not_control,supersedes
+LOC_DEMO,location,CANONICAL,loc_demo.png,"timber hall with central aisle and stable column geometry",CANON,,1.0,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,LOCKED,REF_LOC_DEMO,architecture,"people; time of day; camera framing",
+GENERIC_EXTRAS,character-group,GENERIC,,"background people sharing one wardrobe and cultural language",CANON,,1.0,UNVERIFIED,PLANNED,,,,
+EPHEMERAL_BASKET,prop,EPHEMERAL,,"ordinary woven basket used only in one shot",CANON,,1.0,UNVERIFIED,PLANNED,,,,

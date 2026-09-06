@@ -27,4 +27,14 @@ Implement the provider-neutral visual-control extension on the v2 release branch
 
 ## Status
 
-Task 0: in progress
+Task 0: complete — evidence register and fixtures committed.
+Task 1: complete — schemas and VisualControlPlan committed.
+Task 2: complete — validation and alignment gates committed.
+Task 3: complete — references, templates and skill routing committed.
+Task 4: complete — spatial, scale, physics, previs and lens guidance committed.
+Task 5: complete — compiler and CLI visual-control integration committed.
+Task 6: complete — capability snapshot and provider evidence boundary committed.
+Task 7: complete — experiment, generation, select and QC contracts committed.
+Task 8: complete — Wucheng H3 handoff helpers committed separately in project worktree.
+Task 9: complete — user guide, support matrix and small-team workflow committed.
+Task 10: complete — verification report committed; full suite and diff check pass.

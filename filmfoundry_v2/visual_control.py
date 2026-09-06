@@ -38,6 +38,9 @@ _CHARACTER_FIELDS = {
     "controls",
     "does_not_control",
     "qc_status",
+    "background",
+    "identity_background",
+    "background_color",
     "extensions",
 }
 _LOCATION_FIELDS = {
@@ -456,6 +459,9 @@ def validate_visual_control(
     def _has_gray_note(item: Any) -> bool:
         if not isinstance(item, Mapping):
             return False
+        direct = item.get("identity_background", item.get("background", item.get("background_color", "")))
+        if "gray" in str(direct).casefold() or "grey" in str(direct).casefold():
+            return True
         extensions = item.get("extensions")
         if not isinstance(extensions, Mapping):
             return False

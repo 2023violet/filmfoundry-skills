@@ -1,5 +1,11 @@
 # FilmFoundry Skills
 
+**v2 core:** provider-neutral contracts, validation, compilation, and evidence APIs.
+
+The v1.3.3 metadata remains available as the compatibility baseline. See
+`docs/filmfoundry-v2.md` and `docs/filmfoundry-v2-support-matrix.md` for the
+v2 boundary and adapter responsibilities.
+
 **Repository:** `filmfoundry-skills`  
 **Primary skill:** `generative-film-production`  
 **Version:** 1.3.3

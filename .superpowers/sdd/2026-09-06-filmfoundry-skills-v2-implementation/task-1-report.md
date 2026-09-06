@@ -51,4 +51,4 @@ Command:
 python -m pytest -q tests/test_v2_contracts.py
 ```
 
-Result: `19 passed`.
+Result: `20 passed`.

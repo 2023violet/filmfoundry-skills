@@ -120,7 +120,7 @@ def validate_asset_registry(rows: list[dict[str, Any]]) -> list[str]:
             errors.append(f"row {i}: duplicate asset_id {aid}")
         seen.add(aid)
         for field in required - {"asset_id", "width", "height", "aspect_ratio", "alpha", "episode_scope"}:
-            if not _nonempty(row.get(field)) and field not in {"source", "reference_role", "does_not_control"}:
+            if not _nonempty(row.get(field)):
                 errors.append(f"row {i} {field}: required")
         if not isinstance(row.get("width"), int) or row["width"] <= 0:
             errors.append(f"row {i} width: positive integer required")
@@ -151,6 +151,9 @@ def validate_shot_spec(data: dict[str, Any]) -> list[str]:
     for field in SHOT_CORE:
         if field not in data or data[field] in (None, "", []):
             errors.append(f"{field}: required")
+    for field in ("narrative_goal", "dominant_action", "initial_state", "end_state", "shot_size", "composition", "quality_bar", "transition_type"):
+        if field in data and not _nonempty(data[field]):
+            errors.append(f"{field}: non-empty string required")
     for field in ("shot_id", "generation_unit_id"):
         errors.extend(_id(data.get(field), field))
     if not isinstance(data.get("edit_unit_ids"), list) or not data["edit_unit_ids"]:
@@ -220,6 +223,12 @@ def validate_prompt_markdown(text: str) -> list[str]:
     for field in PROMPT_CORE:
         if field not in data or data[field] in (None, "", []):
             errors.append(f"{field}: required")
+    for field in ("prompt_type", "production_unit", "visual_fact", "output_profile", "start_state", "end_state", "dominant_action", "camera"):
+        if field in data and not _nonempty(data[field]):
+            errors.append(f"{field}: non-empty string required")
+    for field in ("subjects", "continuity_locks", "forbidden", "acceptance"):
+        if field in data and not isinstance(data[field], list):
+            errors.append(f"{field}: list required")
     errors.extend(_id(data.get("prompt_id"), "prompt_id"))
     refs = data.get("references")
     if not isinstance(refs, list):

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filmfoundry.dev/schemas/dependency-graph.v2.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["nodes", "edges"],
+  "properties": {
+    "nodes": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"}},
+    "edges": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["source", "target", "relation"], "properties": {"source": {"type": "string"}, "target": {"type": "string"}, "relation": {"type": "string"}, "extensions": {"type": "object"}}}},
+    "extensions": {"type": "object"}
+  }
+}

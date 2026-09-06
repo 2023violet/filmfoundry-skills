@@ -170,6 +170,23 @@ def test_asset_registry_rejects_invalid_machine_id_and_missing_core_field():
     assert any("sha256" in error for error in errors)
 
 
+def test_asset_registry_requires_reference_boundary_text():
+    asset = valid_asset()
+    asset["does_not_control"] = ""
+    assert any("does_not_control" in error for error in validate_asset_registry([asset]))
+
+
+def test_shot_and_prompt_reject_wrong_core_field_types():
+    shot = valid_shot()
+    shot["narrative_goal"] = 42
+    assert any("narrative_goal" in error for error in validate_shot_spec(shot))
+    prompt = parse_prompt_metadata(valid_prompt())
+    prompt["subjects"] = "CHAR_SHENYE"
+    body = valid_prompt().split("```", 2)[-1]
+    mutated = "```json\n" + json.dumps(prompt) + "\n```" + body[body.find("\n"):]
+    assert any("subjects" in error for error in validate_prompt_markdown(mutated))
+
+
 def test_shot_spec_accepts_base_contract():
     assert validate_shot_spec(valid_shot()) == []
 

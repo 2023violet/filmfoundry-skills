@@ -1,0 +1,23 @@
+{
+  "workspace_version": "2.0.0",
+  "project_id": "PROJECT_WUCHENG",
+  "top_level": {
+    "entry": "00_入口与规则",
+    "governance": "01_项目治理",
+    "canon": "02_故事与Canon",
+    "episodes": "03_分集生产",
+    "assets": "04_资产库",
+    "verification": "05_生成与模型验证",
+    "post": "06_后期与交付",
+    "runtime": "07_运行时",
+    "tools": "08_工具与技能",
+    "outputs": "09_新生成产出",
+    "source": "98_来源原稿",
+    "archive": "99_归档"
+  },
+  "authorities": {"human": "markdown", "machine": ["json", "csv"], "media": "registry"},
+  "archive_boundary": {"path": "99_归档", "mode": "read_only"},
+  "id_policy": {"pattern": "^[A-Z][A-Z0-9_]{2,63}$", "charset": "ASCII"},
+  "adapter_compatibility": {"filmfoundry": ">=2.0.0,<3.0.0", "project": "wucheng-v2"},
+  "required_tools": ["python>=3.11", "git", "sha256"]
+}

@@ -1,0 +1,14 @@
+{
+  "evidence_id": "EVID_H3_001",
+  "provider": "minimax",
+  "provider_surface": "video",
+  "provider_version": "2026-01",
+  "capability": "I2V_REFERENCE",
+  "route": "minimax-h3",
+  "result": "PASS",
+  "evidence_level": "PROJECT_VERIFIED",
+  "generation_ids": ["GEN_EP01_SH001_001"],
+  "scope": "EP01_SH001_G01",
+  "observed_at": "2026-09-07T12:00:00Z",
+  "review_due": "2026-10-07"
+}

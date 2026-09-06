@@ -1,0 +1,42 @@
+[
+  {
+    "asset_id": "CHAR_SHENYE",
+    "asset_type": "character",
+    "asset_class": "CANONICAL",
+    "display_name": "沈夜",
+    "path": "04_资产库/角色/CHAR_SHENYE.png",
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "width": 1024,
+    "height": 1536,
+    "aspect_ratio": 0.6666666667,
+    "mode": "RGBA",
+    "alpha": true,
+    "profile": "CHARACTER_REFERENCE",
+    "state": "LOCKED",
+    "canonical_level": "CANONICAL",
+    "reference_role": "identity and wardrobe",
+    "does_not_control": "camera motion or dialogue timing",
+    "source": "generated",
+    "episode_scope": ["EP01", "EP02"]
+  },
+  {
+    "asset_id": "LOC_INN",
+    "asset_type": "location",
+    "asset_class": "CANONICAL",
+    "display_name": "雾城客栈",
+    "path": "04_资产库/场景/LOC_INN.png",
+    "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "width": 2048,
+    "height": 1152,
+    "aspect_ratio": 1.7777777778,
+    "mode": "RGB",
+    "alpha": false,
+    "profile": "LOCATION_REFERENCE_WIDE",
+    "state": "CANDIDATE",
+    "canonical_level": "CANONICAL",
+    "reference_role": "architecture and geography",
+    "does_not_control": "character identity or time of day",
+    "source": "generated",
+    "episode_scope": ["EP01"]
+  }
+]

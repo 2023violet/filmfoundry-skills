@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filmfoundry.dev/schemas/prompt.v2.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["prompt_id", "prompt_type", "production_unit", "visual_fact", "output_profile", "start_state", "end_state", "subjects", "dominant_action", "camera", "continuity_locks", "references", "forbidden", "acceptance"],
+  "properties": {"prompt_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"}, "prompt_type": {"type": "string"}, "production_unit": {"type": "string"}, "visual_fact": {"type": "string"}, "output_profile": {"type": "string"}, "start_state": {"type": "string"}, "end_state": {"type": "string"}, "subjects": {"type": "array"}, "dominant_action": {"type": "string"}, "camera": {"type": "string"}, "continuity_locks": {"type": "array"}, "references": {"type": "array"}, "forbidden": {"type": "array"}, "acceptance": {"type": "array"}, "extensions": {"type": "object"}}
+}

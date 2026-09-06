@@ -1,0 +1,9 @@
+{
+  "provider": "unknown-provider",
+  "capabilities": [
+    {
+      "name": "text_to_video",
+      "evidence_level": "PASS"
+    }
+  ]
+}

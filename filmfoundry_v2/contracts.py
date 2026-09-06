@@ -172,6 +172,10 @@ def validate_shot_spec(data: dict[str, Any]) -> list[str]:
             if not isinstance(ref, dict):
                 errors.append(f"reference_bindings[{i}]: object required")
                 continue
+            errors.extend(
+                f"reference_bindings[{i}].{error}"
+                for error in _unknown(ref, {"slot", "asset_id", "role", "controls", "does_not_control"})
+            )
             for field in ("slot", "asset_id", "role", "controls", "does_not_control"):
                 if not _nonempty(ref.get(field)):
                     errors.append(f"reference_bindings[{i}].{field}: required")
@@ -239,6 +243,10 @@ def validate_prompt_markdown(text: str) -> list[str]:
             if not isinstance(ref, dict):
                 errors.append(f"references[{i}]: object required")
                 continue
+            errors.extend(
+                f"references[{i}].{error}"
+                for error in _unknown(ref, {"slot", "asset_id", "role", "controls", "does_not_control"})
+            )
             for field in ("slot", "asset_id", "role", "controls", "does_not_control"):
                 if not _nonempty(ref.get(field)):
                     errors.append(f"references[{i}].{field}: required")

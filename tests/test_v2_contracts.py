@@ -187,6 +187,17 @@ def test_shot_and_prompt_reject_wrong_core_field_types():
     assert any("subjects" in error for error in validate_prompt_markdown(mutated))
 
 
+def test_nested_reference_bindings_reject_unscoped_fields():
+    shot = valid_shot()
+    shot["reference_bindings"][0]["rogue"] = True
+    assert any("rogue" in error for error in validate_shot_spec(shot))
+    metadata = parse_prompt_metadata(valid_prompt())
+    metadata["references"][0]["rogue"] = True
+    body = valid_prompt().split("```", 2)[-1]
+    mutated = "```json\n" + json.dumps(metadata) + "\n```" + body[body.find("\n"):]
+    assert any("rogue" in error for error in validate_prompt_markdown(mutated))
+
+
 def test_shot_spec_accepts_base_contract():
     assert validate_shot_spec(valid_shot()) == []
 

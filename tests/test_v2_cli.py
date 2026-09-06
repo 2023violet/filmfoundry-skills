@@ -110,3 +110,16 @@ def test_audit_hashes_and_migrate_dry_run_are_safe(tmp_path: Path):
     payload = json.loads(result.stdout)
     assert payload["dry_run"] is True
     assert (root / "99_归档" / "keep.txt").read_text(encoding="utf-8") == "immutable"
+
+
+def test_reference_audit_reports_missing_and_root_escaping_links(tmp_path: Path):
+    root = tmp_path / "workspace"
+    root.mkdir()
+    (root / "workspace-manifest.v2.json").write_text("{}", encoding="utf-8")
+    (root / "notes.md").write_text("[ok](present.png) [missing](missing.png) [escape](../outside.png)", encoding="utf-8")
+    (root / "present.png").write_bytes(b"png-fixture")
+    result = run_ff("audit", "--root", str(root), "--kind", "references", "--format", "json")
+    assert result.returncode != 0
+    payload = json.loads(result.stdout)
+    assert any("missing.png" in error for error in payload["errors"])
+    assert any("escapes root" in error for error in payload["errors"])

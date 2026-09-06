@@ -139,7 +139,7 @@ def _cmd_validate(args: argparse.Namespace) -> int:
                     checked.append(relative)
                     errors.extend(f"{relative}: {error}" for error in validate_asset_registry(rows))
     payload = {"ok": not errors, "errors": errors, "root": str(root), "stage": args.stage, "checked": sorted(set(checked))}
-    if manifest is not None:
+    if isinstance(manifest, dict):
         payload["workspace_version"] = manifest.get("workspace_version")
     _emit(payload, args.format)
     return 0 if not errors else 1
@@ -208,13 +208,17 @@ def _cmd_audit(args: argparse.Namespace) -> int:
 
 def _cmd_migrate(args: argparse.Namespace) -> int:
     root = _root(args.root)
-    errors: list[str] = []
-    if not root.exists():
-        errors.append(f"root does not exist: {root}")
-    # Task 2 deliberately performs no mutation. Task 3 supplies mappings.
-    payload = {"ok": not errors, "dry_run": bool(args.dry_run or not args.apply), "from": args.source, "root": str(root), "changes": [], "errors": errors}
+    try:
+        from .migration import plan_migration
+    except ImportError:  # pragma: no cover - the adapter is shipped with v2
+        payload = {"ok": root.exists(), "source": args.source, "root": str(root), "dry_run": True, "changes": [], "errors": [] if root.exists() else [f"root does not exist: {root}"]}
+    else:
+        payload = plan_migration(root, source=args.source)
+    if args.apply:
+        payload["ok"] = False
+        payload.setdefault("errors", []).append("migration apply is provided by the project adapter; use --dry-run for the core planner")
     _emit(payload, args.format)
-    return 0 if not errors else 1
+    return 0 if payload.get("ok") else 1
 
 
 def build_parser() -> argparse.ArgumentParser:

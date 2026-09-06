@@ -20,6 +20,10 @@ from .report import ValidationIssue, ValidationReport
 from .adapters import CompiledPayload, ProviderAdapter
 from .validation import validate_workspace
 from .compiler import compile_canonical
+from .visual_control import VisualControlPlan, parse_visual_control, validate_visual_control
+from .alignment import validate_visual_control_alignment
+from .experiments import record_experiment_result
+from .capabilities import CapabilitySnapshot, capability_allows, load_capability_snapshot
 
 __version__ = "2.0.0"
 
@@ -42,4 +46,12 @@ __all__ = [
     "ProviderAdapter",
     "validate_workspace",
     "compile_canonical",
+    "VisualControlPlan",
+    "parse_visual_control",
+    "validate_visual_control",
+    "validate_visual_control_alignment",
+    "record_experiment_result",
+    "CapabilitySnapshot",
+    "capability_allows",
+    "load_capability_snapshot",
 ]

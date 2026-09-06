@@ -1,0 +1,25 @@
+{
+  "relations": [
+    {
+      "subject_id": "CHAR_WATCHER",
+      "anchor_id": "LOC_INN_GATE",
+      "relation": "two steps inside and frame right of",
+      "distance": "about two body lengths",
+      "facing": "toward the lantern",
+      "screen_direction": "holds frame right",
+      "camera_side": "north side of the entrance axis",
+      "light_direction": "moonlight from frame left"
+    },
+    {
+      "subject_id": "PROP_LANTERN",
+      "anchor_id": "LOC_INN_GATE",
+      "relation": "hung beside the gate latch",
+      "distance": "within one hand reach of the watcher",
+      "facing": "front plane faces the camera",
+      "screen_direction": "remains frame left of the watcher",
+      "camera_side": "north side of the entrance axis",
+      "light_direction": "lantern glow toward frame right"
+    }
+  ],
+  "extensions": {}
+}

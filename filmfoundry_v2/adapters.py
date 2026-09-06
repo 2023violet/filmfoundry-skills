@@ -17,6 +17,8 @@ class CompiledPayload:
     capability_snapshot_id: str
     body: str
     input_hashes: dict[str, str] = field(default_factory=dict)
+    visual_control_id: str | None = None
+    visual_control_hash: str | None = None
 
 
 class ProviderAdapter(Protocol):

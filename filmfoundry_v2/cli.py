@@ -9,7 +9,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from .compiler import PromptCompilationError, compile_prompt
+from .compiler import PromptCompilationError, compile_canonical, compile_prompt
 from . import (
     parse_prompt_metadata,
     validate_asset_registry,
@@ -44,6 +44,8 @@ def _emit(payload: dict[str, Any], fmt: str) -> None:
             print("FAIL")
         for error in payload.get("errors", []):
             print(f"ERROR: {error}")
+        for warning in payload.get("warnings", []):
+            print(f"WARNING: {warning}")
         for key, value in payload.items():
             if key not in {"ok", "errors"}:
                 print(f"{key}: {value}")
@@ -89,6 +91,7 @@ def _cmd_validate(args: argparse.Namespace) -> int:
     root = _root(args.root)
     manifest, errors = _load_manifest(root)
     errors = list(errors)
+    warnings: list[str] = []
     checked: list[str] = []
     if manifest is not None and args.stage in {"all", "workspace"}:
         checked.append("workspace-manifest.v2.json")
@@ -104,7 +107,7 @@ def _cmd_validate(args: argparse.Namespace) -> int:
             if "```json" in text and '"prompt_id"' in text:
                 checked.append(path.relative_to(root).as_posix())
                 errors.extend(f"{path.relative_to(root)}: {error}" for error in validate_prompt_markdown(text))
-    if manifest is not None and args.stage in {"all", "shot", "runtime", "evidence"}:
+    if manifest is not None and args.stage in {"all", "shot", "runtime", "evidence", "visual-control"}:
         for path in sorted(root.rglob("*.json")):
             if "99_归档" in path.parts or path.name == "workspace-manifest.v2.json":
                 continue
@@ -116,6 +119,12 @@ def _cmd_validate(args: argparse.Namespace) -> int:
             if args.stage in {"all", "shot"} and isinstance(value, dict) and "shot_id" in value:
                 checked.append(relative)
                 errors.extend(f"{relative}: {error}" for error in validate_shot_spec(value))
+            if args.stage in {"all", "visual-control"} and isinstance(value, dict) and "visual_control_id" in value:
+                from .visual_control import validate_visual_control
+                checked.append(relative)
+                report = validate_visual_control(value, source=relative)
+                errors.extend(f"{relative}: {issue.message}" for issue in report.errors)
+                warnings.extend(f"{relative}: {issue.message}" for issue in report.warnings)
             if args.stage in {"all", "runtime"} and isinstance(value, dict) and "units" in value:
                 checked.append(relative)
                 errors.extend(f"{relative}: {error}" for error in validate_production_state(value))
@@ -138,7 +147,7 @@ def _cmd_validate(args: argparse.Namespace) -> int:
                     relative = path.relative_to(root).as_posix()
                     checked.append(relative)
                     errors.extend(f"{relative}: {error}" for error in validate_asset_registry(rows))
-    payload = {"ok": not errors, "errors": errors, "root": str(root), "stage": args.stage, "checked": sorted(set(checked))}
+    payload = {"ok": not errors, "errors": errors, "warnings": warnings, "root": str(root), "stage": args.stage, "checked": sorted(set(checked))}
     if isinstance(manifest, dict):
         payload["workspace_version"] = manifest.get("workspace_version")
     _emit(payload, args.format)
@@ -162,13 +171,22 @@ def _cmd_compile(args: argparse.Namespace) -> int:
     try:
         prompt = _path_from_root(_root(args.root) if args.root else None, args.prompt)
         out = _path_from_root(_root(args.root) if args.root else None, args.out)
-        payload = compile_prompt(prompt, args.provider)
+        if args.visual_control:
+            capability = {"route": args.provider, "snapshot_id": "CLI_UNVERIFIED", "parameters": {}}
+            visual_control = _path_from_root(_root(args.root) if args.root else None, args.visual_control)
+            compiled = compile_canonical(prompt, args.provider, capability, visual_control)
+            payload = compiled.body
+        else:
+            payload = compile_prompt(prompt, args.provider)
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(payload, encoding="utf-8")
     except (OSError, PromptCompilationError, ValueError) as exc:
         _emit({"ok": False, "errors": [str(exc)]}, args.format)
         return 1
-    _emit({"ok": True, "out": str(out), "provider": args.provider}, args.format)
+    response = {"ok": True, "out": str(out), "provider": args.provider}
+    if args.visual_control:
+        response.update({"visual_control_id": compiled.visual_control_id, "visual_control_hash": compiled.visual_control_hash, "input_hashes": compiled.input_hashes})
+    _emit(response, args.format)
     return 0
 
 
@@ -232,7 +250,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     validate = sub.add_parser("validate", help="validate workspace contracts")
     validate.add_argument("--root", required=True)
-    validate.add_argument("--stage", choices=("all", "workspace", "prompt", "shot", "runtime", "evidence"), default="all")
+    validate.add_argument("--stage", choices=("all", "workspace", "prompt", "shot", "runtime", "evidence", "visual-control"), default="all")
     validate.add_argument("--format", choices=("text", "json"), default="text")
     validate.set_defaults(func=_cmd_validate)
 
@@ -246,6 +264,7 @@ def build_parser() -> argparse.ArgumentParser:
     compile_parser.add_argument("--provider", required=True)
     compile_parser.add_argument("--out", required=True)
     compile_parser.add_argument("--root", required=False)
+    compile_parser.add_argument("--visual-control", required=False)
     compile_parser.add_argument("--format", choices=("text", "json"), default="text")
     compile_parser.set_defaults(func=_cmd_compile)
 

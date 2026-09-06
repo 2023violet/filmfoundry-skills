@@ -1,0 +1,16 @@
+{
+  "production_unit": "EP01_SH001_G01",
+  "physics_cues": [
+    {
+      "material": "aged wood door and damp wool coat",
+      "force": "one shoulder push toward frame left",
+      "weight": "door feels heavy; coat has visible wet drag",
+      "inertia": "door starts after a brief resistance and coat settles after the turn",
+      "gravity": "dust falls from the lintel and the coat hem hangs downward",
+      "observable_result": "the door opens one handspan and the coat stops after the watcher stops"
+    }
+  ],
+  "review_status": "HUMAN_REVIEW",
+  "does_not_prove": "provider material realism or repeatable physics behavior",
+  "extensions": {}
+}

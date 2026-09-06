@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.1.0 — 2026-09-07
+
+- Added the provider-neutral Visual Control Plan for character, voice, location, spatial, scale, physics, previs, and lens facts.
+- Added strict visual-control validation, Shot alignment checks, experiment result recording, capability snapshots, and deterministic visual-control compilation hashes.
+- Added Higgsfield evidence boundaries and references/templates for small-team production; unverified practices remain warnings and cannot unlock routes.
+- Preserved the v1.3.3 compatibility checkpoint and existing v2 CLI/provider contracts.
+
 ## 1.3.3 — 2026-09-06
 
 - Hardened CSV ingestion for UTF-8 BOM (`utf-8-sig`) across asset registry, aggregate runtime asset loading, selects log, and continuity ledger validators.

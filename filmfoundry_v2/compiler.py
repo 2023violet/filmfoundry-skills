@@ -50,7 +50,12 @@ def compile_prompt(prompt_path: str | Path, provider: str) -> str:
     return "\n".join(lines) + "\n"
 
 
-def compile_canonical(prompt_path: str | Path, provider: str, capability: dict[str, Any]) -> CompiledPayload:
+def compile_canonical(
+    prompt_path: str | Path,
+    provider: str,
+    capability: dict[str, Any],
+    visual_control_path: str | Path | None = None,
+) -> CompiledPayload:
     """Return the structured, provider-neutral compilation contract."""
     path = Path(prompt_path)
     text = path.read_text(encoding="utf-8")
@@ -58,7 +63,35 @@ def compile_canonical(prompt_path: str | Path, provider: str, capability: dict[s
     if errors:
         raise PromptCompilationError("; ".join(errors))
     metadata = parse_prompt_metadata(text)
+    visual_control: dict[str, Any] | None = None
+    visual_control_hash: str | None = None
+    visual_control_id: str | None = None
+    if visual_control_path is not None:
+        visual_path = Path(visual_control_path)
+        visual_text = visual_path.read_text(encoding="utf-8")
+        try:
+            visual_control = json.loads(visual_text)
+        except json.JSONDecodeError as exc:
+            raise PromptCompilationError(f"visual control JSON: {exc}") from exc
+        from .visual_control import validate_visual_control
+
+        report = validate_visual_control(visual_control, source=str(visual_path))
+        if not report.ok:
+            raise PromptCompilationError("; ".join(issue.message for issue in report.errors))
+        visual_control_hash = hash_text(visual_text)
+        visual_control_id = str(visual_control["visual_control_id"])
     body = compile_prompt(path, provider)
+    if visual_control is not None:
+        # Keep the control sections deterministic so provider adapters can map
+        # them without changing the authoring artifact.
+        for field in (
+            "visual_control_id", "character_references", "location_reference",
+            "spatial_map", "scale_references", "physics_cues", "previsualization",
+            "lens_result",
+        ):
+            if field in visual_control and visual_control[field] not in (None, [], {}):
+                body += f"\n[{field}]\n{json.dumps(visual_control[field], ensure_ascii=False, sort_keys=True)}\n"
+        body += "[visual_control_hash]\n" + str(visual_control_hash) + "\n"
     return CompiledPayload(
         provider=provider,
         route=str(capability.get("route", "UNSPECIFIED")),
@@ -66,7 +99,12 @@ def compile_canonical(prompt_path: str | Path, provider: str, capability: dict[s
         reference_slots=tuple(str(item["slot"]) for item in metadata.get("references", [])),
         capability_snapshot_id=str(capability.get("snapshot_id", "UNVERIFIED")),
         body=body,
-        input_hashes={"prompt": hash_text(text)},
+        input_hashes={
+            "prompt": hash_text(text),
+            **({"visual_control": visual_control_hash} if visual_control_hash else {}),
+        },
+        visual_control_id=visual_control_id,
+        visual_control_hash=visual_control_hash,
     )
 
 

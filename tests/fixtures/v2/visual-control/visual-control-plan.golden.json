@@ -1,0 +1,9 @@
+{
+  "visual_control_id": "VC_FIXTURE_001",
+  "production_unit": "EP01_SH001_G01",
+  "character_references": [{"asset_id":"CHAR_FIXTURE","reference_kind":"CORE","face_closeup_asset_id":"CHAR_FACE","front_body_asset_id":"CHAR_FRONT","back_body_asset_id":"CHAR_BACK","headless_body_strategy":"OPTIONAL","state_variant":"NORMAL","controls":"identity","does_not_control":"camera","qc_status":"PENDING","background":"neutral gray"}],
+  "scale_references": [{"subject_id":"CHAR_FIXTURE","reference_object_id":"LOC_ANCHOR","visible_relation":"reaches half the doorway","intended_scale":"human","scale_confidence":"UNVERIFIED"}],
+  "physics_cues": [{"material":"wood","force":"push","weight":"heavy","inertia":"brief resistance","gravity":"down","observable_result":"door opens one handspan"}],
+  "review_status": "UNVERIFIED",
+  "experiment_ids": []
+}

@@ -27,12 +27,18 @@ class SnapshotAdapter:
         )
 
     def validate(self, payload: CompiledPayload) -> ValidationReport:
-        errors = []
+        errors: list[str] = []
+        warnings: list[str] = []
         if payload.provider != self.name:
             errors.append("payload provider does not match adapter")
-        if not payload.capability_snapshot_id or payload.capability_snapshot_id == "UNVERIFIED":
+        if not payload.capability_snapshot_id:
             errors.append("capability snapshot id is required")
-        return ValidationReport.from_messages(self.name, [payload.route], errors)
+        elif payload.capability_snapshot_id == "UNVERIFIED" or payload.capability_snapshot_id.startswith("CLI_UNVERIFIED"):
+            if payload.parameters.get("requires_verified_evidence"):
+                errors.append("verified capability evidence is required for this route")
+            else:
+                warnings.append("capability snapshot is unverified; provider obedience is not established")
+        return ValidationReport.from_messages(self.name, [payload.route], errors, warnings)
 
 
 class HiggsfieldAdapter(SnapshotAdapter):

@@ -151,3 +151,10 @@ def test_alignment_rejects_camera_side_and_state_mismatch():
     assert not report.ok
     assert any("camera" in issue.message.lower() for issue in report.errors)
     assert any("state" in issue.message.lower() for issue in report.errors)
+
+
+def test_visual_control_fixture_files_cover_golden_and_invalid_cases():
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[1] / "tests" / "fixtures" / "v2" / "visual-control"
+    assert (root / "visual-control-plan.golden.json").is_file()
+    assert (root / "visual-control-plan.invalid.json").is_file()

@@ -53,8 +53,12 @@ Use progressive disclosure: load only the references required by the current pro
 | Character/product/location must recur | `references/04-asset-passport.md` then `references/05-asset-stress-test.md` |
 | Need shots | `references/06-shot-engineering.md`, `references/19-adaptive-spec.md` |
 | Need optional visual planning / storyboard / authority frames | `references/24-visual-planning-layer.md`, `references/27-storyboard-keyframe-planning.md`, `references/28-visual-plan-qc.md` |
-| Need recurring character reference strategy | `references/25-character-reference-system.md` |
-| Need recurring location/spatial reference strategy | `references/26-location-reference-system.md` |
+| Need recurring character reference strategy | `references/25-character-reference-system.md`, `references/32-spatial-map.md` |
+| Need recurring location/spatial reference strategy | `references/26-location-reference-system.md`, `references/32-spatial-map.md` |
+| Need scale or physical-response control | `references/33-scale-reference.md`, `references/34-physics-cues.md` |
+| Need previsualization or lens-result guidance | `references/35-previsualization-route.md` |
+| Need to choose the smallest visual-control artifact | `references/36-visual-control-decision-tree.md` |
+| Small team needs a reduced operating mode | `references/37-small-team-operating-mode.md` |
 | Need provider evidence for a specific route | `references/29-capability-scoped-model-gates.md`, `references/16-model-evidence.md` |
 | Need full edit timeline / Picture Lock | `references/30-edit-timeline-contract.md`, `references/11-editing.md` |
 | Need to verify a keyframe/First-Last pair actually matches shot state | `references/31-visual-control-state-alignment.md` |
@@ -67,6 +71,15 @@ Use progressive disclosure: load only the references required by the current pro
 | Generation is failing | `references/13-qc.md`, `references/14-failure-recovery.md` |
 | Clips are approved | `references/11-editing.md`, `references/12-audio.md` |
 | Whole project needs first principles | `references/00-production-philosophy.md` |
+
+Visual-control examples:
+`templates/visual-control-plan.example.json`,
+`templates/character-reference.example.json`,
+`templates/voice-passport.example.json`,
+`templates/location-reference.example.json`,
+`templates/spatial-map.example.json`,
+`templates/physics-cues.example.json`, and
+`templates/previsualization.example.json`.
 
 ## Content Market Gate and project approval
 
@@ -105,6 +118,20 @@ Do not force every shot to fill the same thirty fields. Require every applicable
 - second-level timing → hard timing constraint + named timing authority
 
 Use `templates/shot-spec.example.json` and `scripts/validate_shot_spec.py`.
+
+## Visual Control Plan
+
+Use visual controls only when a Shot Spec leaves an expensive visible fact
+ambiguous. Bind optional character, location, spatial, scale, physics, previs,
+or lens controls in a `Visual Control Plan`. Every authority states what it
+controls and does not control, and every provider input is checked against the
+expected visible start/end state.
+
+Use `references/36-visual-control-decision-tree.md` to choose the smallest
+artifact. `UNVERIFIED` and `HUMAN_REVIEW` describe plan/evidence status; they
+do not unlock provider behavior. Record observed results in the evidence
+register and keep them scoped to the exact provider surface, version, and
+inputs.
 
 ## Asset authority
 
@@ -188,6 +215,8 @@ Prefer production artifacts over prose-only advice:
 - Content Market Gate / Market MVP Report
 - Creative Brief / Production Bible
 - Sequence Plan / optional Visual Control Board / Character & Location Reference Sheet
+- Visual Control Plan / Character Reference / Location Reference / Spatial Map
+- Scale Reference / Physics Cue / Previsualization / Lens Result
 - Visual Control State Audit
 - Edit Timeline Ledger / Picture Lock record
 - Asset Passport / Asset Registry

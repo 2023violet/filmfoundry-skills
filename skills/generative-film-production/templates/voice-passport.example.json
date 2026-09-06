@@ -1,0 +1,22 @@
+{
+  "voice_id": "VOICE_WATCHER",
+  "voice_description": "Low, restrained adult voice with a dry edge and deliberate consonants.",
+  "sample_asset_ids": [
+    "ASSET_VOICE_WATCHER_TEST_01",
+    "ASSET_VOICE_WATCHER_TEST_02"
+  ],
+  "accent": "Standard Mandarin with light northern coloring",
+  "pitch": "low register; narrow pitch movement in neutral delivery",
+  "pace": "measured; pauses are preserved at clause boundaries",
+  "emotional_behavior": "quiet under pressure; intensity increases through compression rather than shouting",
+  "test_lines": [
+    "Bie hui tou.",
+    "Men hou mei you ren."
+  ],
+  "version": "v1",
+  "drift_observations": [
+    "No cross-shot drift observation recorded yet."
+  ],
+  "evidence_level": "UNVERIFIED",
+  "extensions": {}
+}

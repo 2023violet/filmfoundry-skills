@@ -113,15 +113,15 @@ class VisualControlPlan:
 
     visual_control_id: str
     production_unit: str
-    character_references: tuple[Mapping[str, Any], ...] = ()
+    character_references: list[dict[str, Any]] = field(default_factory=list)
     location_reference: Mapping[str, Any] | None = None
     spatial_map: Mapping[str, Any] | None = None
-    scale_references: tuple[Mapping[str, Any], ...] = ()
-    physics_cues: tuple[Mapping[str, Any], ...] = ()
+    scale_references: list[dict[str, Any]] = field(default_factory=list)
+    physics_cues: list[dict[str, Any]] = field(default_factory=list)
     previsualization: Mapping[str, Any] | None = None
     lens_result: Mapping[str, Any] | None = None
     review_status: str = ""
-    experiment_ids: tuple[str, ...] = ()
+    experiment_ids: list[str] = field(default_factory=list)
     extensions: Mapping[str, Any] = field(default_factory=dict)
     raw: Mapping[str, Any] = field(default_factory=dict, repr=False, compare=False)
 
@@ -130,15 +130,15 @@ class VisualControlPlan:
         return cls(
             visual_control_id=str(value.get("visual_control_id", "")),
             production_unit=str(value.get("production_unit", "")),
-            character_references=tuple(value.get("character_references", ()) or ()),
+            character_references=[dict(item) for item in (value.get("character_references", ()) or ())],
             location_reference=value.get("location_reference"),
             spatial_map=value.get("spatial_map"),
-            scale_references=tuple(value.get("scale_references", ()) or ()),
-            physics_cues=tuple(value.get("physics_cues", ()) or ()),
+            scale_references=[dict(item) for item in (value.get("scale_references", ()) or ())],
+            physics_cues=[dict(item) for item in (value.get("physics_cues", ()) or ())],
             previsualization=value.get("previsualization"),
             lens_result=value.get("lens_result"),
             review_status=str(value.get("review_status", "")),
-            experiment_ids=tuple(value.get("experiment_ids", ()) or ()),
+            experiment_ids=[str(item) for item in (value.get("experiment_ids", ()) or ())],
             extensions=value.get("extensions", {}) or {},
             raw=dict(value),
         )

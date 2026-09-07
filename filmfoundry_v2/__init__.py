@@ -45,6 +45,25 @@ from .creator_sources import (
     CreatorSourceCoverageGap,
     discover_creator_sources,
 )
+from .creator_read_model import (
+    CreatorAction,
+    CreatorAsset,
+    CreatorBlocker,
+    CreatorConflict,
+    CreatorContinuityEdge,
+    CreatorCoverage,
+    CreatorEmotionPoint,
+    CreatorMetric,
+    CreatorNarrativeNode,
+    CreatorNavigation,
+    CreatorOverview,
+    CreatorProvenance,
+    CreatorReadModel,
+    CreatorShot,
+    CreatorSnapshot,
+    CreatorSourceRef,
+    collect_creator_snapshot,
+)
 
 __version__ = "2.2.0"
 
@@ -106,4 +125,21 @@ __all__ = [
     "CreatorSourceCatalog",
     "CreatorSourceCoverageGap",
     "discover_creator_sources",
+    "CreatorAction",
+    "CreatorAsset",
+    "CreatorBlocker",
+    "CreatorConflict",
+    "CreatorContinuityEdge",
+    "CreatorCoverage",
+    "CreatorEmotionPoint",
+    "CreatorMetric",
+    "CreatorNarrativeNode",
+    "CreatorNavigation",
+    "CreatorOverview",
+    "CreatorProvenance",
+    "CreatorReadModel",
+    "CreatorShot",
+    "CreatorSnapshot",
+    "CreatorSourceRef",
+    "collect_creator_snapshot",
 ]

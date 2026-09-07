@@ -1,0 +1,12 @@
+{
+  "schema_version": "creator-source-catalog.v1",
+  "project_id": "WUCHENG_FROZEN",
+  "runtime_path": "runtime/project-runtime.json",
+  "sources": [
+    {"source_id": "SRC_WORKSPACE", "source_kind": "workspace_manifest", "path": "workspace-manifest.v2.json", "path_base": "WORKSPACE_ROOT", "parser_id": "workspace-manifest-json", "schema_version": "workspace-manifest.v2", "authority_role": "CURRENT", "scope": "project", "required": true},
+    {"source_id": "SRC_STORY_V3_CURRENT", "source_kind": "narrative_index", "path": "story-v3-current.v1.json", "path_base": "WORKSPACE_ROOT", "parser_id": "narrative-index-json", "schema_version": "narrative-index.v1", "authority_role": "CURRENT", "scope": "STORY_V3", "required": true},
+    {"source_id": "SRC_ASSETS", "source_kind": "asset_registry", "path": "sources/asset-registry.v2.json", "path_base": "RUNTIME_DIR", "parser_id": "asset-registry-json", "schema_version": "asset-registry.v2", "authority_role": "CURRENT", "scope": "project", "required": true},
+    {"source_id": "SRC_PRODUCTION_HISTORICAL", "source_kind": "production_state", "path": "historical/production-mapping.v2.json", "path_base": "WORKSPACE_ROOT", "parser_id": "production-state-json", "schema_version": "production-state.v2", "authority_role": "HISTORICAL", "scope": "STORY_V3", "required": true}
+  ]
+}
+

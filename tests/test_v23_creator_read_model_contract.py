@@ -1,7 +1,7 @@
 """Deliberately RED v2.3 contracts for the Creator Read Model."""
 from __future__ import annotations
 
-from dataclasses import MISSING, fields, is_dataclass
+from dataclasses import MISSING, fields, is_dataclass, replace
 import json
 from pathlib import Path
 import shutil
@@ -14,6 +14,7 @@ import filmfoundry_v2
 
 ROOT = Path(__file__).resolve().parents[1]
 SMOKE_PROJECT = ROOT / "tests" / "fixtures" / "v23" / "creator-read-model" / "smoke-project"
+FROZEN_WUCHENG_PROJECT = ROOT / "tests" / "fixtures" / "v23" / "creator-read-model" / "projects" / "wucheng-frozen"
 PATH_ESCAPE_ERROR = "CREATOR_SOURCE_PATH_ESCAPE: source path escapes workspace"
 ARCHIVE_ACTIVE_ERROR = "CREATOR_ARCHIVE_SOURCE_ACTIVE: active source is inside archive"
 MULTIPLE_CURRENT_ERROR = "CREATOR_MULTIPLE_CURRENT: multiple CURRENT sources for source_kind and scope"
@@ -133,6 +134,64 @@ def test_creator_snapshot_reports_present_media_hash_mismatch(tmp_path: Path):
     assert asset.observed_readiness == "PRESENT_HASH_MISMATCH"
 
 
+def test_creator_snapshot_serialization_is_deterministic_and_workspace_relative():
+    snapshot = collect_snapshot(SMOKE_PROJECT)
+
+    first = snapshot.to_json()
+    second = snapshot.to_json()
+
+    assert first == second
+    payload = json.loads(first)
+    assert payload["schema_version"] == "creator-snapshot.v1"
+    assert "actions" not in payload
+    assert "navigation" not in payload
+    asset = next(asset for asset in snapshot.assets if asset.asset_id == "CHAR_RIVER")
+    source_ref = asset.provenance.source_refs[0]
+    assert source_ref.path == "runtime/sources/asset-registry.v2.json"
+    assert source_ref.pointer == "/0"
+    assert len(source_ref.sha256) == 64
+
+
+def test_creator_snapshot_preserves_current_and_historical_authority_mismatch(tmp_path: Path):
+    root = copied_smoke_project(tmp_path)
+    path, catalog = source_catalog(root)
+    historical = root / "historical-production-state.v2.json"
+    shutil.copy2(root / "runtime" / "sources" / "production-state.v2.json", historical)
+    historical_source = dict(next(source for source in catalog["sources"] if source["source_id"] == "SRC_STATE"))
+    historical_source.update(
+        source_id="SRC_HISTORICAL_PRODUCTION",
+        source_kind="production_state",
+        path="historical-production-state.v2.json",
+        path_base="WORKSPACE_ROOT",
+        authority_role="HISTORICAL",
+    )
+    catalog["sources"].append(historical_source)
+    write_json(path, catalog)
+
+    snapshot = collect_snapshot(root)
+
+    assert any(conflict.conflict_type == "AUTHORITY_MISMATCH" for conflict in snapshot.conflicts)
+    assert snapshot.overview.current_authority == "CURRENT"
+    assert snapshot.overview.historical_authority == "HISTORICAL"
+    assert next(metric for metric in snapshot.metrics if metric.metric_id == "assets.total").data_status == "KNOWN"
+
+
+def test_frozen_wucheng_snapshot_keeps_exact_boundary_facts():
+    snapshot = collect_snapshot(FROZEN_WUCHENG_PROJECT)
+    metrics = {metric.metric_id: metric.value for metric in snapshot.metrics}
+
+    assert metrics == {
+        "assets.total": 75,
+        "production_units.total": 19,
+        "character_media.missing": 21,
+        "generation.total": 0,
+        "select.total": 0,
+    }
+    assert snapshot.overview.current_authority == "CURRENT"
+    assert snapshot.overview.historical_authority == "HISTORICAL"
+    assert any(conflict.conflict_type == "AUTHORITY_MISMATCH" for conflict in snapshot.conflicts)
+
+
 def test_creator_catalog_rejects_required_unknown_schema(tmp_path: Path):
     root = copied_smoke_project(tmp_path)
     path, catalog = source_catalog(root)
@@ -203,6 +262,25 @@ def test_creator_catalog_reports_optional_unsupported_source_as_coverage_gap(tmp
     assert [(gap.source_id, gap.reason) for gap in discovered.coverage_gaps] == [
         ("SRC_OPTIONAL_FUTURE", "unsupported source schema")
     ]
+
+
+def test_creator_snapshot_marks_optional_invalid_source_as_invalid_coverage(tmp_path: Path):
+    root = copied_smoke_project(tmp_path)
+    discovered = creator_api("discover_creator_sources")(root)
+    discovered = replace(
+        discovered,
+        coverage_gaps=(
+            *discovered.coverage_gaps,
+            filmfoundry_v2.CreatorSourceCoverageGap(
+                "SRC_OPTIONAL_INVALID", "asset_registry", "asset-registry-json", "asset-registry.v2", "invalid source"
+            ),
+        ),
+    )
+    snapshot = creator_api("collect_creator_snapshot")(root, discovered)
+
+    invalid = next(item for item in snapshot.coverage if item.coverage_id == "SRC_OPTIONAL_INVALID")
+    assert invalid.data_status == "INVALID"
+    assert invalid.successful_sources == 0
 
 
 def test_creator_catalog_uses_an_adapter_catalog_path(tmp_path: Path):

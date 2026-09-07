@@ -19,6 +19,8 @@ class CompiledPayload:
     input_hashes: dict[str, str] = field(default_factory=dict)
     visual_control_id: str | None = None
     visual_control_hash: str | None = None
+    production_ledger_event_ids: tuple[str, ...] = ()
+    requirement_report_hash: str | None = None
 
 
 class ProviderAdapter(Protocol):

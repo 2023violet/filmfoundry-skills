@@ -36,8 +36,10 @@ from .script_analysis import ScriptAnalysis, parse_script_analysis, validate_scr
 from .beat_map import EmotionalBeatMap, parse_emotional_beat_map, production_requirement_facts, validate_emotional_beat_map
 from .scene_topology import SceneTopology, parse_scene_topology, validate_scene_topology
 from .coverage import LocationCoverageSet, parse_location_coverage, validate_location_coverage
+from .look_bible import LookBible, parse_look_bible, validate_look_bible
+from .dependency_graph import DependencyGraph, build_dependency_graph, parse_dependency_graph, validate_dependency_graph
 
-__version__ = "2.1.0"
+__version__ = "2.2.0"
 
 __all__ = [
     "LIFECYCLE_STATES",
@@ -85,4 +87,11 @@ __all__ = [
     "LocationCoverageSet",
     "parse_location_coverage",
     "validate_location_coverage",
+    "LookBible",
+    "parse_look_bible",
+    "validate_look_bible",
+    "DependencyGraph",
+    "build_dependency_graph",
+    "parse_dependency_graph",
+    "validate_dependency_graph",
 ]

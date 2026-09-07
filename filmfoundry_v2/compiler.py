@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 
 from . import parse_prompt_metadata, validate_prompt_markdown
 from .adapters import CompiledPayload, hash_text
@@ -55,6 +55,9 @@ def compile_canonical(
     provider: str,
     capability: dict[str, Any],
     visual_control_path: str | Path | None = None,
+    context_paths: Mapping[str, str | Path] | None = None,
+    production_ledger_event_ids: tuple[str, ...] = (),
+    requirement_report_path: str | Path | None = None,
 ) -> CompiledPayload:
     """Return the structured, provider-neutral compilation contract."""
     path = Path(prompt_path)
@@ -80,7 +83,44 @@ def compile_canonical(
             raise PromptCompilationError("; ".join(issue.message for issue in report.errors))
         visual_control_hash = hash_text(visual_text)
         visual_control_id = str(visual_control["visual_control_id"])
+    context_paths = dict(context_paths or {})
+    context_sections: list[tuple[str, Any]] = []
+    context_validators = {
+        "script_analysis": ("script_analysis", "validate_script_analysis"),
+        "look_bible": ("look_bible", "validate_look_bible"),
+        "scene_topology": ("scene_topology", "validate_scene_topology"),
+        "dependency_graph": ("dependency_graph", "validate_dependency_graph"),
+    }
+    input_hashes: dict[str, str] = {"prompt": hash_text(text)}
+    for name in ("script_analysis", "look_bible", "scene_topology", "dependency_graph"):
+        if name not in context_paths:
+            continue
+        context_path = Path(context_paths[name])
+        context_text = context_path.read_text(encoding="utf-8")
+        try:
+            value = json.loads(context_text)
+        except json.JSONDecodeError as exc:
+            raise PromptCompilationError(f"{name} JSON: {exc}") from exc
+        module_name, validator_name = context_validators[name]
+        if name == "script_analysis":
+            from .script_analysis import validate_script_analysis
+            report = validate_script_analysis(value, source=str(context_path))
+        elif name == "look_bible":
+            from .look_bible import validate_look_bible
+            report = validate_look_bible(value, source=str(context_path))
+        elif name == "scene_topology":
+            from .scene_topology import validate_scene_topology
+            report = validate_scene_topology(value, source=str(context_path))
+        else:
+            from .dependency_graph import validate_dependency_graph
+            report = validate_dependency_graph(value, source=str(context_path))
+        if not report.ok:
+            raise PromptCompilationError("; ".join(issue.message for issue in report.errors))
+        context_sections.append((name, value))
+        input_hashes[name] = hash_text(context_text)
     body = compile_prompt(path, provider)
+    for name, value in context_sections:
+        body += f"\n[{name}]\n{json.dumps(value, ensure_ascii=False, sort_keys=True)}\n"
     if visual_control is not None:
         # Keep the control sections deterministic so provider adapters can map
         # them without changing the authoring artifact.
@@ -99,12 +139,11 @@ def compile_canonical(
         reference_slots=tuple(str(item["slot"]) for item in metadata.get("references", [])),
         capability_snapshot_id=str(capability.get("snapshot_id", "UNVERIFIED")),
         body=body,
-        input_hashes={
-            "prompt": hash_text(text),
-            **({"visual_control": visual_control_hash} if visual_control_hash else {}),
-        },
+        input_hashes={**input_hashes, **({"visual_control": visual_control_hash} if visual_control_hash else {})},
         visual_control_id=visual_control_id,
         visual_control_hash=visual_control_hash,
+        production_ledger_event_ids=tuple(production_ledger_event_ids),
+        requirement_report_hash=(hash_text(Path(requirement_report_path).read_text(encoding="utf-8")) if requirement_report_path is not None else None),
     )
 
 

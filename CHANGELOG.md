@@ -81,3 +81,6 @@
 - Added deterministic validators for shot specs, asset registries, compiled prompts, and adjacent-shot continuity.
 - Added 12 agentic eval definitions plus deterministic fixture/scoring smoke harness.
 - Static/TDD verification is part of v1. Fresh-context agentic benchmark and real multi-project production validation remain separate evidence gates.
+## 2.2.0
+
+- Add production ledger, conditional artifact requirements, script facts, emotional beats, scene topology, coverage, look bible, dependency graph, and context-aware compilation.

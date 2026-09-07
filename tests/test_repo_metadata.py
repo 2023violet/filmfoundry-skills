@@ -24,12 +24,12 @@ def test_repo_has_release_metadata_and_ci():
         assert (ROOT / rel).is_file(), rel
 
 
-def test_public_package_version_matches_v21_release_metadata():
+def test_public_package_version_matches_v22_release_metadata():
     pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    assert filmfoundry_v2.__version__ == "2.1.0"
-    assert 'version = "2.1.0"' in pyproject
-    assert "**Version:** 2.1.0" in readme
+    assert filmfoundry_v2.__version__ == "2.2.0"
+    assert 'version = "2.2.0"' in pyproject
+    assert "**Version:** 2.2.0" in readme
 
 
 def test_model_profile_template_exists_and_records_evidence_scope():

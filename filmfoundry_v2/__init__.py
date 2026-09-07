@@ -38,6 +38,13 @@ from .scene_topology import SceneTopology, parse_scene_topology, validate_scene_
 from .coverage import LocationCoverageSet, parse_location_coverage, validate_location_coverage
 from .look_bible import LookBible, parse_look_bible, validate_look_bible
 from .dependency_graph import DependencyGraph, build_dependency_graph, parse_dependency_graph, validate_dependency_graph
+from .creator_sources import (
+    CreatorCatalogSource,
+    CreatorProjectAdapter,
+    CreatorSourceCatalog,
+    CreatorSourceCoverageGap,
+    discover_creator_sources,
+)
 
 __version__ = "2.2.0"
 
@@ -94,4 +101,9 @@ __all__ = [
     "build_dependency_graph",
     "parse_dependency_graph",
     "validate_dependency_graph",
+    "CreatorCatalogSource",
+    "CreatorProjectAdapter",
+    "CreatorSourceCatalog",
+    "CreatorSourceCoverageGap",
+    "discover_creator_sources",
 ]

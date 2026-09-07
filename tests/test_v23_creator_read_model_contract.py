@@ -152,6 +152,68 @@ def test_creator_catalog_rejects_unknown_authority_enum(tmp_path: Path):
     assert_creator_error(exc_info, UNKNOWN_ENUM_ERROR)
 
 
+def test_creator_catalog_discovers_supported_sources_with_parsed_records():
+    catalog = creator_api("discover_creator_sources")(SMOKE_PROJECT)
+
+    assert catalog.project_id == "SMOKE_PROJECT"
+    assert catalog.runtime_path == SMOKE_PROJECT / "runtime" / "project-runtime.json"
+    assert catalog.coverage_gaps == ()
+    assert len(catalog.sources) == 9
+    source = next(source for source in catalog.sources if source.source_id == "SRC_SHOT_ONE")
+    assert source.path == SMOKE_PROJECT / "runtime" / "sources" / "shots" / "EP01_SH001.v2.json"
+    assert source.data["shot_id"] == "EP01_SH001"
+
+
+def test_creator_catalog_resolves_windows_syntax_from_a_chinese_workspace(tmp_path: Path):
+    root = tmp_path / "项目"
+    shutil.copytree(SMOKE_PROJECT, root)
+    path, catalog = source_catalog(root)
+    catalog["runtime_path"] = "runtime\\project-runtime.json"
+    source = next(source for source in catalog["sources"] if source["source_id"] == "SRC_ASSETS")
+    source["path"] = "sources\\asset-registry.v2.json"
+    write_json(path, catalog)
+
+    discovered = creator_api("discover_creator_sources")(root)
+
+    asset_source = next(source for source in discovered.sources if source.source_id == "SRC_ASSETS")
+    assert asset_source.path == root / "runtime" / "sources" / "asset-registry.v2.json"
+
+
+def test_creator_catalog_reports_optional_unsupported_source_as_coverage_gap(tmp_path: Path):
+    root = copied_smoke_project(tmp_path)
+    path, catalog = source_catalog(root)
+    optional = dict(catalog["sources"][0])
+    optional.update(
+        source_id="SRC_OPTIONAL_FUTURE",
+        source_kind="future_source",
+        parser_id="future-json",
+        schema_version="future-source.v1",
+        authority_role="SUPPORTING",
+        required=False,
+    )
+    catalog["sources"].append(optional)
+    write_json(path, catalog)
+
+    discovered = creator_api("discover_creator_sources")(root)
+
+    assert all(source.source_id != "SRC_OPTIONAL_FUTURE" for source in discovered.sources)
+    assert [(gap.source_id, gap.reason) for gap in discovered.coverage_gaps] == [
+        ("SRC_OPTIONAL_FUTURE", "unsupported source schema")
+    ]
+
+
+def test_creator_catalog_uses_an_adapter_catalog_path(tmp_path: Path):
+    root = copied_smoke_project(tmp_path)
+
+    class Adapter:
+        def locate_catalog(self, workspace_root: Path) -> Path:
+            return workspace_root / "creator-source-catalog.v1.json"
+
+    discovered = creator_api("discover_creator_sources")(root, Adapter())
+
+    assert discovered.project_id == "SMOKE_PROJECT"
+
+
 def test_creator_snapshot_dataclass_and_schema_stay_aligned():
     snapshot_type = getattr(filmfoundry_v2, "CreatorSnapshot", None)
     assert snapshot_type is not None, "FilmFoundry v2.3 public CreatorSnapshot dataclass is missing"

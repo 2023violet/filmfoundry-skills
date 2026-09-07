@@ -211,6 +211,15 @@ def test_existing_v2_sources_in_creator_fixtures_remain_valid():
                 raise AssertionError(f"unsupported fixture source_kind: {source['source_kind']}")
 
 
+def test_fixture_shot_sources_use_their_stable_shot_ids_as_scopes():
+    for entry in fixture_index():
+        project_root = FIXTURES / entry["path"]
+        catalog = read_json(project_root / "creator-source-catalog.v1.json")
+        for source in catalog["sources"]:
+            if source["source_kind"] == "shot_spec":
+                assert source["scope"] == read_json(source_path(project_root, catalog, source))["shot_id"]
+
+
 def test_fixture_integrity_rejects_unknown_source_kind():
     entry = next(entry for entry in fixture_index() if entry["fixture_id"] == "smoke-project")
     project_root = FIXTURES / entry["path"]
@@ -233,6 +242,17 @@ def test_smoke_project_has_exact_generic_counts_and_verified_fixture_media():
     project_root = FIXTURES / entry["path"]
     catalog = read_json(project_root / "creator-source-catalog.v1.json")
     assert fixture_counts(project_root, catalog) == entry["expected"]
+    shot_scopes = {
+        source["source_id"]: source["scope"]
+        for source in catalog["sources"]
+        if source["source_kind"] == "shot_spec"
+    }
+    assert shot_scopes == {
+        "SRC_SHOT_ONE": "EP01_SH001",
+        "SRC_SHOT_TWO": "EP01_SH002",
+        "SRC_SHOT_THREE": "EP02_SH001",
+        "SRC_SHOT_FOUR": "EP02_SH002",
+    }
     assets = next(
         read_json(source_path(project_root, catalog, source))
         for source in catalog["sources"]

@@ -19,6 +19,9 @@ ARCHIVE_ACTIVE_ERROR = "CREATOR_ARCHIVE_SOURCE_ACTIVE: active source is inside a
 MULTIPLE_CURRENT_ERROR = "CREATOR_MULTIPLE_CURRENT: multiple CURRENT sources for source_kind and scope"
 UNKNOWN_SCHEMA_ERROR = "CREATOR_UNKNOWN_SCHEMA: unsupported source schema"
 UNKNOWN_ENUM_ERROR = "CREATOR_UNKNOWN_ENUM: unknown authority_role"
+INVALID_ID_ERROR = "CREATOR_INVALID_ID: invalid stable ASCII ID"
+DUPLICATE_SOURCE_ID_ERROR = "CREATOR_DUPLICATE_SOURCE_ID: duplicate source_id"
+INVALID_SOURCE_ERROR = "CREATOR_SOURCE_INVALID: source validation failed"
 
 
 def read_json(path: Path):
@@ -93,10 +96,10 @@ def test_creator_catalog_rejects_workspace_path_escape(tmp_path: Path):
 def test_creator_catalog_rejects_archive_as_active_source(tmp_path: Path):
     root = copied_smoke_project(tmp_path)
     path, catalog = source_catalog(root)
-    archive_path = root / "99_\u5f52\u6863" / "workspace-manifest.v2.json"
+    archive_path = root / "archive" / "workspace-manifest.v2.json"
     archive_path.parent.mkdir()
     shutil.copy2(root / "workspace-manifest.v2.json", archive_path)
-    catalog["sources"][0]["path"] = "99_\u5f52\u6863/workspace-manifest.v2.json"
+    catalog["sources"][0]["path"] = "archive/workspace-manifest.v2.json"
     write_json(path, catalog)
 
     with pytest.raises(ValueError) as exc_info:
@@ -208,6 +211,167 @@ def test_creator_catalog_uses_an_adapter_catalog_path(tmp_path: Path):
     class Adapter:
         def locate_catalog(self, workspace_root: Path) -> Path:
             return workspace_root / "creator-source-catalog.v1.json"
+
+    discovered = creator_api("discover_creator_sources")(root, Adapter())
+
+    assert discovered.project_id == "SMOKE_PROJECT"
+
+
+def test_creator_catalog_rejects_duplicate_current_shot_with_equivalent_path(tmp_path: Path):
+    root = copied_smoke_project(tmp_path)
+    path, catalog = source_catalog(root)
+    shot = next(source for source in catalog["sources"] if source["source_id"] == "SRC_SHOT_ONE")
+    duplicate = dict(shot)
+    duplicate.update(
+        source_id="SRC_SHOT_ONE_DUPLICATE",
+        path="sources/shots/../shots/EP01_SH001.v2.json",
+    )
+    catalog["sources"].append(duplicate)
+    write_json(path, catalog)
+
+    with pytest.raises(ValueError) as exc_info:
+        creator_api("discover_creator_sources")(root)
+    assert_creator_error(exc_info, MULTIPLE_CURRENT_ERROR)
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("project_id", "project-id"),
+        ("source_id", "source-id"),
+        ("scope", "scope-id"),
+    ],
+)
+def test_creator_catalog_rejects_non_stable_ascii_ids(tmp_path: Path, field: str, value: str):
+    root = copied_smoke_project(tmp_path)
+    path, catalog = source_catalog(root)
+    if field == "project_id":
+        catalog[field] = value
+    else:
+        catalog["sources"][0][field] = value
+    write_json(path, catalog)
+
+    with pytest.raises(ValueError) as exc_info:
+        creator_api("discover_creator_sources")(root)
+    assert_creator_error(exc_info, INVALID_ID_ERROR)
+
+
+def test_creator_catalog_rejects_duplicate_source_id(tmp_path: Path):
+    root = copied_smoke_project(tmp_path)
+    path, catalog = source_catalog(root)
+    catalog["sources"][1]["source_id"] = catalog["sources"][0]["source_id"]
+    write_json(path, catalog)
+
+    with pytest.raises(ValueError) as exc_info:
+        creator_api("discover_creator_sources")(root)
+    assert_creator_error(exc_info, DUPLICATE_SOURCE_ID_ERROR)
+
+
+def test_creator_catalog_uses_a_declared_manifest_for_archive_boundary(tmp_path: Path):
+    root = copied_smoke_project(tmp_path)
+    path, catalog = source_catalog(root)
+    manifest = root / "workspace-manifest.v2.json"
+    declared_manifest = root / "manifest" / manifest.name
+    declared_manifest.parent.mkdir()
+    shutil.copy2(manifest, declared_manifest)
+    manifest.unlink()
+    catalog["sources"][0]["path"] = "manifest/workspace-manifest.v2.json"
+    archive_path = root / "archive" / "narrative-index.v1.json"
+    archive_path.parent.mkdir()
+    shutil.copy2(root / "narrative-index.v1.json", archive_path)
+    catalog["sources"][1]["path"] = "archive/narrative-index.v1.json"
+    write_json(path, catalog)
+
+    with pytest.raises(ValueError) as exc_info:
+        creator_api("discover_creator_sources")(root)
+    assert_creator_error(exc_info, ARCHIVE_ACTIVE_ERROR)
+
+
+def test_creator_catalog_allows_archive_named_path_without_declared_manifest(tmp_path: Path):
+    root = copied_smoke_project(tmp_path)
+    path, catalog = source_catalog(root)
+    catalog["sources"] = catalog["sources"][1:]
+    archive_path = root / "99_\u5f52\u6863" / "narrative-index.v1.json"
+    archive_path.parent.mkdir()
+    shutil.copy2(root / "narrative-index.v1.json", archive_path)
+    catalog["sources"][0]["path"] = "99_\u5f52\u6863/narrative-index.v1.json"
+    write_json(path, catalog)
+
+    discovered = creator_api("discover_creator_sources")(root)
+
+    assert discovered.sources[0].path == archive_path
+
+
+@pytest.mark.parametrize("mutation", ["unknown_field", "missing_field", "invalid_id", "unknown_parent"])
+def test_creator_catalog_rejects_invalid_narrative_index_records(tmp_path: Path, mutation: str):
+    root = copied_smoke_project(tmp_path)
+    narrative_path = root / "narrative-index.v1.json"
+    narrative = read_json(narrative_path)
+    if mutation == "unknown_field":
+        narrative["nodes"][0]["unexpected"] = "value"
+    elif mutation == "missing_field":
+        del narrative["nodes"][0]["display_name"]
+    elif mutation == "invalid_id":
+        narrative["nodes"][0]["node_id"] = "season-one"
+    else:
+        narrative["nodes"][1]["parent_id"] = "MISSING_PARENT"
+    write_json(narrative_path, narrative)
+
+    with pytest.raises(ValueError) as exc_info:
+        creator_api("discover_creator_sources")(root)
+    assert_creator_error(exc_info, INVALID_SOURCE_ERROR)
+
+
+@pytest.mark.parametrize("mutation", ["unknown_field", "missing_field", "invalid_id", "self_edge"])
+def test_creator_catalog_rejects_invalid_continuity_records(tmp_path: Path, mutation: str):
+    root = copied_smoke_project(tmp_path)
+    continuity_path = root / "continuity-chain.v1.json"
+    continuity = read_json(continuity_path)
+    edge = continuity["chains"][0]["edges"][0]
+    if mutation == "unknown_field":
+        edge["unexpected"] = "value"
+    elif mutation == "missing_field":
+        del edge["field"]
+    elif mutation == "invalid_id":
+        continuity["chains"][0]["chain_id"] = "chain-lamp"
+    else:
+        edge["to_shot_id"] = edge["from_shot_id"]
+    write_json(continuity_path, continuity)
+
+    with pytest.raises(ValueError) as exc_info:
+        creator_api("discover_creator_sources")(root)
+    assert_creator_error(exc_info, INVALID_SOURCE_ERROR)
+
+
+def test_creator_catalog_accepts_object_form_asset_registry(tmp_path: Path):
+    root = copied_smoke_project(tmp_path)
+    registry_path = root / "runtime" / "sources" / "asset-registry.v2.json"
+    write_json(registry_path, {"assets": read_json(registry_path)})
+
+    discovered = creator_api("discover_creator_sources")(root)
+
+    assets = next(source for source in discovered.sources if source.source_id == "SRC_ASSETS")
+    assert assets.data["assets"][0]["asset_id"] == "CHAR_RIVER"
+
+
+def test_creator_catalog_rejects_drive_qualified_source_path(tmp_path: Path):
+    root = copied_smoke_project(tmp_path)
+    path, catalog = source_catalog(root)
+    catalog["sources"][0]["path"] = "C:workspace-manifest.v2.json"
+    write_json(path, catalog)
+
+    with pytest.raises(ValueError) as exc_info:
+        creator_api("discover_creator_sources")(root)
+    assert_creator_error(exc_info, PATH_ESCAPE_ERROR)
+
+
+def test_creator_catalog_resolves_relative_adapter_path_from_workspace(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    root = copied_smoke_project(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    class Adapter:
+        def locate_catalog(self, workspace_root: Path) -> Path:
+            return Path("creator-source-catalog.v1.json")
 
     discovered = creator_api("discover_creator_sources")(root, Adapter())
 

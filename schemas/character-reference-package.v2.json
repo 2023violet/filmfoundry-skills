@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filmfoundry.dev/schemas/character-reference-package.v2.json",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "package_id", "asset_id", "views", "state_variants", "review_status"],
+  "properties": {
+    "schema_version": {"const": "character-reference-package.v2"},
+    "package_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"},
+    "asset_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"},
+    "views": {"type": "array", "minItems": 3, "items": {"$ref": "#/$defs/view"}},
+    "state_variants": {"type": "array", "items": {"$ref": "#/$defs/variant"}},
+    "review_status": {"type": "string", "minLength": 1},
+    "extensions": {"type": "object"}
+  },
+  "$defs": {
+    "view": {"type": "object", "additionalProperties": false, "required": ["asset_id", "view_kind", "state_variant", "source_hash", "controls", "does_not_control", "qc_status"], "properties": {"asset_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"}, "view_kind": {"enum": ["FACE_CLOSEUP", "FRONT_BODY", "BACK_BODY", "HEADLESS_BODY", "SIDE_BODY", "EXPRESSION_GRID"]}, "state_variant": {"type": "string", "minLength": 1}, "source_hash": {"type": "string", "pattern": "^[0-9a-fA-F]{64}$"}, "controls": {"type": "string", "minLength": 1}, "does_not_control": {"type": "string", "minLength": 1}, "qc_status": {"type": "string", "minLength": 1}, "extensions": {"type": "object"}}},
+    "variant": {"type": "object", "additionalProperties": false, "required": ["variant_id", "state_variant", "parent_asset_id", "mask_regions", "source_hash", "qc_status"], "properties": {"variant_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"}, "state_variant": {"type": "string", "minLength": 1}, "parent_asset_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"}, "mask_regions": {"type": "array", "items": {"type": "string", "minLength": 1}}, "source_hash": {"type": "string", "pattern": "^[0-9a-fA-F]{64}$"}, "qc_status": {"type": "string", "minLength": 1}, "extensions": {"type": "object"}}}
+  }
+}

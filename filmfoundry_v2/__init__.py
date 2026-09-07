@@ -34,6 +34,8 @@ from .ledger import (
 )
 from .script_analysis import ScriptAnalysis, parse_script_analysis, validate_script_analysis
 from .beat_map import EmotionalBeatMap, parse_emotional_beat_map, production_requirement_facts, validate_emotional_beat_map
+from .scene_topology import SceneTopology, parse_scene_topology, validate_scene_topology
+from .coverage import LocationCoverageSet, parse_location_coverage, validate_location_coverage
 
 __version__ = "2.1.0"
 
@@ -77,4 +79,10 @@ __all__ = [
     "parse_emotional_beat_map",
     "validate_emotional_beat_map",
     "production_requirement_facts",
+    "SceneTopology",
+    "parse_scene_topology",
+    "validate_scene_topology",
+    "LocationCoverageSet",
+    "parse_location_coverage",
+    "validate_location_coverage",
 ]

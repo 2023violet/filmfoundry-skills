@@ -22,6 +22,7 @@ _EVENT_FIELDS = {
 _POLICY_FIELDS = {"schema_version", "policy_id", "requirements", "extensions"}
 _REQUIREMENT_FIELDS = {"requirement_id", "artifact_type", "description", "severity", "required_when", "extensions"}
 _EXTENSION_RE = re.compile(r"^(?:project|provider):[^\s:]+$")
+_MISSING = object()
 
 
 def _issue(code: str, message: str, pointer: str = "", severity: str = "ERROR") -> ValidationIssue:
@@ -78,7 +79,7 @@ def validate_production_ledger(value: Mapping[str, Any]) -> ValidationReport:
         issues.append(_issue("INVALID_ID", "/ledger_id: stable ID required", "/ledger_id"))
     entities = value.get("entities")
     entity_ids: set[str] = set()
-    entity_rows: list[Mapping[str, Any]] = []
+    entity_rows: list[tuple[int, Mapping[str, Any]]] = []
     if not isinstance(entities, list):
         issues.append(_issue("INVALID_TYPE", "/entities: list required", "/entities"))
     else:
@@ -87,7 +88,7 @@ def validate_production_ledger(value: Mapping[str, Any]) -> ValidationReport:
             if not isinstance(entity, Mapping):
                 issues.append(_issue("INVALID_TYPE", f"{pointer[:-1]}: object required", pointer[:-1]))
                 continue
-            entity_rows.append(entity)
+            entity_rows.append((index, entity))
             _unknown(entity, _ENTITY_FIELDS, pointer, issues)
             entity_id = entity.get("entity_id")
             if not _valid_id(entity_id):
@@ -102,7 +103,7 @@ def validate_production_ledger(value: Mapping[str, Any]) -> ValidationReport:
             if not isinstance(references, Mapping):
                 issues.append(_issue("INVALID_TYPE", f"{pointer}references: object required", f"{pointer}references"))
             _extensions(entity.get("extensions"), pointer, issues)
-    for index, entity in enumerate(entity_rows):
+    for index, entity in entity_rows:
         references = entity.get("references", {})
         if not isinstance(references, Mapping):
             continue
@@ -130,13 +131,17 @@ def validate_production_ledger(value: Mapping[str, Any]) -> ValidationReport:
                 issues.append(_issue("INVALID_ID", f"{pointer}event_id: stable ID required", f"{pointer}event_id"))
             elif event_id in event_by_id:
                 issues.append(_issue("DUPLICATE_EVENT_ID", f"{pointer}event_id: duplicate {event_id}", f"{pointer}event_id"))
-            if event.get("sequence") != index + 1:
+            sequence = event.get("sequence")
+            if not isinstance(sequence, int) or isinstance(sequence, bool) or sequence != index + 1:
                 issues.append(_issue("INVALID_EVENT_SEQUENCE", f"{pointer}sequence: expected {index + 1} for append-only order", f"{pointer}sequence"))
             if not _valid_timestamp(event.get("occurred_at")):
                 issues.append(_issue("INVALID_TIMESTAMP", f"{pointer}occurred_at: timezone-aware ISO-8601 timestamp required", f"{pointer}occurred_at"))
             if not isinstance(event.get("event_type"), str) or not event["event_type"].strip():
                 issues.append(_issue("REQUIRED_FIELD", f"{pointer}event_type: non-empty string required", f"{pointer}event_type"))
-            if event.get("entity_id") not in entity_ids:
+            entity_id = event.get("entity_id")
+            if not _valid_id(entity_id):
+                issues.append(_issue("INVALID_REFERENCE", f"{pointer}entity_id: stable entity ID required", f"{pointer}entity_id"))
+            elif entity_id not in entity_ids:
                 issues.append(_issue("UNKNOWN_EVENT_ENTITY", f"{pointer}entity_id: unknown entity {event.get('entity_id')!r}", f"{pointer}entity_id"))
             if not isinstance(event.get("actor"), str) or not event["actor"].strip():
                 issues.append(_issue("REQUIRED_FIELD", f"{pointer}actor: non-empty string required", f"{pointer}actor"))
@@ -147,16 +152,21 @@ def validate_production_ledger(value: Mapping[str, Any]) -> ValidationReport:
                 issues.append(_issue("INVALID_TYPE", f"{pointer}parameters: object required", f"{pointer}parameters"))
                 parameters = {}
             expected_previous = None if index == 0 else previous_hash
-            if event.get("previous_event_hash") != expected_previous:
+            if "previous_event_hash" not in event:
+                issues.append(_issue("REQUIRED_FIELD", f"{pointer}previous_event_hash: required", f"{pointer}previous_event_hash"))
+            elif event["previous_event_hash"] != expected_previous:
                 issues.append(_issue("INVALID_EVENT_CHAIN", f"{pointer}previous_event_hash: does not match preceding event", f"{pointer}previous_event_hash"))
             supplied_hash = event.get("event_hash")
             if not isinstance(supplied_hash, str) or not SHA256_RE.fullmatch(supplied_hash) or supplied_hash.lower() != _canonical_event_hash(event):
                 issues.append(_issue("INVALID_EVENT_HASH", f"{pointer}event_hash: does not match immutable event content", f"{pointer}event_hash"))
             previous_hash = supplied_hash if isinstance(supplied_hash, str) else None
 
-            retry_of = event.get("retry_of")
-            if retry_of is not None:
-                original = event_by_id.get(retry_of) if isinstance(retry_of, str) else None
+            if "retry_of" in event:
+                retry_of = event["retry_of"]
+                if not _valid_id(retry_of):
+                    issues.append(_issue("INVALID_REFERENCE", f"{pointer}retry_of: stable earlier event ID required", f"{pointer}retry_of"))
+                    retry_of = None
+                original = event_by_id.get(retry_of) if retry_of is not None else None
                 if original is None:
                     issues.append(_issue("UNKNOWN_RETRY_EVENT", f"{pointer}retry_of: must refer to an earlier event", f"{pointer}retry_of"))
                 else:
@@ -169,16 +179,27 @@ def validate_production_ledger(value: Mapping[str, Any]) -> ValidationReport:
                         if not isinstance(original_parameters, Mapping):
                             original_parameters = {}
                         for field in sorted(set(original_parameters) | set(parameters)):
-                            if original_parameters.get(field) != parameters.get(field) and field not in variables:
+                            original_value = original_parameters.get(field, _MISSING)
+                            retry_value = parameters.get(field, _MISSING)
+                            if original_value is _MISSING or retry_value is _MISSING:
+                                changed = original_value is not retry_value
+                            else:
+                                changed = original_value != retry_value
+                            if changed and field not in variables:
                                 issues.append(_issue("RETRY_VARIABLE_NOT_ALLOWED", f"{pointer}parameters.{field}: retry may change only declared variables", f"{pointer}parameters.{field}"))
             retry_policy = event.get("retry_policy")
             if retry_policy is not None:
                 variables = retry_policy.get("variable_fields") if isinstance(retry_policy, Mapping) else None
+                if isinstance(retry_policy, Mapping):
+                    _unknown(retry_policy, {"variable_fields"}, f"{pointer}retry_policy/", issues)
                 if not isinstance(variables, list) or any(not isinstance(item, str) or not item for item in variables):
                     issues.append(_issue("INVALID_RETRY_POLICY", f"{pointer}retry_policy.variable_fields: list of non-empty strings required", f"{pointer}retry_policy"))
-            correction_of = event.get("correction_of")
-            if correction_of is not None:
-                if correction_of not in event_by_id:
+            if "correction_of" in event:
+                correction_of = event["correction_of"]
+                if not _valid_id(correction_of):
+                    issues.append(_issue("INVALID_REFERENCE", f"{pointer}correction_of: stable earlier event ID required", f"{pointer}correction_of"))
+                    correction_of = None
+                if correction_of is None or correction_of not in event_by_id:
                     issues.append(_issue("UNKNOWN_CORRECTION_EVENT", f"{pointer}correction_of: must refer to an earlier event", f"{pointer}correction_of"))
                 if event.get("event_type") != "CORRECTION_RECORDED":
                     issues.append(_issue("INVALID_CORRECTION_EVENT", f"{pointer}event_type: corrections use CORRECTION_RECORDED compensating events", f"{pointer}event_type"))
@@ -255,7 +276,8 @@ def validate_production_policy(value: Mapping[str, Any]) -> ValidationReport:
                 seen.add(requirement_id)
             if not isinstance(requirement.get("description"), str) or not requirement["description"].strip():
                 issues.append(_issue("REQUIRED_FIELD", f"{pointer}description: non-empty string required", f"{pointer}description"))
-            if requirement.get("severity", "ERROR") not in {"ERROR", "WARNING"}:
+            severity = requirement.get("severity", "ERROR")
+            if not isinstance(severity, str) or severity not in {"ERROR", "WARNING"}:
                 issues.append(_issue("INVALID_SEVERITY", f"{pointer}severity: ERROR or WARNING required", f"{pointer}severity"))
             if "required_when" in requirement and not isinstance(requirement["required_when"], Mapping):
                 issues.append(_issue("INVALID_TYPE", f"{pointer}required_when: object required", f"{pointer}required_when"))
@@ -311,18 +333,18 @@ class RequirementReport:
         }
 
 
-def _artifact_types(value: Any) -> set[str]:
+def _artifact_types(value: Any) -> tuple[set[str], str | None]:
     if isinstance(value, Mapping):
         value = value.get("artifacts", [])
     if not isinstance(value, list):
-        return set()
+        return set(), "artifact inventory: list or object with artifacts list required"
     result: set[str] = set()
     for item in value:
         if isinstance(item, str):
             result.add(item)
         elif isinstance(item, Mapping) and isinstance(item.get("artifact_type"), str):
             result.add(item["artifact_type"])
-    return result
+    return result, None
 
 
 def evaluate_requirements(
@@ -338,7 +360,9 @@ def evaluate_requirements(
     required: list[ArtifactRequirement] = []
     satisfied: list[str] = []
     if validation.ok and isinstance(policy.get("requirements"), list) and isinstance(facts, Mapping):
-        artifact_types = _artifact_types(artifacts)
+        artifact_types, inventory_error = _artifact_types(artifacts)
+        if inventory_error:
+            issues.append(_issue("INVALID_ARTIFACT_INVENTORY", inventory_error))
         for raw in policy["requirements"]:
             if not isinstance(raw, Mapping):
                 continue

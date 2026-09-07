@@ -137,6 +137,9 @@ The formal views are `index`, `emotional-map`, `story-map`, `assets`, `shots`,
 and `continuity` in HTML and Markdown. The renderer additionally writes
 `emotional-map.svg`, `creator-snapshot.json`, and `render-manifest.json`.
 
+`--view overview` is the canonical CLI selector for the overview view and
+emits `index.html` and `index.md`. `--view all` includes that overview output.
+
 The HTML is a dense, high-contrast production interface with semantic markup,
 text plus status icons, accessible `details`, local CSS/SVG, and minimal inline
 JavaScript. It has no CDN, remote font/script, external URL, copied workspace

@@ -134,6 +134,9 @@ Sort by `priority -> severity -> entity_id -> action_id`. Show one primary actio
 
 Output `index`, `emotional-map`, `story-map`, `assets`, `shots`, and `continuity` as HTML and Markdown, plus `emotional-map.svg`, `creator-snapshot.json`, and `render-manifest.json`.
 
+`--view overview` is the canonical CLI selector for the overview view and
+emits `index.html` and `index.md`. `--view all` includes that overview output.
+
 Use a dark, high-contrast, dense production UI with text plus status icons, semantic HTML, accessible `<details>`, local CSS/SVG, and minimal inline JavaScript. Do not use CDNs, remote fonts/scripts, large frameworks, card-within-card layouts, clipped text, or color-only state. Workspace media uses safe relative paths and is never copied. Missing media shows a placeholder and source path. HTML escape all content and reject external URLs.
 
 Emotion v2 renders only points, straight segments, or steps. Missing values say data is unavailable.
@@ -245,7 +248,7 @@ Default JSON is UTF-8/LF/sorted keys. HTML, Markdown, and SVG contain no current
 - Add only the Creator View entry and decision order to the main `SKILL.md`; keep it at or below 300 lines.
 - Package `filmfoundry_v2/`, `schemas/`, `skills/generative-film-production/`, `pyproject.toml`, README, and CHANGELOG.
 - Create `filmfoundry-skills-v2.3.0` beside v2.2 under Wucheng `08_工具与技能`; preserve prior releases.
-- After final acceptance, update the Runtime tool pointer. Project wrappers use relative `python -m filmfoundry_v2`, not global installation.
+- Do not update the Runtime tool pointer in this task. Project wrappers use relative `python -m filmfoundry_v2`, not global installation.
 - Create a separate ZIP and packaging audit; review and commit. Do not publish or tag final release in this task.
 
 ## Task 11: Final acceptance and release readiness
@@ -257,6 +260,7 @@ Default JSON is UTF-8/LF/sorted keys. HTML, Markdown, and SVG contain no current
 - Perform desktop/mobile visual checks and canvas/SVG pixel checks where applicable.
 - Run `git diff --check`; verify `git diff -- 99_归档` is empty, v2.2/v1.3.3 files are unchanged, and main `SKILL.md` is at most 300 lines.
 - Produce final verification and evidence-gap reports.
+- Update the Runtime tool pointer only after every acceptance check above passes.
 - Create `v2.3.0-rc1` only if this is a local, reversible release marker permitted by repository policy; do not push, publish, merge, or create the final `v2.3.0` tag without explicit authority.
 
 ## Maturity gates

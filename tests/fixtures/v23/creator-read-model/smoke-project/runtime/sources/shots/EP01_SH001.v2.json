@@ -1,0 +1,19 @@
+{
+  "shot_id": "EP01_SH001",
+  "generation_unit_id": "EP01_SH001_G01",
+  "edit_unit_ids": ["EP01_EDIT001"],
+  "generation_duration_seconds": 8,
+  "edit_target_duration_seconds": 5,
+  "narrative_goal": "Introduce the workshop.",
+  "dominant_action": "River opens the workshop door.",
+  "location": {"asset_id": "LOC_WORKSHOP"},
+  "initial_state": "Door closed.",
+  "end_state": "Door open.",
+  "shot_size": "wide",
+  "composition": "Door in frame left.",
+  "camera": {"movement": "static", "axis": "screen-left"},
+  "transition_type": "hard_cut",
+  "reference_bindings": [{"slot": "character", "asset_id": "CHAR_RIVER", "role": "identity", "controls": "face", "does_not_control": "motion"}],
+  "failure_risks": ["identity drift"],
+  "quality_bar": "Door action is clear."
+}

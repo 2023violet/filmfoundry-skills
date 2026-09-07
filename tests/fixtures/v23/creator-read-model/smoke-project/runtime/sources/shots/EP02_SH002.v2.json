@@ -1,0 +1,19 @@
+{
+  "shot_id": "EP02_SH002",
+  "generation_unit_id": "EP02_SH002_G01",
+  "edit_unit_ids": ["EP02_EDIT002"],
+  "generation_duration_seconds": 8,
+  "edit_target_duration_seconds": 5,
+  "narrative_goal": "Close the exchange.",
+  "dominant_action": "River lowers the lamp.",
+  "location": {"asset_id": "LOC_WORKSHOP"},
+  "initial_state": "Lamp lit.",
+  "end_state": "Lamp lowered.",
+  "shot_size": "close",
+  "composition": "Lamp centered.",
+  "camera": {"movement": "static", "axis": "screen-left"},
+  "transition_type": "hard_cut",
+  "reference_bindings": [{"slot": "prop", "asset_id": "PROP_LAMP", "role": "state", "controls": "lamp", "does_not_control": "dialogue"}],
+  "failure_risks": ["state drift"],
+  "quality_bar": "Final lamp position is clear."
+}

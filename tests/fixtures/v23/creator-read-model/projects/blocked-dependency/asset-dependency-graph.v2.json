@@ -1,0 +1,6 @@
+{
+  "schema_version": "asset-dependency-graph.v2",
+  "graph_id": "DEPENDENCY_GRAPH",
+  "nodes": ["ASSET_TIDE", "SHOT_OPENING"],
+  "edges": [{"source": "ASSET_TIDE", "target": "SHOT_OPENING", "relation": "MUST_PRECEDE"}]
+}

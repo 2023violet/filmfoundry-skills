@@ -1,0 +1,19 @@
+{
+  "shot_id": "EP01_SH001",
+  "generation_unit_id": "EP01_SH001_G01",
+  "edit_unit_ids": ["EP01_EDIT001"],
+  "generation_duration_seconds": 8,
+  "edit_target_duration_seconds": 5,
+  "narrative_goal": "Start the task.",
+  "dominant_action": "Tide opens a notebook.",
+  "location": {"asset_id": "LOC_DESK"},
+  "initial_state": "Notebook closed.",
+  "end_state": "Notebook open.",
+  "shot_size": "medium",
+  "composition": "Notebook centered.",
+  "camera": {"movement": "static", "axis": "screen-left"},
+  "transition_type": "hard_cut",
+  "reference_bindings": [{"slot": "character", "asset_id": "CHAR_TIDE", "role": "identity", "controls": "face", "does_not_control": "camera"}],
+  "failure_risks": ["state drift"],
+  "quality_bar": "Notebook action is clear."
+}

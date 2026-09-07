@@ -1,0 +1,9 @@
+{
+  "schema_version": "2.0.0",
+  "units": {
+    "EP01_SH001_G01": {"runtime_status": "DRAFT"},
+    "EP01_SH002_G01": {"runtime_status": "SPEC_RESOLVED"},
+    "EP02_SH001_G01": {"runtime_status": "PREFLIGHT_PASS"},
+    "EP02_SH002_G01": {"runtime_status": "READY_FOR_KF"}
+  }
+}

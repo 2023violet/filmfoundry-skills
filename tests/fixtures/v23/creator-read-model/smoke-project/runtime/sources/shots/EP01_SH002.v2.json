@@ -1,0 +1,19 @@
+{
+  "shot_id": "EP01_SH002",
+  "generation_unit_id": "EP01_SH002_G01",
+  "edit_unit_ids": ["EP01_EDIT002"],
+  "generation_duration_seconds": 8,
+  "edit_target_duration_seconds": 5,
+  "narrative_goal": "Show the lamp.",
+  "dominant_action": "River lights the lamp.",
+  "location": {"asset_id": "LOC_WORKSHOP"},
+  "initial_state": "Lamp unlit.",
+  "end_state": "Lamp lit.",
+  "shot_size": "medium",
+  "composition": "Lamp in foreground.",
+  "camera": {"movement": "static", "axis": "screen-left"},
+  "transition_type": "hard_cut",
+  "reference_bindings": [{"slot": "prop", "asset_id": "PROP_LAMP", "role": "state", "controls": "lamp", "does_not_control": "camera"}],
+  "failure_risks": ["prop drift"],
+  "quality_bar": "Lamp state is clear."
+}

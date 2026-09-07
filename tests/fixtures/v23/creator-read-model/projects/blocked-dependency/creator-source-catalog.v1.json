@@ -1,0 +1,8 @@
+{
+  "schema_version": "creator-source-catalog.v1",
+  "project_id": "BLOCKED_DEPENDENCY",
+  "runtime_path": "runtime.json",
+  "sources": [
+    {"source_id": "SRC_DEPENDENCIES", "source_kind": "dependency_graph", "path": "asset-dependency-graph.v2.json", "path_base": "WORKSPACE_ROOT", "parser_id": "dependency-graph-json", "schema_version": "asset-dependency-graph.v2", "authority_role": "SUPPORTING", "scope": "project", "required": true}
+  ]
+}

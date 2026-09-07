@@ -32,6 +32,8 @@ from .ledger import (
     validate_production_ledger,
     validate_production_policy,
 )
+from .script_analysis import ScriptAnalysis, parse_script_analysis, validate_script_analysis
+from .beat_map import EmotionalBeatMap, parse_emotional_beat_map, production_requirement_facts, validate_emotional_beat_map
 
 __version__ = "2.1.0"
 
@@ -68,4 +70,11 @@ __all__ = [
     "production_ledger_report",
     "validate_production_ledger",
     "validate_production_policy",
+    "ScriptAnalysis",
+    "parse_script_analysis",
+    "validate_script_analysis",
+    "EmotionalBeatMap",
+    "parse_emotional_beat_map",
+    "validate_emotional_beat_map",
+    "production_requirement_facts",
 ]

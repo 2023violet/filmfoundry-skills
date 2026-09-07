@@ -25,7 +25,7 @@ from .alignment import validate_visual_control_alignment
 from .experiments import record_experiment_result
 from .capabilities import CapabilitySnapshot, capability_allows, load_capability_snapshot
 
-__version__ = "2.0.0"
+__version__ = "2.1.0"
 
 __all__ = [
     "LIFECYCLE_STATES",

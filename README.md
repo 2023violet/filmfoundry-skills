@@ -10,6 +10,8 @@ v2 boundary and adapter responsibilities.
 **Primary skill:** `generative-film-production`  
 **Version:** 2.1.0
 
+开始使用：阅读[AI 视频全流程操作指南](docs/ai-video-production-guide-zh.md)。评分与边界见[全面评分报告](docs/reports/2026-09-07-filmfoundry-skills-v2.1-score.md)。
+
 Compatibility baseline: **Version:** 1.3.3 (immutable checkpoint; current package metadata is 2.1.0).
 
 FilmFoundry Skills is a production-oriented Agent Skill suite for AI filmmaking. v1.2.0 keeps one end-to-end skill and adds a **Content-Market-First** front end so audience-growth and monetization projects validate who watches, why they click, what the hook/payoff/follow engine is, whether thirty episodes are sustainable, what can monetize, and what the cheapest real MVP is **before** FilmFoundry pays the full production cost.

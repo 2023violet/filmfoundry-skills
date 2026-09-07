@@ -11,6 +11,8 @@ description: Use when planning, generating, reviewing, repairing, or finishing A
 
 Use progressive disclosure: load only the references required by the current production stage. For multi-shot/recurring-asset projects, move current facts into the runtime artifacts instead of relying on a long Markdown plan.
 
+For a Chinese beginner-oriented walkthrough, start with `../../docs/ai-video-production-guide-zh.md`; this file remains the compact routing contract and the references hold the detailed decisions.
+
 ## Core invariants
 
 1. For audience-growth, monetization, or repeatable-series work, pass a Content Market Gate before expensive production scale.

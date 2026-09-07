@@ -101,8 +101,13 @@ def _parse_workspace_manifest(data: object) -> object:
 
 
 def _parse_asset_registry(data: object) -> object:
+    if isinstance(data, dict):
+        if set(data) != {"assets"} or not isinstance(data["assets"], list):
+            raise ValueError(_SOURCE_INVALID_ERROR)
+    elif not isinstance(data, list):
+        raise ValueError(_SOURCE_INVALID_ERROR)
     return _validated(
-        validate_asset_registry(data) if isinstance(data, (dict, list)) else ["invalid"],
+        validate_asset_registry(data),
         data,
     )
 

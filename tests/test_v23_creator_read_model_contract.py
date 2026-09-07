@@ -354,6 +354,17 @@ def test_creator_catalog_accepts_object_form_asset_registry(tmp_path: Path):
     assert assets.data["assets"][0]["asset_id"] == "CHAR_RIVER"
 
 
+@pytest.mark.parametrize("registry", [{}, {"assets": {}}, {"unexpected": []}])
+def test_creator_catalog_rejects_invalid_object_form_asset_registry(tmp_path: Path, registry: dict):
+    root = copied_smoke_project(tmp_path)
+    registry_path = root / "runtime" / "sources" / "asset-registry.v2.json"
+    write_json(registry_path, registry)
+
+    with pytest.raises(ValueError) as exc_info:
+        creator_api("discover_creator_sources")(root)
+    assert_creator_error(exc_info, INVALID_SOURCE_ERROR)
+
+
 def test_creator_catalog_rejects_drive_qualified_source_path(tmp_path: Path):
     root = copied_smoke_project(tmp_path)
     path, catalog = source_catalog(root)

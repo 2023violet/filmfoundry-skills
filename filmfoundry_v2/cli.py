@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from .compiler import PromptCompilationError, compile_canonical, compile_prompt
+from .ledger import evaluate_requirements, production_ledger_report, validate_production_ledger
 from . import (
     parse_prompt_metadata,
     validate_asset_registry,
@@ -239,6 +240,46 @@ def _cmd_migrate(args: argparse.Namespace) -> int:
     return 0 if payload.get("ok") else 1
 
 
+def _load_json_argument(path: str, label: str) -> Any:
+    try:
+        return json.loads(Path(path).expanduser().resolve().read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f"invalid {label}: {exc}") from exc
+
+
+def _cmd_requirements(args: argparse.Namespace) -> int:
+    try:
+        policy = _load_json_argument(args.policy, "policy")
+        facts = _load_json_argument(args.facts, "facts")
+        artifacts = _load_json_argument(args.artifacts, "artifacts")
+        report = evaluate_requirements(policy, facts, artifacts)
+        payload = report.to_dict()
+    except ValueError as exc:
+        payload = {"ok": False, "errors": [str(exc)], "warnings": []}
+    _emit(payload, args.format)
+    return 0 if payload.get("ok") else 1
+
+
+def _cmd_ledger_validate(args: argparse.Namespace) -> int:
+    try:
+        ledger = _load_json_argument(args.ledger, "ledger")
+        payload = validate_production_ledger(ledger).to_dict()
+    except ValueError as exc:
+        payload = {"ok": False, "errors": [str(exc)], "warnings": []}
+    _emit(payload, args.format)
+    return 0 if payload.get("ok") else 1
+
+
+def _cmd_ledger_report(args: argparse.Namespace) -> int:
+    try:
+        ledger = _load_json_argument(args.ledger, "ledger")
+        payload = production_ledger_report(ledger)
+    except ValueError as exc:
+        payload = {"ok": False, "errors": [str(exc)], "warnings": []}
+    _emit(payload, args.format)
+    return 0 if payload.get("ok") else 1
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="ff", description="FilmFoundry Skills v2 CLI")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -281,6 +322,24 @@ def build_parser() -> argparse.ArgumentParser:
     migrate.add_argument("--apply", action="store_true")
     migrate.add_argument("--format", choices=("text", "json"), default="text")
     migrate.set_defaults(func=_cmd_migrate)
+
+    requirements = sub.add_parser("requirements", help="evaluate artifact requirements")
+    requirements.add_argument("--policy", required=True)
+    requirements.add_argument("--facts", required=True)
+    requirements.add_argument("--artifacts", required=True)
+    requirements.add_argument("--format", choices=("text", "json"), default="text")
+    requirements.set_defaults(func=_cmd_requirements)
+
+    ledger = sub.add_parser("ledger", help="validate and report production ledger events")
+    ledger_sub = ledger.add_subparsers(dest="ledger_command", required=True)
+    ledger_validate = ledger_sub.add_parser("validate", help="validate an append-only production ledger")
+    ledger_validate.add_argument("--ledger", required=True)
+    ledger_validate.add_argument("--format", choices=("text", "json"), default="text")
+    ledger_validate.set_defaults(func=_cmd_ledger_validate)
+    ledger_report = ledger_sub.add_parser("report", help="report production ledger status")
+    ledger_report.add_argument("--ledger", required=True)
+    ledger_report.add_argument("--format", choices=("text", "json"), default="text")
+    ledger_report.set_defaults(func=_cmd_ledger_report)
     return parser
 
 

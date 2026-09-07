@@ -24,6 +24,14 @@ from .visual_control import VisualControlPlan, parse_visual_control, validate_vi
 from .alignment import validate_visual_control_alignment
 from .experiments import record_experiment_result
 from .capabilities import CapabilitySnapshot, capability_allows, load_capability_snapshot
+from .ledger import (
+    ArtifactRequirement,
+    RequirementReport,
+    evaluate_requirements,
+    production_ledger_report,
+    validate_production_ledger,
+    validate_production_policy,
+)
 
 __version__ = "2.1.0"
 
@@ -54,4 +62,10 @@ __all__ = [
     "CapabilitySnapshot",
     "capability_allows",
     "load_capability_snapshot",
+    "ArtifactRequirement",
+    "RequirementReport",
+    "evaluate_requirements",
+    "production_ledger_report",
+    "validate_production_ledger",
+    "validate_production_policy",
 ]

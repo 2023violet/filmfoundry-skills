@@ -20,7 +20,7 @@
 | 镜头与连续性 | 8.2 | Narrative/Generation/Edit Unit 分离、轴线、eyeline、state alignment、partial select | 运动结果、接缝和表演节奏需要真实素材复核 |
 | 视觉控制扩展 | 8.0 | 角色多视图、场景锚点、Spatial Map、Scale、Physics、Previs、Lens | 灰背景、去头全身、3/4、预演、FOV 和物理提示均未完成受控实验 |
 | Provider 适配与能力证据 | 6.4 | Higgsfield 能力快照/dry-run、H3 Smoke 语义、证据等级 | 没有真实 Higgsfield/H3 输出；没有 API、下载、重试和跨项目验证 |
-| 可检索性与新手可用性 | 7.4 | 主 Skill 278 行、阶段路由、37-small-team-operating-mode、中文项目适配器 | 文档数量较多；新手仍需理解 ID、状态和 Runtime 关系 |
+| 可检索性与新手可用性 | 7.4 | 主 Skill 280 行、阶段路由、37-small-team-operating-mode、中文项目适配器 | 文档数量较多；新手仍需理解 ID、状态和 Runtime 关系 |
 | 验证、回滚与可审计性 | 8.1 | v1 `167 passed`、v2.1 `210 passed`、确定性报告、哈希和归档边界 | 迁移 apply、真实媒体回填和全链路 CI 仍非核心自动化 |
 | **综合** | **7.7** | 结构门禁和证据边界清楚 | 生成质量与发布闭环尚未实证 |
 
@@ -56,4 +56,3 @@
 ## 结论
 
 这套 Skill 值得继续使用和迭代。它最强的价值是把“经验技巧”转成可追溯的视觉事实和证据等级，而不是承诺某种神奇提示词。对当前小团队，建议用小规模垂直切片验证，不要先建设完整模型矩阵或批量生成。
-

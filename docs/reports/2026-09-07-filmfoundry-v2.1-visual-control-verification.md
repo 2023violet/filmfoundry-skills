@@ -8,7 +8,7 @@ Date: 2026-09-07
 - v2.1 release worktree tests: `210 passed`.
 - Visual Control Plan parsing, strict unknown-field and namespace checks, conditional previs/physics/lens checks, alignment and compiler hash tests pass.
 - Provider payload compilation remains read-only and records prompt plus visual-control hashes.
-- Main `SKILL.md` is 278 lines.
+- Main `SKILL.md` is 280 lines.
 - Higgsfield evidence remains `UNVERIFIED`; no paid generation was called.
 
 ## Boundary

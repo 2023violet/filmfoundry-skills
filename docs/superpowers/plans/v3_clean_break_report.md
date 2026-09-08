@@ -23,14 +23,17 @@ versions.
 
 ## Commit
 
-The implementation commit is `625ada4` (`feat: establish filmfoundry v3
-clean-break package`).
+The implementation commit is `63b1cce` (`feat: establish filmfoundry v3
+clean-break package`). A follow-up commit will record the contract-test EOF
+normalization and this report correction.
 
 ## Concerns and follow-up
 
 - Existing contract filenames still carry historical `.v2` labels for artifact
   schemas; this task only hard-breaks the package/workspace version boundary.
   A later schema rename should be coordinated with adapters and fixtures.
+- The contract-test file had an extra blank line at EOF; it was normalized in
+  the follow-up verification commit.
 - The v2.3 Task 4 report modification was preserved and was not included in the
   implementation commit.
 - Creative Mode, renderers/CLI rendering, and project adapters remain pending

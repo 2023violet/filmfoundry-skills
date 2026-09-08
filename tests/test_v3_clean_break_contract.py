@@ -61,5 +61,3 @@ def test_v1_and_v2_workspace_versions_are_rejected(tmp_path: Path):
     for version in ("1.0.0", "2.0.0"):
         errors = filmfoundry.validate_workspace_manifest({**base, "workspace_version": version})
         assert any("unsupported" in error.lower() for error in errors)
-
-

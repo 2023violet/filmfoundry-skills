@@ -22,3 +22,13 @@
 - No Wucheng branch was added to core code or the Snapshot schema. The frozen fixture still proves `75 / 19 / 21 / 0 / 0`.
 - Navigation derivation and rendering remain intentionally unimplemented for later v2.3 tasks.
 - No live AI-Short-Drama files, Canon, Registry, media, state, provider evidence, or archive paths were read or modified.
+
+## Fix Round 2 TDD
+
+- RED: `python -m pytest tests/test_v23_creator_read_model_contract.py -q` -> 1 failed, 41 passed. The regression reproduced a malformed optional HISTORICAL production source in the same scope incorrectly tainting authoritative CURRENT metrics and provenance.
+- GREEN: `python -m pytest tests/test_v23_creator_read_model_contract.py -q` -> 42 passed.
+- Focused regression: `python -m pytest tests/test_v23_creator_read_model_contract.py tests/test_v23_creator_read_model_fixtures.py -q` -> 47 passed.
+- Full regression: `python -m pytest -q` -> 281 passed.
+- `python -m compileall -q filmfoundry_v2`, working-tree `git diff --check`, committed-range `git diff --check 3bfc32a..HEAD`, and `git diff -- 99_归档` passed.
+
+The production aggregate now applies the selected per-scope authority set to both sources and gaps. A historical gap remains visible in coverage but cannot invalidate a valid CURRENT aggregate for the same scope.

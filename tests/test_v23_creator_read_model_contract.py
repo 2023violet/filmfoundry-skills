@@ -412,6 +412,43 @@ def test_creator_snapshot_does_not_fall_back_to_historical_when_current_scope_is
         assert [ref.source_id for ref in metrics[metric_id].provenance.source_refs] == ["SRC_STATE"]
 
 
+def test_creator_snapshot_keeps_current_metrics_known_when_historical_source_is_invalid(tmp_path: Path):
+    root = copied_smoke_project(tmp_path)
+    path, catalog = source_catalog(root)
+    historical_path = root / "historical-production-state.v2.json"
+    historical_path.write_text("{", encoding="utf-8")
+    historical_source = dict(next(source for source in catalog["sources"] if source["source_id"] == "SRC_STATE"))
+    historical_source.update(
+        source_id="SRC_HISTORICAL_PRODUCTION_INVALID",
+        path="historical-production-state.v2.json",
+        path_base="WORKSPACE_ROOT",
+        authority_role="HISTORICAL",
+        required=False,
+    )
+    catalog["sources"].append(historical_source)
+    write_json(path, catalog)
+
+    discovered = creator_api("discover_creator_sources")(root)
+    snapshot = creator_api("collect_creator_snapshot")(root, discovered)
+
+    historical_gap = next(
+        gap for gap in discovered.coverage_gaps
+        if gap.source_id == "SRC_HISTORICAL_PRODUCTION_INVALID"
+    )
+    assert historical_gap.data_status == "INVALID"
+    coverage = next(item for item in snapshot.coverage if item.coverage_id == historical_gap.source_id)
+    assert coverage.data_status == "INVALID"
+    metrics = {metric.metric_id: metric for metric in snapshot.metrics}
+    for metric_id, value in {
+        "production_units.total": 4,
+        "generation.total": 0,
+        "select.total": 0,
+    }.items():
+        assert metrics[metric_id].value == value
+        assert metrics[metric_id].data_status == "KNOWN"
+        assert [ref.source_id for ref in metrics[metric_id].provenance.source_refs] == ["SRC_STATE"]
+
+
 def test_creator_catalog_uses_an_adapter_catalog_path(tmp_path: Path):
     root = copied_smoke_project(tmp_path)
 

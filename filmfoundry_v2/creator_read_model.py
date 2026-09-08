@@ -402,6 +402,7 @@ def collect_creator_snapshot(root: Path, catalog: CreatorSourceCatalog) -> Creat
 
     declared_production_sources = source_by_kind.get("production_state", [])
     production_sources: list[CreatorCatalogSource] = []
+    selected_production_gaps: list[CreatorSourceCoverageGap] = []
     production_by_scope: dict[str, list[CreatorCatalogSource]] = {}
     production_gaps_by_scope: dict[str, list[CreatorSourceCoverageGap]] = {}
     for source in declared_production_sources:
@@ -421,10 +422,20 @@ def collect_creator_snapshot(root: Path, catalog: CreatorSourceCatalog) -> Creat
         historical = [source for source in sources if source.authority_role == "HISTORICAL"]
         if current:
             production_sources.extend(current)
+            selected_production_gaps.extend(
+                gap for gap in scope_gaps if gap.authority_role == "CURRENT"
+            )
         elif any(gap.authority_role == "CURRENT" for gap in scope_gaps):
+            selected_production_gaps.extend(
+                gap for gap in scope_gaps if gap.authority_role == "CURRENT"
+            )
             continue
         elif len(historical) == 1 and not any(gap.authority_role == "HISTORICAL" for gap in scope_gaps):
             production_sources.extend(historical)
+        else:
+            selected_production_gaps.extend(
+                gap for gap in scope_gaps if gap.authority_role == "HISTORICAL"
+            )
 
     state_rows: list[tuple[str, dict[str, Any], CreatorSourceRef]] = []
     for source in production_sources:
@@ -444,7 +455,7 @@ def collect_creator_snapshot(root: Path, catalog: CreatorSourceCatalog) -> Creat
 
     asset_sources = source_by_kind.get("asset_registry", [])
     asset_gaps = gaps_by_kind.get("asset_registry", [])
-    production_gaps = gaps_by_kind.get("production_state", [])
+    production_gaps = selected_production_gaps
     asset_status = _aggregate_status(asset_sources, asset_gaps)
     production_status = _aggregate_status(production_sources, production_gaps)
     asset_refs = tuple(_source_ref(workspace_root, source) for source in asset_sources) + tuple(

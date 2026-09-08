@@ -24,8 +24,9 @@ versions.
 ## Commit
 
 The implementation commit is `63b1cce` (`feat: establish filmfoundry v3
-clean-break package`). A follow-up commit will record the contract-test EOF
-normalization and this report correction.
+clean-break package`). A follow-up commit records the contract-test EOF
+normalization; that verification fix is `664561f` (`fix: normalize v3
+contract test eof`).
 
 ## Concerns and follow-up
 

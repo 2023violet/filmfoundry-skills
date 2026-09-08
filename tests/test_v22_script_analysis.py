@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 
-from filmfoundry_v2 import (
+from filmfoundry import (
     EmotionalBeatMap,
     ScriptAnalysis,
     parse_emotional_beat_map,

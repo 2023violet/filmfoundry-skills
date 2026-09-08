@@ -4,7 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 
-from filmfoundry_v2 import (
+from filmfoundry import (
     ArtifactRequirement,
     RequirementReport,
     evaluate_requirements,

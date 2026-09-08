@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-from filmfoundry_v2 import (
+from filmfoundry import (
     LIFECYCLE_STATES,
     parse_prompt_metadata,
     resolve_manifest_path,
@@ -28,7 +28,7 @@ from filmfoundry_v2 import (
 
 def valid_manifest() -> dict:
     return {
-        "workspace_version": "2.0.0",
+        "workspace_version": "3.0.0",
         "project_id": "PROJECT_WUCHENG",
         "top_level": {"entry": "00_入口与规则", "stories": "02_故事与Canon"},
         "authorities": {

@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from filmfoundry_v2 import (
+from filmfoundry import (
     VisualControlPlan,
     parse_visual_control,
     validate_visual_control,

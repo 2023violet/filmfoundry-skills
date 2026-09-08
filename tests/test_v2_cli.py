@@ -12,7 +12,7 @@ def run_ff(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess[s
     repo = str(Path(__file__).resolve().parents[1])
     env["PYTHONPATH"] = repo + os.pathsep + env.get("PYTHONPATH", "")
     return subprocess.run(
-        [sys.executable, "-m", "filmfoundry_v2", *args],
+        [sys.executable, "-m", "filmfoundry", *args],
         cwd=cwd,
         text=True,
         capture_output=True,
@@ -30,7 +30,7 @@ def test_help_and_init_are_available_from_any_cwd(tmp_path: Path):
     assert result.returncode == 0, result.stderr
     manifest = root / "workspace-manifest.v2.json"
     assert manifest.exists()
-    assert json.loads(manifest.read_text(encoding="utf-8"))["workspace_version"] == "2.0.0"
+    assert json.loads(manifest.read_text(encoding="utf-8"))["workspace_version"] == "3.0.0"
 
 
 def test_validate_supports_json_format_and_nonzero_on_invalid_manifest(tmp_path: Path):
@@ -96,7 +96,7 @@ def test_compile_prompt_is_provider_neutral_and_read_only(tmp_path: Path):
     assert prompt.read_bytes() == before
 
 
-def test_audit_hashes_and_migrate_dry_run_are_safe(tmp_path: Path):
+def test_audit_hashes_are_safe_and_legacy_migration_is_removed(tmp_path: Path):
     root = tmp_path / "workspace"
     root.mkdir()
     (root / "99_归档").mkdir()
@@ -106,9 +106,8 @@ def test_audit_hashes_and_migrate_dry_run_are_safe(tmp_path: Path):
     assert json.loads(result.stdout)["ok"] is True
 
     result = run_ff("migrate", "--root", str(root), "--from", "1.x", "--dry-run", "--format", "json")
-    assert result.returncode == 0
-    payload = json.loads(result.stdout)
-    assert payload["dry_run"] is True
+    assert result.returncode != 0
+    assert "invalid choice" in result.stderr.lower()
     assert (root / "99_归档" / "keep.txt").read_text(encoding="utf-8") == "immutable"
 
 

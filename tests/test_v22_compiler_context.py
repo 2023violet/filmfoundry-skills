@@ -1,7 +1,7 @@
 from __future__ import annotations
 import json
 from pathlib import Path
-from filmfoundry_v2 import compile_canonical
+from filmfoundry import compile_canonical
 
 def prompt(path: Path) -> None:
     path.write_text("```json\n" + json.dumps({"prompt_id":"PROMPT_CTX","prompt_type":"I2V","production_unit":"UNIT_CTX","visual_fact":"A watcher waits.","output_profile":"VIDEO_SOURCE_NATIVE","start_state":"dark","end_state":"lit","subjects":["CHAR_A"],"dominant_action":"waits","camera":"locked","continuity_locks":["identity"],"references":[{"slot":"character","asset_id":"CHAR_A","role":"identity","controls":"face","does_not_control":"camera"}],"forbidden":["extra people"],"acceptance":["stable face"]}) + "\n```\n\n" + "\n".join(f"## {x}\n\nvalue" for x in ("visual_fact","output_profile","start_state","end_state","subjects","dominant_action","camera","continuity_locks","references","forbidden","acceptance")), encoding="utf-8")

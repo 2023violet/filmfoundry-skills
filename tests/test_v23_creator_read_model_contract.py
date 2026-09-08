@@ -10,7 +10,7 @@ from typing import Literal, Union, get_args, get_origin, get_type_hints
 
 import pytest
 
-import filmfoundry_v2
+import filmfoundry
 
 ROOT = Path(__file__).resolve().parents[1]
 SMOKE_PROJECT = ROOT / "tests" / "fixtures" / "v23" / "creator-read-model" / "smoke-project"
@@ -45,7 +45,7 @@ def source_catalog(root: Path) -> tuple[Path, dict]:
 
 
 def creator_api(name: str):
-    value = getattr(filmfoundry_v2, name, None)
+    value = getattr(filmfoundry, name, None)
     assert callable(value), f"FilmFoundry v2.3 public API {name} is missing"
     return value
 
@@ -638,7 +638,7 @@ def test_creator_catalog_resolves_relative_adapter_path_from_workspace(tmp_path:
 
 
 def test_creator_snapshot_dataclass_and_schema_stay_aligned():
-    snapshot_type = getattr(filmfoundry_v2, "CreatorSnapshot", None)
+    snapshot_type = getattr(filmfoundry, "CreatorSnapshot", None)
     assert snapshot_type is not None, "FilmFoundry v2.3 public CreatorSnapshot dataclass is missing"
     assert is_dataclass(snapshot_type)
 
@@ -701,18 +701,18 @@ def test_creator_snapshot_dataclass_and_schema_stay_aligned():
             assert literal_values == set(definition["enum"])
 
     dataclass_definitions = {
-        "source_ref": filmfoundry_v2.CreatorSourceRef,
-        "provenance": filmfoundry_v2.CreatorProvenance,
-        "overview": filmfoundry_v2.CreatorOverview,
-        "metric": filmfoundry_v2.CreatorMetric,
-        "narrative_node": filmfoundry_v2.CreatorNarrativeNode,
-        "emotion_point": filmfoundry_v2.CreatorEmotionPoint,
-        "asset": filmfoundry_v2.CreatorAsset,
-        "shot": filmfoundry_v2.CreatorShot,
-        "continuity_edge": filmfoundry_v2.CreatorContinuityEdge,
-        "blocker": filmfoundry_v2.CreatorBlocker,
-        "conflict": filmfoundry_v2.CreatorConflict,
-        "coverage": filmfoundry_v2.CreatorCoverage,
+        "source_ref": filmfoundry.CreatorSourceRef,
+        "provenance": filmfoundry.CreatorProvenance,
+        "overview": filmfoundry.CreatorOverview,
+        "metric": filmfoundry.CreatorMetric,
+        "narrative_node": filmfoundry.CreatorNarrativeNode,
+        "emotion_point": filmfoundry.CreatorEmotionPoint,
+        "asset": filmfoundry.CreatorAsset,
+        "shot": filmfoundry.CreatorShot,
+        "continuity_edge": filmfoundry.CreatorContinuityEdge,
+        "blocker": filmfoundry.CreatorBlocker,
+        "conflict": filmfoundry.CreatorConflict,
+        "coverage": filmfoundry.CreatorCoverage,
     }
     for definition_name, dataclass_type in dataclass_definitions.items():
         definition = schema["$defs"][definition_name]
@@ -721,10 +721,10 @@ def test_creator_snapshot_dataclass_and_schema_stay_aligned():
         assert set(definition["required"]) == dataclass_field_names
 
     enum_fields = {
-        ("provenance", "derivation"): (filmfoundry_v2.CreatorProvenance, "derivation"),
-        ("metric", "data_status"): (filmfoundry_v2.CreatorMetric, "data_status"),
-        ("asset", "observed_readiness"): (filmfoundry_v2.CreatorAsset, "observed_readiness"),
-        ("coverage", "data_status"): (filmfoundry_v2.CreatorCoverage, "data_status"),
+        ("provenance", "derivation"): (filmfoundry.CreatorProvenance, "derivation"),
+        ("metric", "data_status"): (filmfoundry.CreatorMetric, "data_status"),
+        ("asset", "observed_readiness"): (filmfoundry.CreatorAsset, "observed_readiness"),
+        ("coverage", "data_status"): (filmfoundry.CreatorCoverage, "data_status"),
     }
     for (definition_name, property_name), (dataclass_type, field_name) in enum_fields.items():
         annotation = get_type_hints(dataclass_type)[field_name]

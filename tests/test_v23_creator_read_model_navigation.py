@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-import filmfoundry_v2
+import filmfoundry
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -19,12 +19,12 @@ def read_json(path: Path):
 
 
 def collect_snapshot():
-    catalog = filmfoundry_v2.discover_creator_sources(SMOKE_PROJECT)
-    return catalog, filmfoundry_v2.collect_creator_snapshot(SMOKE_PROJECT, catalog)
+    catalog = filmfoundry.discover_creator_sources(SMOKE_PROJECT)
+    return catalog, filmfoundry.collect_creator_snapshot(SMOKE_PROJECT, catalog)
 
 
 def test_terminology_registry_is_versioned_and_uses_english_fallback_for_unknown_language():
-    registry = filmfoundry_v2.CreatorTerminologyRegistry()
+    registry = filmfoundry.CreatorTerminologyRegistry()
 
     assert registry.schema_version == "creator-terminology.v1"
     assert registry.label("lifecycle", "DRAFT", language="zh-CN") == "草稿"
@@ -33,7 +33,7 @@ def test_terminology_registry_is_versioned_and_uses_english_fallback_for_unknown
 
 
 def test_terminology_registry_keeps_unknown_enum_raw_with_explicit_no_explanation():
-    registry = filmfoundry_v2.CreatorTerminologyRegistry()
+    registry = filmfoundry.CreatorTerminologyRegistry()
 
     unknown_zh = registry.label("lifecycle", "FUTURE_STATE", language="zh-CN")
     unknown_en = registry.label("lifecycle", "FUTURE_STATE", language="en")
@@ -46,8 +46,8 @@ def test_terminology_registry_keeps_unknown_enum_raw_with_explicit_no_explanatio
 def test_navigation_is_derived_from_action_free_snapshot_and_read_model_composes_both():
     catalog, snapshot = collect_snapshot()
 
-    navigation = filmfoundry_v2.derive_creator_navigation(snapshot)
-    model = filmfoundry_v2.build_creator_read_model(SMOKE_PROJECT, catalog)
+    navigation = filmfoundry.derive_creator_navigation(snapshot)
+    model = filmfoundry.build_creator_read_model(SMOKE_PROJECT, catalog)
 
     assert not hasattr(snapshot, "actions")
     assert not hasattr(snapshot, "navigation")
@@ -59,18 +59,18 @@ def test_navigation_is_derived_from_action_free_snapshot_and_read_model_composes
 def test_navigation_returns_one_primary_and_all_same_priority_parallel_actions_in_stable_order():
     _, snapshot = collect_snapshot()
     ref = snapshot.assets[0].provenance.source_refs[0]
-    provenance = filmfoundry_v2.CreatorProvenance((ref,), "VALIDATED", "test.rule")
+    provenance = filmfoundry.CreatorProvenance((ref,), "VALIDATED", "test.rule")
     blockers = (
-        filmfoundry_v2.CreatorBlocker(
+        filmfoundry.CreatorBlocker(
             "BLOCKER_Z", "ERROR", "ENTITY_Z", "test.z", "z reason", "test boundary", provenance
         ),
-        filmfoundry_v2.CreatorBlocker(
+        filmfoundry.CreatorBlocker(
             "BLOCKER_A", "ERROR", "ENTITY_A", "test.a", "a reason", "test boundary", provenance
         ),
     )
     snapshot = replace(snapshot, blockers=blockers)
 
-    navigation = filmfoundry_v2.derive_creator_navigation(snapshot)
+    navigation = filmfoundry.derive_creator_navigation(snapshot)
 
     assert [action.action_id for action in navigation.actions[:2]] == ["BLOCKER_BLOCKER_A", "BLOCKER_BLOCKER_Z"]
     assert navigation.primary_action == navigation.actions[0]
@@ -87,16 +87,16 @@ def test_navigation_returns_one_primary_and_all_same_priority_parallel_actions_i
 def test_navigation_prioritizes_source_conflicts_before_hard_blockers_and_lifecycle_advice():
     _, snapshot = collect_snapshot()
     ref = snapshot.assets[0].provenance.source_refs[0]
-    provenance = filmfoundry_v2.CreatorProvenance((ref,), "VALIDATED", "test.rule")
-    conflict = filmfoundry_v2.CreatorConflict(
+    provenance = filmfoundry.CreatorProvenance((ref,), "VALIDATED", "test.rule")
+    conflict = filmfoundry.CreatorConflict(
         "AUTHORITY_MISMATCH", "AUTHORITY_MISMATCH", None, "authority differs", provenance
     )
-    blocker = filmfoundry_v2.CreatorBlocker(
+    blocker = filmfoundry.CreatorBlocker(
         "BLOCKER_HARD", "ERROR", "ENTITY_HARD", "test.hard", "hard reason", "test boundary", provenance
     )
     snapshot = replace(snapshot, conflicts=(conflict,), blockers=(blocker,))
 
-    navigation = filmfoundry_v2.derive_creator_navigation(snapshot)
+    navigation = filmfoundry.derive_creator_navigation(snapshot)
 
     assert navigation.actions[0].priority == 1
     assert navigation.actions[0].action_id == "CONFLICT_AUTHORITY_MISMATCH"
@@ -110,7 +110,7 @@ def test_navigation_reports_missing_observed_state_before_lifecycle_progression(
     selected = replace(shot, runtime_status="SELECT", observed_state=None)
     snapshot = replace(snapshot, shots=(selected, *snapshot.shots[1:]))
 
-    navigation = filmfoundry_v2.derive_creator_navigation(snapshot)
+    navigation = filmfoundry.derive_creator_navigation(snapshot)
 
     observed = next(action for action in navigation.actions if action.entity_id == selected.shot_id)
     assert observed.priority == 4
@@ -123,7 +123,7 @@ def test_navigation_treats_hash_mismatch_as_integrity_priority():
     asset = replace(snapshot.assets[0], observed_readiness="PRESENT_HASH_MISMATCH")
     snapshot = replace(snapshot, assets=(asset, *snapshot.assets[1:]))
 
-    navigation = filmfoundry_v2.derive_creator_navigation(snapshot)
+    navigation = filmfoundry.derive_creator_navigation(snapshot)
 
     integrity = next(action for action in navigation.actions if action.entity_id == asset.asset_id)
     assert integrity.priority == 2
@@ -134,13 +134,13 @@ def test_navigation_treats_hash_mismatch_as_integrity_priority():
 def test_hard_blocker_severity_precedes_observed_state_rule_heuristic():
     _, snapshot = collect_snapshot()
     ref = snapshot.assets[0].provenance.source_refs[0]
-    provenance = filmfoundry_v2.CreatorProvenance((ref,), "VALIDATED", "test.rule")
-    blocker = filmfoundry_v2.CreatorBlocker(
+    provenance = filmfoundry.CreatorProvenance((ref,), "VALIDATED", "test.rule")
+    blocker = filmfoundry.CreatorBlocker(
         "BLOCKER_STATE", "CRITICAL", "ENTITY_STATE", "creator.navigation.previous_observed_state",
         "critical state blocker", "BLOCKER_REVIEW", provenance,
     )
 
-    navigation = filmfoundry_v2.derive_creator_navigation(replace(snapshot, blockers=(blocker,)))
+    navigation = filmfoundry.derive_creator_navigation(replace(snapshot, blockers=(blocker,)))
 
     action = next(action for action in navigation.actions if action.action_id == "BLOCKER_BLOCKER_STATE")
     assert action.priority == 2
@@ -152,7 +152,7 @@ def test_continuity_edge_before_select_does_not_require_observed_state():
     predecessor = replace(predecessor, runtime_status="DRAFT", observed_state=None)
     shots = tuple(predecessor if shot.shot_id == predecessor.shot_id else shot for shot in snapshot.shots)
 
-    navigation = filmfoundry_v2.derive_creator_navigation(replace(snapshot, shots=shots))
+    navigation = filmfoundry.derive_creator_navigation(replace(snapshot, shots=shots))
 
     assert not any(action.action_id == "OBSERVED_STATE_EP01_SH002_BEFORE_EP02_SH002" for action in navigation.actions)
 
@@ -163,7 +163,7 @@ def test_continuity_edge_with_selected_predecessor_requires_observed_state_hando
     predecessor = replace(predecessor, runtime_status="SELECT", observed_state=None)
     shots = tuple(predecessor if shot.shot_id == predecessor.shot_id else shot for shot in snapshot.shots)
 
-    navigation = filmfoundry_v2.derive_creator_navigation(replace(snapshot, shots=shots))
+    navigation = filmfoundry.derive_creator_navigation(replace(snapshot, shots=shots))
 
     action = next(action for action in navigation.actions if action.action_id == "OBSERVED_STATE_EP01_SH002_BEFORE_EP02_SH002")
     assert action.priority == 4
@@ -172,17 +172,17 @@ def test_continuity_edge_with_selected_predecessor_requires_observed_state_hando
 
 def test_derived_action_rejects_empty_provenance_with_contract_error():
     _, snapshot = collect_snapshot()
-    empty_provenance = filmfoundry_v2.CreatorProvenance((), "VALIDATED", "test.rule")
-    blocker = filmfoundry_v2.CreatorBlocker(
+    empty_provenance = filmfoundry.CreatorProvenance((), "VALIDATED", "test.rule")
+    blocker = filmfoundry.CreatorBlocker(
         "BLOCKER_EMPTY_PROVENANCE", "ERROR", "ENTITY_EMPTY", "test.rule", "missing provenance", "BLOCKER_REVIEW", empty_provenance,
     )
 
     with pytest.raises(ValueError, match="CREATOR_NAVIGATION_PROVENANCE: derived action requires non-empty provenance"):
-        filmfoundry_v2.derive_creator_navigation(replace(snapshot, blockers=(blocker,)))
+        filmfoundry.derive_creator_navigation(replace(snapshot, blockers=(blocker,)))
 
 
 def test_terminology_registry_is_deeply_immutable():
-    registry = filmfoundry_v2.CreatorTerminologyRegistry()
+    registry = filmfoundry.CreatorTerminologyRegistry()
 
     with pytest.raises(TypeError):
         registry.registry["lifecycle"]["DRAFT"]["en"] = "Changed"
@@ -190,8 +190,8 @@ def test_terminology_registry_is_deeply_immutable():
 
 def test_action_support_boundaries_resolve_in_registry_in_both_languages():
     _, snapshot = collect_snapshot()
-    navigation = filmfoundry_v2.derive_creator_navigation(snapshot)
-    registry = filmfoundry_v2.TERMINOLOGY_REGISTRY
+    navigation = filmfoundry.derive_creator_navigation(snapshot)
+    registry = filmfoundry.TERMINOLOGY_REGISTRY
 
     for action in navigation.actions:
         assert action.support_boundary in registry.registry["support_boundary"]
@@ -208,7 +208,7 @@ def test_navigation_and_read_model_have_versioned_schemas_and_round_trip():
     assert set(read_model_schema["properties"]) == {"snapshot", "navigation", "schema_version"}
 
     catalog, snapshot = collect_snapshot()
-    model = filmfoundry_v2.build_creator_read_model(SMOKE_PROJECT, catalog)
+    model = filmfoundry.build_creator_read_model(SMOKE_PROJECT, catalog)
     assert json.loads(model.navigation.to_json()) == model.navigation.to_dict()
     assert json.loads(model.to_json()) == model.to_dict()
     assert model.snapshot == snapshot

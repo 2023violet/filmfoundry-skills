@@ -5,7 +5,7 @@ import hashlib
 import json
 from pathlib import Path
 
-from filmfoundry_v2 import (
+from filmfoundry import (
     parse_emotional_beat_map,
     validate_dependency_graph,
     validate_asset_registry,

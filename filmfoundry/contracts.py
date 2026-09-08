@@ -60,8 +60,8 @@ def validate_workspace_manifest(data: dict[str, Any]) -> list[str]:
     if not isinstance(data, dict):
         return ["manifest: top-level object required"]
     errors.extend(_unknown(data, MANIFEST_CORE))
-    if data.get("workspace_version") != "2.0.0":
-        errors.append("workspace_version: expected 2.0.0")
+    if data.get("workspace_version") != "3.0.0":
+        errors.append("workspace_version: unsupported; expected 3.0.0")
     errors.extend(_id(data.get("project_id"), "project_id"))
     if not isinstance(data.get("top_level"), dict) or not data["top_level"]:
         errors.append("top_level: non-empty object required")

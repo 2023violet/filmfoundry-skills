@@ -1,4 +1,4 @@
-"""Additive FilmFoundry v2 production contracts.
+"""FilmFoundry v3 production contracts.
 
 The package is intentionally dependency free.  It validates machine contracts
 without making claims about provider obedience or visual quality.
@@ -73,7 +73,7 @@ from .creator_read_model import (
     translate_creator_term,
 )
 
-__version__ = "2.2.0"
+__version__ = "3.0.0"
 
 __all__ = [
     "LIFECYCLE_STATES",

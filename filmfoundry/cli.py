@@ -1,4 +1,4 @@
-"""Unified ``ff`` command line interface for FilmFoundry v2."""
+"""Unified ``ff`` command line interface for FilmFoundry v3."""
 from __future__ import annotations
 
 import argparse
@@ -54,13 +54,13 @@ def _emit(payload: dict[str, Any], fmt: str) -> None:
 
 def _default_manifest() -> dict[str, Any]:
     return {
-        "workspace_version": "2.0.0",
+        "workspace_version": "3.0.0",
         "project_id": "PROJECT",
         "top_level": {"entry": "00_入口与规则"},
         "authorities": {"human": "markdown", "machine": ["json", "csv"], "media": "registry"},
         "archive_boundary": {"path": "99_归档", "mode": "read_only"},
         "id_policy": {"pattern": "^[A-Z][A-Z0-9_]{2,63}$", "charset": "ASCII"},
-        "adapter_compatibility": {"filmfoundry": ">=2.0.0,<3.0.0"},
+        "adapter_compatibility": {"filmfoundry": ">=3.0.0,<4.0.0"},
         "required_tools": ["python>=3.11"],
     }
 
@@ -225,21 +225,6 @@ def _cmd_audit(args: argparse.Namespace) -> int:
     return 0 if not errors else 1
 
 
-def _cmd_migrate(args: argparse.Namespace) -> int:
-    root = _root(args.root)
-    try:
-        from .migration import plan_migration
-    except ImportError:  # pragma: no cover - the adapter is shipped with v2
-        payload = {"ok": root.exists(), "source": args.source, "root": str(root), "dry_run": True, "changes": [], "errors": [] if root.exists() else [f"root does not exist: {root}"]}
-    else:
-        payload = plan_migration(root, source=args.source)
-    if args.apply:
-        payload["ok"] = False
-        payload.setdefault("errors", []).append("migration apply is provided by the project adapter; use --dry-run for the core planner")
-    _emit(payload, args.format)
-    return 0 if payload.get("ok") else 1
-
-
 def _load_json_argument(path: str, label: str) -> Any:
     try:
         return json.loads(Path(path).expanduser().resolve().read_text(encoding="utf-8"))
@@ -281,9 +266,9 @@ def _cmd_ledger_report(args: argparse.Namespace) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="ff", description="FilmFoundry Skills v2 CLI")
+    parser = argparse.ArgumentParser(prog="ff", description="FilmFoundry Skills v3 CLI")
     sub = parser.add_subparsers(dest="command", required=True)
-    init = sub.add_parser("init", help="create a v2 workspace manifest")
+    init = sub.add_parser("init", help="create a v3 workspace manifest")
     init.add_argument("--root", required=True)
     init.add_argument("--force", action="store_true")
     init.add_argument("--format", choices=("text", "json"), default="text")
@@ -315,13 +300,6 @@ def build_parser() -> argparse.ArgumentParser:
     audit.add_argument("--format", choices=("text", "json"), default="text")
     audit.set_defaults(func=_cmd_audit)
 
-    migrate = sub.add_parser("migrate", help="plan a v1 migration")
-    migrate.add_argument("--root", required=True)
-    migrate.add_argument("--from", dest="source", required=True)
-    migrate.add_argument("--dry-run", action="store_true")
-    migrate.add_argument("--apply", action="store_true")
-    migrate.add_argument("--format", choices=("text", "json"), default="text")
-    migrate.set_defaults(func=_cmd_migrate)
 
     requirements = sub.add_parser("requirements", help="evaluate artifact requirements")
     requirements.add_argument("--policy", required=True)

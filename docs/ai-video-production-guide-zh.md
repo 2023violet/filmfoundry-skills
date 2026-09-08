@@ -36,9 +36,9 @@ Skill 的职责边界可以这样理解：
 FilmFoundry 独立工作区可以先执行：
 
 ```text
-python -m filmfoundry_v2 init --root <workspace>
-python -m filmfoundry_v2 validate --root <workspace> --format json
-python -m filmfoundry_v2 index --root <workspace>
+python -m filmfoundry init --root <workspace>
+python -m filmfoundry validate --root <workspace> --format json
+python -m filmfoundry index --root <workspace>
 ```
 
 雾城项目使用：
@@ -131,7 +131,7 @@ Generation record → Select + QC → Observed State → Edit Timeline
 运行：
 
 ```text
-python -m filmfoundry_v2 validate --root <workspace> --stage shot --format json
+python -m filmfoundry validate --root <workspace> --stage shot --format json
 ```
 
 ## 5. 选择视觉控制计划
@@ -159,9 +159,9 @@ python -m filmfoundry_v2 validate --root <workspace> --stage shot --format json
 校验并编译：
 
 ```text
-python -m filmfoundry_v2 validate --root <workspace> --stage prompt --format json
-python -m filmfoundry_v2 compile --prompt <prompt.md> --provider minimax-h3 --out <payload.txt>
-python -m filmfoundry_v2 compile --prompt <prompt.md> --visual-control <plan.json> --provider minimax-h3 --out <payload.txt> --format json
+python -m filmfoundry validate --root <workspace> --stage prompt --format json
+python -m filmfoundry compile --prompt <prompt.md> --provider minimax-h3 --out <payload.txt>
+python -m filmfoundry compile --prompt <prompt.md> --visual-control <plan.json> --provider minimax-h3 --out <payload.txt> --format json
 ```
 
 编译器只读取 Prompt 和视觉控制计划，输出 payload、引用槽和输入哈希，不回写 Canon、Prompt 或 Registry。

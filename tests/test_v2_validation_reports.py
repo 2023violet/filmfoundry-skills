@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from filmfoundry_v2 import ValidationIssue, ValidationReport
+from filmfoundry import ValidationIssue, ValidationReport
 
 
 def test_validation_issue_rejects_unknown_severity():

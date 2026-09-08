@@ -1,5 +1,5 @@
 from __future__ import annotations
-from filmfoundry_v2 import parse_scene_topology, validate_scene_topology, parse_location_coverage, validate_location_coverage
+from filmfoundry import parse_scene_topology, validate_scene_topology, parse_location_coverage, validate_location_coverage
 
 def topology():
     return {"schema_version":"scene-topology.v2","topology_id":"TOPO_INN","location_id":"LOC_INN","nodes":[{"node_id":"NODE_DOOR","node_type":"ROOM","adjacent_nodes":[],"entrances":[],"exits":[],"floor":"GROUND","elevation":"0","orientation":"north","anchor_ids":["ANCHOR_LAMP"],"light_sources":["LAMP"],"camera_side_regions":["NORTH"]}],"movement_paths":[],"review_status":"REVIEWED"}

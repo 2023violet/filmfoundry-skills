@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from filmfoundry_v2 import compile_canonical
+from filmfoundry import compile_canonical
 
 
 def _prompt(path: Path) -> None:

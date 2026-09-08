@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filmfoundry.dev/schemas/emotional-beat-map.v3.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "beat_map_id", "production_unit", "beats", "review_status"],
+  "properties": {
+    "schema_version": {"const": "emotional-beat-map.v3"},
+    "beat_map_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"},
+    "production_unit": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"},
+    "beats": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/beat"}},
+    "review_status": {"type": "string", "minLength": 1},
+    "extensions": {"type": "object"}
+  },
+  "$defs": {
+    "beat": {"type": "object", "additionalProperties": false, "required": ["beat_id", "sequence", "narrative_function", "primary_emotion", "tension_level", "direction", "turning_point", "rationale", "music_state", "silence_required", "dialogue_density", "timing_authority", "review_status"], "properties": {"beat_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"}, "sequence": {"type": "integer", "minimum": 1}, "narrative_function": {"type": "string", "minLength": 1}, "primary_emotion": {"type": "string", "minLength": 1}, "tension_level": {"type": "integer", "minimum": 0, "maximum": 10}, "direction": {"enum": ["RISING", "FALLING", "STEADY"]}, "turning_point": {"type": "boolean"}, "rationale": {"type": "string", "minLength": 1}, "music_state": {"type": "string", "minLength": 1}, "silence_required": {"type": "boolean"}, "dialogue_density": {"type": "string", "minLength": 1}, "timing_authority": {"type": "string", "minLength": 1}, "review_status": {"type": "string", "minLength": 1}, "extensions": {"type": "object"}}}
+  }
+}

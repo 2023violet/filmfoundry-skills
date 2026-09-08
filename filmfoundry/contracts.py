@@ -1,4 +1,4 @@
-"""Strict, provider-neutral FilmFoundry v2 contracts."""
+"""Strict, provider-neutral FilmFoundry v3 contracts."""
 from __future__ import annotations
 
 import json
@@ -272,6 +272,8 @@ def validate_state_transition(old: str, new: str) -> list[str]:
 
 def validate_production_state(data: dict[str, Any]) -> list[str]:
     errors: list[str] = _unknown(data, {"schema_version", "units"}) if isinstance(data, dict) else []
+    if isinstance(data, dict) and data.get("schema_version") != "3.0.0":
+        errors.append("schema_version: unsupported; expected 3.0.0")
     units = data.get("units") if isinstance(data, dict) else None
     if not isinstance(units, dict):
         return ["units: object required"]

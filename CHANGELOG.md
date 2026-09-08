@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.0.0 — 2026-09-09
+
+- Replaced the active `filmfoundry_v2` package with the canonical `filmfoundry` v3 package and removed the migration command and old schema acceptance.
+- Added Creative, Commit, Production, and Gate work modes with progressive reference loading and explicit draft/deferred-check labels.
+- Added deterministic Creator Read Model HTML, Markdown, and SVG renderers plus `ff render` and `render-manifest.v1` output.
+- Renamed active production contracts and fixtures to v3; historical v1/v2 files are not part of the active package.
+
 ## 2.1.0 — 2026-09-07
 
 - Added the provider-neutral Visual Control Plan for character, voice, location, spatial, scale, physics, previs, and lens facts.

@@ -1,9 +1,0 @@
-{
-  "schema_version": "emotional-beat-map.v2",
-  "beat_map_id": "SEASON_EMOTION_MAP",
-  "production_unit": "SEASON_ONE",
-  "beats": [
-    {"beat_id": "SEASON_BEAT_ONE", "sequence": 1, "narrative_function": "Opening pressure", "primary_emotion": "anticipation", "tension_level": 3, "direction": "RISING", "turning_point": false, "rationale": "The task becomes visible.", "music_state": "quiet pulse", "silence_required": false, "dialogue_density": "low", "timing_authority": "editor", "review_status": "REVIEWED"}
-  ],
-  "review_status": "REVIEWED"
-}

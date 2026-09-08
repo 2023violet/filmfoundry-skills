@@ -1,4 +1,4 @@
-"""Provider-neutral compilation of v2 Prompt Markdown."""
+"""Provider-neutral compilation of v3 Prompt Markdown."""
 from __future__ import annotations
 
 import json
@@ -29,7 +29,7 @@ def compile_prompt(prompt_path: str | Path, provider: str) -> str:
     lines = [
         "# FilmFoundry provider payload",
         f"provider: {provider}",
-        "contract: prompt.v2",
+        "contract: prompt.v3",
         f"prompt_id: {metadata['prompt_id']}",
         f"prompt_type: {metadata['prompt_type']}",
         f"production_unit: {metadata['production_unit']}",

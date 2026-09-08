@@ -41,8 +41,8 @@ def validate_emotional_beat_map(value: EmotionalBeatMap | Mapping[str, Any], *, 
     if not isinstance(data, Mapping):
         return ValidationReport("emotional_beat_map", [], [_issue("INVALID_TYPE", "emotional beat map: top-level object required", "", source)])
     issues = _unknown(data, _ROOT_FIELDS, "", source)
-    if data.get("schema_version") != "emotional-beat-map.v2":
-        issues.append(_issue("INVALID_SCHEMA_VERSION", "schema_version: expected emotional-beat-map.v2", "/schema_version", source))
+    if data.get("schema_version") != "emotional-beat-map.v3":
+        issues.append(_issue("INVALID_SCHEMA_VERSION", "schema_version: expected emotional-beat-map.v3", "/schema_version", source))
     for name in ("beat_map_id", "production_unit"):
         if not isinstance(data.get(name), str) or not ID_RE.fullmatch(data[name]):
             issues.append(_issue("INVALID_ID", f"{name}: stable ASCII ID required", f"/{name}", source))

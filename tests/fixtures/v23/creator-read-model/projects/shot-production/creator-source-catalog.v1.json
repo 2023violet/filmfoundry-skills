@@ -3,7 +3,7 @@
   "project_id": "SHOT_PRODUCTION",
   "runtime_path": "runtime.json",
   "sources": [
-    {"source_id": "SRC_STATE", "source_kind": "production_state", "path": "production-state.v2.json", "path_base": "WORKSPACE_ROOT", "parser_id": "production-state-json", "schema_version": "production-state.v2", "authority_role": "CURRENT", "scope": "project", "required": true},
-    {"source_id": "SRC_SHOT", "source_kind": "shot_spec", "path": "shot-spec.v2.json", "path_base": "WORKSPACE_ROOT", "parser_id": "shot-spec-json", "schema_version": "shot-spec.v2", "authority_role": "CURRENT", "scope": "EP01_SH001", "required": true}
+    {"source_id": "SRC_STATE", "source_kind": "production_state", "path": "production-state.v3.json", "path_base": "WORKSPACE_ROOT", "parser_id": "production-state-json", "schema_version": "production-state.v3", "authority_role": "CURRENT", "scope": "project", "required": true},
+    {"source_id": "SRC_SHOT", "source_kind": "shot_spec", "path": "shot-spec.v3.json", "path_base": "WORKSPACE_ROOT", "parser_id": "shot-spec-json", "schema_version": "shot-spec.v3", "authority_role": "CURRENT", "scope": "EP01_SH001", "required": true}
   ]
 }

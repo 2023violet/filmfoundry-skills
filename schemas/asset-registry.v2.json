@@ -1,6 +1,0 @@
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://filmfoundry.dev/schemas/asset-registry.v2.json",
-  "type": "array",
-  "items": {"type": "object", "additionalProperties": false, "required": ["asset_id", "asset_type", "asset_class", "display_name", "path", "sha256", "width", "height", "aspect_ratio", "mode", "alpha", "profile", "state", "canonical_level", "reference_role", "does_not_control", "source", "episode_scope"], "properties": {"asset_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"}, "asset_type": {"type": "string"}, "asset_class": {"type": "string"}, "display_name": {"type": "string"}, "path": {"type": "string"}, "sha256": {"type": "string", "pattern": "^[0-9a-fA-F]{64}$"}, "width": {"type": "integer", "minimum": 1}, "height": {"type": "integer", "minimum": 1}, "aspect_ratio": {"type": "number", "exclusiveMinimum": 0}, "mode": {"type": "string"}, "alpha": {"type": "boolean"}, "profile": {"type": "string"}, "state": {"type": "string"}, "canonical_level": {"type": "string"}, "reference_role": {"type": "string"}, "does_not_control": {"type": "string"}, "source": {"type": "string"}, "episode_scope": {"type": "array"}, "extensions": {"type": "object"}}}
-}

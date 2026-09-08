@@ -28,7 +28,7 @@ def test_help_and_init_are_available_from_any_cwd(tmp_path: Path):
     root = tmp_path / "workspace"
     result = run_ff("init", "--root", str(root), cwd=tmp_path)
     assert result.returncode == 0, result.stderr
-    manifest = root / "workspace-manifest.v2.json"
+    manifest = root / "workspace-manifest.v3.json"
     assert manifest.exists()
     assert json.loads(manifest.read_text(encoding="utf-8"))["workspace_version"] == "3.0.0"
 
@@ -36,7 +36,7 @@ def test_help_and_init_are_available_from_any_cwd(tmp_path: Path):
 def test_validate_supports_json_format_and_nonzero_on_invalid_manifest(tmp_path: Path):
     root = tmp_path / "workspace"
     root.mkdir()
-    (root / "workspace-manifest.v2.json").write_text(json.dumps({"workspace_version": "2.0.0"}), encoding="utf-8")
+    (root / "workspace-manifest.v3.json").write_text(json.dumps({"workspace_version": "2.0.0"}), encoding="utf-8")
     result = run_ff("validate", "--root", str(root), "--format", "json")
     assert result.returncode != 0
     payload = json.loads(result.stdout)
@@ -114,7 +114,7 @@ def test_audit_hashes_are_safe_and_legacy_migration_is_removed(tmp_path: Path):
 def test_reference_audit_reports_missing_and_root_escaping_links(tmp_path: Path):
     root = tmp_path / "workspace"
     root.mkdir()
-    (root / "workspace-manifest.v2.json").write_text("{}", encoding="utf-8")
+    (root / "workspace-manifest.v3.json").write_text("{}", encoding="utf-8")
     (root / "notes.md").write_text("[ok](present.png) [missing](missing.png) [escape](../outside.png)", encoding="utf-8")
     (root / "present.png").write_bytes(b"png-fixture")
     result = run_ff("audit", "--root", str(root), "--kind", "references", "--format", "json")

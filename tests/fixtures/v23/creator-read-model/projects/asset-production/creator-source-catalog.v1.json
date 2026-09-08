@@ -3,6 +3,6 @@
   "project_id": "ASSET_PRODUCTION",
   "runtime_path": "runtime.json",
   "sources": [
-    {"source_id": "SRC_ASSETS", "source_kind": "asset_registry", "path": "asset-registry.v2.json", "path_base": "WORKSPACE_ROOT", "parser_id": "asset-registry-json", "schema_version": "asset-registry.v2", "authority_role": "CURRENT", "scope": "project", "required": true}
+    {"source_id": "SRC_ASSETS", "source_kind": "asset_registry", "path": "asset-registry.v3.json", "path_base": "WORKSPACE_ROOT", "parser_id": "asset-registry-json", "schema_version": "asset-registry.v3", "authority_role": "CURRENT", "scope": "project", "required": true}
   ]
 }

@@ -19,7 +19,7 @@ def validate_dependency_graph(value:DependencyGraph|Mapping[str,Any],*,source:st
     d=value.to_dict() if isinstance(value,DependencyGraph) else value; issue=lambda c,m,p:ValidationIssue("ERROR",c,m,source=source,json_pointer=p)
     if not isinstance(d,Mapping): return ValidationReport("dependency_graph",[],[issue("INVALID_TYPE","dependency graph: top-level object required","")])
     issues=_unknown(d,_ROOT,"",source)
-    if d.get("schema_version")!="asset-dependency-graph.v2": issues.append(issue("INVALID_SCHEMA_VERSION","schema_version: expected asset-dependency-graph.v2","/schema_version"))
+    if d.get("schema_version")!="asset-dependency-graph.v3": issues.append(issue("INVALID_SCHEMA_VERSION","schema_version: expected asset-dependency-graph.v3","/schema_version"))
     if not isinstance(d.get("graph_id"),str) or not ID_RE.fullmatch(d["graph_id"]): issues.append(issue("INVALID_ID","/graph_id: stable ASCII ID required","/graph_id"))
     nodes=d.get("nodes"); node_set=set(nodes) if isinstance(nodes,list) else set()
     if not isinstance(nodes,list) or any(not isinstance(x,str) or not ID_RE.fullmatch(x) for x in nodes): issues.append(issue("INVALID_NODES","/nodes: stable ASCII IDs required","/nodes"))

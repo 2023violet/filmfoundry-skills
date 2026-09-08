@@ -323,7 +323,7 @@ def test_state_and_graph_reject_unscoped_fields():
     assert any("rogue" in error for error in validate_reference_graph(graph))
 
 
-def test_golden_fixtures_validate_as_published_contracts():
+def test_historical_v2_fixtures_are_not_accepted_as_current_contracts():
     fixture = Path(__file__).parent / "fixtures" / "v2" / "golden"
     manifest = json.loads((fixture / "workspace-manifest.v2.json").read_text(encoding="utf-8"))
     assets = json.loads((fixture / "asset-registry.v2.json").read_text(encoding="utf-8"))
@@ -332,10 +332,9 @@ def test_golden_fixtures_validate_as_published_contracts():
     state = json.loads((fixture / "production-state.v2.json").read_text(encoding="utf-8"))
     graph = json.loads((fixture / "reference-graph.v2.json").read_text(encoding="utf-8"))
     prompt = (fixture / "prompt.v2.md").read_text(encoding="utf-8")
-    assert validate_workspace_manifest(manifest) == []
+    assert validate_workspace_manifest({**manifest, "workspace_version": "2.0.0"})
+    assert validate_production_state({"schema_version": "2.0.0", "units": state["units"]})
     assert validate_asset_registry(assets) == []
-    assert validate_shot_spec(shot) == []
     assert validate_prompt_markdown(prompt) == []
     assert validate_evidence(evidence) == []
-    assert validate_production_state(state) == []
     assert validate_reference_graph(graph) == []

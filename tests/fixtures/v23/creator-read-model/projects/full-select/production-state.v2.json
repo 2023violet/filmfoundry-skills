@@ -1,6 +1,0 @@
-{
-  "schema_version": "2.0.0",
-  "units": {
-    "EP01_SH001_G01": {"runtime_status": "SELECT", "visual_control_state_alignment": "PASS", "provider_route": "manual-review", "provider_evidence_id": "EVID_SELECT_001", "select_type": "FULL"}
-  }
-}

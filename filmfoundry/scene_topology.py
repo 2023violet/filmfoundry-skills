@@ -37,7 +37,7 @@ def validate_scene_topology(value: SceneTopology | Mapping[str, Any], *, source:
     data = value.to_dict() if isinstance(value, SceneTopology) else value
     if not isinstance(data, Mapping): return ValidationReport("scene_topology", [], [_issue("INVALID_TYPE", "scene topology: top-level object required", "", source)])
     issues = _unknown(data, _ROOT, "", source)
-    if data.get("schema_version") != "scene-topology.v2": issues.append(_issue("INVALID_SCHEMA_VERSION", "schema_version: expected scene-topology.v2", "/schema_version", source))
+    if data.get("schema_version") != "scene-topology.v3": issues.append(_issue("INVALID_SCHEMA_VERSION", "schema_version: expected scene-topology.v3", "/schema_version", source))
     _required_id(data.get("topology_id"), "topology_id", "", source, issues); _required_id(data.get("location_id"), "location_id", "", source, issues)
     nodes = data.get("nodes")
     node_ids: set[str] = set()

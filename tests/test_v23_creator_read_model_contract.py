@@ -85,7 +85,7 @@ def test_creator_catalog_rejects_multiple_current_authorities(tmp_path: Path):
 def test_creator_catalog_rejects_workspace_path_escape(tmp_path: Path):
     root = copied_smoke_project(tmp_path)
     path, catalog = source_catalog(root)
-    shutil.copy2(root / "workspace-manifest.v2.json", tmp_path / "outside.json")
+    shutil.copy2(root / "workspace-manifest.v3.json", tmp_path / "outside.json")
     catalog["sources"][0]["path"] = "../outside.json"
     write_json(path, catalog)
 
@@ -97,10 +97,10 @@ def test_creator_catalog_rejects_workspace_path_escape(tmp_path: Path):
 def test_creator_catalog_rejects_archive_as_active_source(tmp_path: Path):
     root = copied_smoke_project(tmp_path)
     path, catalog = source_catalog(root)
-    archive_path = root / "archive" / "workspace-manifest.v2.json"
+    archive_path = root / "archive" / "workspace-manifest.v3.json"
     archive_path.parent.mkdir()
-    shutil.copy2(root / "workspace-manifest.v2.json", archive_path)
-    catalog["sources"][0]["path"] = "archive/workspace-manifest.v2.json"
+    shutil.copy2(root / "workspace-manifest.v3.json", archive_path)
+    catalog["sources"][0]["path"] = "archive/workspace-manifest.v3.json"
     write_json(path, catalog)
 
     with pytest.raises(ValueError) as exc_info:
@@ -110,7 +110,7 @@ def test_creator_catalog_rejects_archive_as_active_source(tmp_path: Path):
 
 def test_creator_snapshot_keeps_locked_asset_when_media_is_missing(tmp_path: Path):
     root = copied_smoke_project(tmp_path)
-    registry_path = root / "runtime" / "sources" / "asset-registry.v2.json"
+    registry_path = root / "runtime" / "sources" / "asset-registry.v3.json"
     registry = read_json(registry_path)
     registry[0]["state"] = "LOCKED"
     registry[0]["path"] = "media/missing-reference.txt"
@@ -128,7 +128,7 @@ def test_creator_snapshot_keeps_locked_asset_when_media_is_missing(tmp_path: Pat
 
 def test_creator_snapshot_reports_present_media_hash_mismatch(tmp_path: Path):
     root = copied_smoke_project(tmp_path)
-    registry_path = root / "runtime" / "sources" / "asset-registry.v2.json"
+    registry_path = root / "runtime" / "sources" / "asset-registry.v3.json"
     registry = read_json(registry_path)
     registry[0]["sha256"] = "a" * 64
     write_json(registry_path, registry)
@@ -151,7 +151,7 @@ def test_creator_snapshot_serialization_is_deterministic_and_workspace_relative(
     assert "navigation" not in payload
     asset = next(asset for asset in snapshot.assets if asset.asset_id == "CHAR_RIVER")
     source_ref = asset.provenance.source_refs[0]
-    assert source_ref.path == "runtime/sources/asset-registry.v2.json"
+    assert source_ref.path == "runtime/sources/asset-registry.v3.json"
     assert source_ref.pointer == "/0"
     assert len(source_ref.sha256) == 64
 
@@ -159,8 +159,8 @@ def test_creator_snapshot_serialization_is_deterministic_and_workspace_relative(
 def test_creator_snapshot_preserves_current_and_historical_authority_mismatch(tmp_path: Path):
     root = copied_smoke_project(tmp_path)
     path, catalog = source_catalog(root)
-    historical = root / "historical-production-state.v2.json"
-    historical_data = read_json(root / "runtime" / "sources" / "production-state.v2.json")
+    historical = root / "historical-production-state.v3.json"
+    historical_data = read_json(root / "runtime" / "sources" / "production-state.v3.json")
     for unit in historical_data["units"].values():
         unit.update(
             runtime_status="SELECT",
@@ -172,7 +172,7 @@ def test_creator_snapshot_preserves_current_and_historical_authority_mismatch(tm
     historical_source.update(
         source_id="SRC_HISTORICAL_PRODUCTION",
         source_kind="production_state",
-        path="historical-production-state.v2.json",
+        path="historical-production-state.v3.json",
         path_base="WORKSPACE_ROOT",
         authority_role="HISTORICAL",
     )
@@ -211,12 +211,12 @@ def test_creator_snapshot_preserves_current_and_historical_authority_mismatch(tm
 def test_creator_snapshot_ignores_unrelated_authority_scopes(tmp_path: Path):
     root = copied_smoke_project(tmp_path)
     path, catalog = source_catalog(root)
-    historical = root / "historical-production-state.v2.json"
-    shutil.copy2(root / "runtime" / "sources" / "production-state.v2.json", historical)
+    historical = root / "historical-production-state.v3.json"
+    shutil.copy2(root / "runtime" / "sources" / "production-state.v3.json", historical)
     historical_source = dict(next(source for source in catalog["sources"] if source["source_id"] == "SRC_STATE"))
     historical_source.update(
         source_id="SRC_OTHER_STORY_PRODUCTION",
-        path="historical-production-state.v2.json",
+        path="historical-production-state.v3.json",
         path_base="WORKSPACE_ROOT",
         authority_role="HISTORICAL",
         scope="OTHER_STORY",
@@ -282,7 +282,7 @@ def test_creator_catalog_discovers_supported_sources_with_parsed_records():
     assert catalog.coverage_gaps == ()
     assert len(catalog.sources) == 9
     source = next(source for source in catalog.sources if source.source_id == "SRC_SHOT_ONE")
-    assert source.path == SMOKE_PROJECT / "runtime" / "sources" / "shots" / "EP01_SH001.v2.json"
+    assert source.path == SMOKE_PROJECT / "runtime" / "sources" / "shots" / "EP01_SH001.v3.json"
     assert source.data["shot_id"] == "EP01_SH001"
 
 
@@ -292,13 +292,13 @@ def test_creator_catalog_resolves_windows_syntax_from_a_chinese_workspace(tmp_pa
     path, catalog = source_catalog(root)
     catalog["runtime_path"] = "runtime\\project-runtime.json"
     source = next(source for source in catalog["sources"] if source["source_id"] == "SRC_ASSETS")
-    source["path"] = "sources\\asset-registry.v2.json"
+    source["path"] = "sources\\asset-registry.v3.json"
     write_json(path, catalog)
 
     discovered = creator_api("discover_creator_sources")(root)
 
     asset_source = next(source for source in discovered.sources if source.source_id == "SRC_ASSETS")
-    assert asset_source.path == root / "runtime" / "sources" / "asset-registry.v2.json"
+    assert asset_source.path == root / "runtime" / "sources" / "asset-registry.v3.json"
 
 
 def test_creator_catalog_reports_optional_unsupported_source_as_coverage_gap(tmp_path: Path):
@@ -335,7 +335,7 @@ def test_creator_snapshot_marks_optional_invalid_source_and_metrics_invalid(tmp_
     asset_source = next(source for source in catalog["sources"] if source["source_id"] == "SRC_ASSETS")
     asset_source["required"] = False
     write_json(path, catalog)
-    registry_path = root / "runtime" / "sources" / "asset-registry.v2.json"
+    registry_path = root / "runtime" / "sources" / "asset-registry.v3.json"
     if failure == "malformed_json":
         registry_path.write_text("{", encoding="utf-8")
     else:
@@ -367,7 +367,7 @@ def test_creator_snapshot_marks_optional_missing_source_and_metrics_unknown(tmp_
     asset_source = next(source for source in catalog["sources"] if source["source_id"] == "SRC_ASSETS")
     asset_source["required"] = False
     write_json(path, catalog)
-    registry_path = root / "runtime" / "sources" / "asset-registry.v2.json"
+    registry_path = root / "runtime" / "sources" / "asset-registry.v3.json"
     registry_path.unlink()
 
     discovered = creator_api("discover_creator_sources")(root)
@@ -388,18 +388,18 @@ def test_creator_snapshot_does_not_fall_back_to_historical_when_current_scope_is
     path, catalog = source_catalog(root)
     current_source = next(source for source in catalog["sources"] if source["source_id"] == "SRC_STATE")
     current_source["required"] = False
-    historical_path = root / "historical-production-state.v2.json"
-    shutil.copy2(root / "runtime" / "sources" / "production-state.v2.json", historical_path)
+    historical_path = root / "historical-production-state.v3.json"
+    shutil.copy2(root / "runtime" / "sources" / "production-state.v3.json", historical_path)
     historical_source = dict(current_source)
     historical_source.update(
         source_id="SRC_HISTORICAL_PRODUCTION",
-        path="historical-production-state.v2.json",
+        path="historical-production-state.v3.json",
         path_base="WORKSPACE_ROOT",
         authority_role="HISTORICAL",
     )
     catalog["sources"].append(historical_source)
     write_json(path, catalog)
-    write_json(root / "runtime" / "sources" / "production-state.v2.json", {})
+    write_json(root / "runtime" / "sources" / "production-state.v3.json", {})
 
     snapshot = collect_snapshot(root)
 
@@ -415,12 +415,12 @@ def test_creator_snapshot_does_not_fall_back_to_historical_when_current_scope_is
 def test_creator_snapshot_keeps_current_metrics_known_when_historical_source_is_invalid(tmp_path: Path):
     root = copied_smoke_project(tmp_path)
     path, catalog = source_catalog(root)
-    historical_path = root / "historical-production-state.v2.json"
+    historical_path = root / "historical-production-state.v3.json"
     historical_path.write_text("{", encoding="utf-8")
     historical_source = dict(next(source for source in catalog["sources"] if source["source_id"] == "SRC_STATE"))
     historical_source.update(
         source_id="SRC_HISTORICAL_PRODUCTION_INVALID",
-        path="historical-production-state.v2.json",
+        path="historical-production-state.v3.json",
         path_base="WORKSPACE_ROOT",
         authority_role="HISTORICAL",
         required=False,
@@ -468,7 +468,7 @@ def test_creator_catalog_rejects_duplicate_current_shot_with_equivalent_path(tmp
     duplicate = dict(shot)
     duplicate.update(
         source_id="SRC_SHOT_ONE_DUPLICATE",
-        path="sources/shots/../shots/EP01_SH001.v2.json",
+        path="sources/shots/../shots/EP01_SH001.v3.json",
     )
     catalog["sources"].append(duplicate)
     write_json(path, catalog)
@@ -514,12 +514,12 @@ def test_creator_catalog_rejects_duplicate_source_id(tmp_path: Path):
 def test_creator_catalog_uses_a_declared_manifest_for_archive_boundary(tmp_path: Path):
     root = copied_smoke_project(tmp_path)
     path, catalog = source_catalog(root)
-    manifest = root / "workspace-manifest.v2.json"
+    manifest = root / "workspace-manifest.v3.json"
     declared_manifest = root / "manifest" / manifest.name
     declared_manifest.parent.mkdir()
     shutil.copy2(manifest, declared_manifest)
     manifest.unlink()
-    catalog["sources"][0]["path"] = "manifest/workspace-manifest.v2.json"
+    catalog["sources"][0]["path"] = "manifest/workspace-manifest.v3.json"
     archive_path = root / "archive" / "narrative-index.v1.json"
     archive_path.parent.mkdir()
     shutil.copy2(root / "narrative-index.v1.json", archive_path)
@@ -593,7 +593,7 @@ def test_creator_catalog_rejects_invalid_continuity_records(tmp_path: Path, muta
 
 def test_creator_catalog_accepts_object_form_asset_registry(tmp_path: Path):
     root = copied_smoke_project(tmp_path)
-    registry_path = root / "runtime" / "sources" / "asset-registry.v2.json"
+    registry_path = root / "runtime" / "sources" / "asset-registry.v3.json"
     write_json(registry_path, {"assets": read_json(registry_path)})
 
     discovered = creator_api("discover_creator_sources")(root)
@@ -605,7 +605,7 @@ def test_creator_catalog_accepts_object_form_asset_registry(tmp_path: Path):
 @pytest.mark.parametrize("registry", [{}, {"assets": {}}, {"unexpected": []}])
 def test_creator_catalog_rejects_invalid_object_form_asset_registry(tmp_path: Path, registry: dict):
     root = copied_smoke_project(tmp_path)
-    registry_path = root / "runtime" / "sources" / "asset-registry.v2.json"
+    registry_path = root / "runtime" / "sources" / "asset-registry.v3.json"
     write_json(registry_path, registry)
 
     with pytest.raises(ValueError) as exc_info:
@@ -616,7 +616,7 @@ def test_creator_catalog_rejects_invalid_object_form_asset_registry(tmp_path: Pa
 def test_creator_catalog_rejects_drive_qualified_source_path(tmp_path: Path):
     root = copied_smoke_project(tmp_path)
     path, catalog = source_catalog(root)
-    catalog["sources"][0]["path"] = "C:workspace-manifest.v2.json"
+    catalog["sources"][0]["path"] = "C:workspace-manifest.v3.json"
     write_json(path, catalog)
 
     with pytest.raises(ValueError) as exc_info:

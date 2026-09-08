@@ -229,12 +229,12 @@ def _parse_continuity_chain(data: object) -> object:
 
 
 _PARSERS: dict[tuple[str, str], Parser] = {
-    ("workspace-manifest-json", "workspace-manifest.v2"): _parse_workspace_manifest,
-    ("asset-registry-json", "asset-registry.v2"): _parse_asset_registry,
-    ("production-state-json", "production-state.v2"): _parse_production_state,
-    ("shot-spec-json", "shot-spec.v2"): _parse_shot_spec,
-    ("dependency-graph-json", "asset-dependency-graph.v2"): _parse_dependency_graph,
-    ("emotional-beat-map-json", "emotional-beat-map.v2"): _parse_emotional_beat_map,
+    ("workspace-manifest-json", "workspace-manifest.v3"): _parse_workspace_manifest,
+    ("asset-registry-json", "asset-registry.v3"): _parse_asset_registry,
+    ("production-state-json", "production-state.v3"): _parse_production_state,
+    ("shot-spec-json", "shot-spec.v3"): _parse_shot_spec,
+    ("dependency-graph-json", "asset-dependency-graph.v3"): _parse_dependency_graph,
+    ("emotional-beat-map-json", "emotional-beat-map.v3"): _parse_emotional_beat_map,
     ("narrative-index-json", "narrative-index.v1"): _parse_narrative_index,
     ("continuity-chain-json", "continuity-chain.v1"): _parse_continuity_chain,
 }

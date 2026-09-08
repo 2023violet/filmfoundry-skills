@@ -1,10 +1,9 @@
 # FilmFoundry Skills
 
-**v3.0 core:** provider-neutral contracts, visual-control validation, compilation, and evidence APIs.
+**v3.0 core:** a provider-neutral creator-to-production system with typed Creator Read Models, lightweight work modes, deterministic renderers, validation, compilation, and evidence APIs.
 
-Historical v1/v2 releases remain available in Git history only. See
-`docs/filmfoundry-v2.md` and `docs/filmfoundry-v2-support-matrix.md` for the
-contract boundary and adapter responsibilities.
+The active package is a clean break. Historical v1/v2 releases remain in Git
+history and are not accepted by the v3 package.
 
 **Repository:** `filmfoundry-skills`  
 **Primary skill:** `generative-film-production`  
@@ -12,9 +11,7 @@ contract boundary and adapter responsibilities.
 
 开始使用：阅读[AI 视频全流程操作指南](docs/ai-video-production-guide-zh.md)。评分与边界见[全面评分报告](docs/reports/2026-09-07-filmfoundry-skills-v2.1-score.md)。
 
-Historical baseline: **Version:** 1.3.3 (immutable checkpoint; the active package is the v3.0 clean break).
-
-FilmFoundry Skills is a production-oriented Agent Skill suite for AI filmmaking. v1.2.0 keeps one end-to-end skill and adds a **Content-Market-First** front end so audience-growth and monetization projects validate who watches, why they click, what the hook/payoff/follow engine is, whether thirty episodes are sustainable, what can monetize, and what the cheapest real MVP is **before** FilmFoundry pays the full production cost.
+FilmFoundry Skills is a production-oriented Agent Skill suite for AI filmmaking. v3.0 keeps the **Content-Market-First** front end while separating creative exploration from production and gate work, so a hook or prompt draft does not trigger full workspace and provider validation.
 FilmFoundry Skills v1.3.3 keeps the **format-agnostic visual-planning and edit-timeline layer** and hardens state alignment between Shot Specs and visual-control assets. Storyboards, first/last frames, keyframes, character sheets, scene sheets, and model-specific prompts are optional control artifacts chosen by production risk; none of them is the parent workflow.
 
 

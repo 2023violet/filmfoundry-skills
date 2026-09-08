@@ -73,8 +73,8 @@ def validate_production_ledger(value: Mapping[str, Any]) -> ValidationReport:
     ledger_id = value.get("ledger_id")
     checked = [str(ledger_id)] if isinstance(ledger_id, str) else []
     _unknown(value, _LEDGER_FIELDS, "/", issues)
-    if value.get("schema_version") != "production-ledger.v2":
-        issues.append(_issue("INVALID_SCHEMA_VERSION", "/schema_version: expected production-ledger.v2", "/schema_version"))
+    if value.get("schema_version") != "production-ledger.v3":
+        issues.append(_issue("INVALID_SCHEMA_VERSION", "/schema_version: expected production-ledger.v3", "/schema_version"))
     if not _valid_id(ledger_id):
         issues.append(_issue("INVALID_ID", "/ledger_id: stable ID required", "/ledger_id"))
     entities = value.get("entities")
@@ -250,8 +250,8 @@ def validate_production_policy(value: Mapping[str, Any]) -> ValidationReport:
     policy_id = value.get("policy_id")
     checked = [str(policy_id)] if isinstance(policy_id, str) else []
     _unknown(value, _POLICY_FIELDS, "/", issues)
-    if value.get("schema_version") != "production-policy.v2":
-        issues.append(_issue("INVALID_SCHEMA_VERSION", "/schema_version: expected production-policy.v2", "/schema_version"))
+    if value.get("schema_version") != "production-policy.v3":
+        issues.append(_issue("INVALID_SCHEMA_VERSION", "/schema_version: expected production-policy.v3", "/schema_version"))
     if not _valid_id(policy_id):
         issues.append(_issue("INVALID_ID", "/policy_id: stable ID required", "/policy_id"))
     requirements = value.get("requirements")

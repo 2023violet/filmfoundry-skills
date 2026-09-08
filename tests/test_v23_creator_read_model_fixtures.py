@@ -189,7 +189,7 @@ def test_fixture_inventory_is_complete_and_each_catalog_is_resolvable():
         assert fixture_counts(project_root, catalog) == entry["expected"]
 
 
-def test_existing_v2_sources_in_creator_fixtures_remain_valid():
+def test_existing_v3_sources_in_creator_fixtures_remain_valid():
     for entry in fixture_index():
         project_root = FIXTURES / entry["path"]
         catalog = read_json(project_root / "creator-source-catalog.v1.json")

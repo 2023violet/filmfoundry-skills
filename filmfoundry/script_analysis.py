@@ -89,8 +89,8 @@ def validate_script_analysis(value: ScriptAnalysis | Mapping[str, Any], *, sourc
     if not isinstance(data, Mapping):
         return ValidationReport("script_analysis", [], [_issue("INVALID_TYPE", "script analysis: top-level object required", "", source)])
     issues = _unknown(data, _ROOT_FIELDS, "", source)
-    if data.get("schema_version") != "script-analysis.v2":
-        issues.append(_issue("INVALID_SCHEMA_VERSION", "schema_version: expected script-analysis.v2", "/schema_version", source))
+    if data.get("schema_version") != "script-analysis.v3":
+        issues.append(_issue("INVALID_SCHEMA_VERSION", "schema_version: expected script-analysis.v3", "/schema_version", source))
     if not isinstance(data.get("script_analysis_id"), str) or not ID_RE.fullmatch(data["script_analysis_id"]):
         issues.append(_issue("INVALID_ID", "script_analysis_id: stable ASCII ID required", "/script_analysis_id", source))
     script = data.get("source_script")

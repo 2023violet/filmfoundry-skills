@@ -1,4 +1,4 @@
-"""Provider-neutral visual-control contracts for FilmFoundry v2.1."""
+"""Provider-neutral visual-control contracts for FilmFoundry v3.1."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field

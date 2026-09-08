@@ -13,6 +13,19 @@ Use progressive disclosure: load only the references required by the current pro
 
 For a Chinese beginner-oriented walkthrough, start with `../../docs/ai-video-production-guide-zh.md`; this file remains the compact routing contract and the references hold the detailed decisions.
 
+## Work modes
+
+Route the request before loading project references. Use `references/40-work-modes.md` for the mode contract.
+
+| Request | Mode | Default boundary |
+|---|---|---|
+| Explore hooks, story directions, emotions, or prompt drafts | **Creative Mode** | Load only declared creative references; does not run full Runtime, media, provider, or index validation |
+| Confirm a direction or write it into a formal brief/script | **Commit Mode** | Record the choice, assumptions, and Canon conflicts; no provider call or source mutation |
+| Compile a Shot Spec, asset binding, timeline, or provider payload | **Production Mode** | Run only relevant runtime, state, asset, and dependency checks |
+| Ask whether something is ready, producible, publishable, or passes acceptance | **Gate Mode** | Run the complete capability-scoped validation and evidence review |
+
+Creative output is labeled `CREATIVE_DRAFT`, `ASSUMPTION`, `DEFERRED_CHECK`, or `HARD_CANON_CONFLICT`. A creative hypothesis never becomes Canon, Runtime, or Registry state without Commit Mode.
+
 ## Core invariants
 
 1. For audience-growth, monetization, or repeatable-series work, pass a Content Market Gate before expensive production scale.

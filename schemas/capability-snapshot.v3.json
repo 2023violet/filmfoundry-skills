@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filmfoundry.dev/schemas/capability-snapshot.v3.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["snapshot_id", "provider", "provider_surface", "provider_version", "captured_at", "evidence_level", "capabilities"],
+  "properties": {
+    "snapshot_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"},
+    "provider": {"type": "string"},
+    "provider_surface": {"type": "string"},
+    "provider_version": {"type": "string"},
+    "captured_at": {"type": "string"},
+    "evidence_level": {"type": "string"},
+    "capabilities": {"type": "object"},
+    "extensions": {"type": "object"}
+  }
+}

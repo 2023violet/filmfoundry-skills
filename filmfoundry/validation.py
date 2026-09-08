@@ -13,7 +13,7 @@ def validate_workspace(root: Path, stages: set[str] | None = None) -> Validation
     errors: list[str] = []
     warnings: list[str] = []
     checked: list[str] = []
-    manifest_path = root / "workspace-manifest.v2.json"
+    manifest_path = root / "workspace-manifest.v3.json"
     if not manifest_path.exists():
         errors.append(f"missing workspace manifest: {manifest_path}")
     else:
@@ -33,7 +33,7 @@ def validate_workspace(root: Path, stages: set[str] | None = None) -> Validation
                 errors.extend(f"{path}: {item}" for item in validate_prompt_markdown(text))
     if "all" in stages or "visual-control" in stages:
         for path in sorted(root.rglob("*.json")):
-            if "99_归档" in path.parts or path.name == "workspace-manifest.v2.json":
+            if "99_归档" in path.parts or path.name == "workspace-manifest.v3.json":
                 continue
             try:
                 value = json.loads(path.read_text(encoding="utf-8"))

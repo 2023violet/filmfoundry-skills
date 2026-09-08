@@ -1,9 +1,0 @@
-{
-  "schema_version": "emotional-beat-map.v2",
-  "beat_map_id": "EPISODE_EMOTION_MAP",
-  "production_unit": "EPISODE_ONE",
-  "beats": [
-    {"beat_id": "EPISODE_BEAT_ONE", "sequence": 1, "narrative_function": "Choice", "primary_emotion": "resolve", "tension_level": 6, "direction": "STEADY", "turning_point": true, "rationale": "The choice is explicit.", "music_state": "held note", "silence_required": true, "dialogue_density": "medium", "timing_authority": "editor", "review_status": "REVIEWED"}
-  ],
-  "review_status": "REVIEWED"
-}

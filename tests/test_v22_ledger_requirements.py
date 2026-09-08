@@ -34,7 +34,7 @@ def valid_ledger() -> dict:
     }
     first["event_hash"] = _event_hash(first)
     return {
-        "schema_version": "production-ledger.v2",
+        "schema_version": "production-ledger.v3",
         "ledger_id": "LEDGER_TEST",
         "entities": [
             {"entity_id": "SCRIPT_TEST", "entity_type": "SCRIPT"},
@@ -92,7 +92,7 @@ def test_ledger_retry_can_change_only_declared_variables():
 
 def test_requirement_evaluation_keeps_optional_creative_artifacts_as_warnings():
     policy = {
-        "schema_version": "production-policy.v2",
+        "schema_version": "production-policy.v3",
         "policy_id": "POLICY_TEST",
         "requirements": [
             {
@@ -121,7 +121,7 @@ def test_requirement_evaluation_keeps_optional_creative_artifacts_as_warnings():
 
 def test_requirement_evaluation_reports_missing_foundation_artifact_as_error():
     policy = {
-        "schema_version": "production-policy.v2",
+        "schema_version": "production-policy.v3",
         "policy_id": "POLICY_TEST",
         "requirements": [{"requirement_id": "REQ_SCRIPT_FACTS", "artifact_type": "SCRIPT_FACTS", "description": "sourced script facts"}],
     }
@@ -145,7 +145,7 @@ def test_cli_ledger_and_requirements_commands_preserve_error_only_exit_semantics
 
     policy_path = tmp_path / "policy.json"
     policy_path.write_text(json.dumps({
-        "schema_version": "production-policy.v2",
+        "schema_version": "production-policy.v3",
         "policy_id": "POLICY_TEST",
         "requirements": [{"requirement_id": "REQ_MUSIC", "artifact_type": "MUSIC_INTENT", "description": "music", "severity": "WARNING"}],
     }), encoding="utf-8")
@@ -192,7 +192,7 @@ def test_malformed_reference_and_severity_containers_return_structural_reports()
     correction_report = _report_or_none(validate_production_ledger, malformed_correction)
 
     malformed_severity = {
-        "schema_version": "production-policy.v2",
+        "schema_version": "production-policy.v3",
         "policy_id": "POLICY_TEST",
         "requirements": [{"requirement_id": "REQ_TEST", "artifact_type": "SCRIPT_FACTS", "description": "facts", "severity": []}],
     }
@@ -225,7 +225,7 @@ def test_runtime_ledger_validation_matches_strict_nested_schema_rules():
 
 def test_malformed_artifact_inventory_is_an_error_not_a_warning_only_report(tmp_path: Path):
     policy = {
-        "schema_version": "production-policy.v2",
+        "schema_version": "production-policy.v3",
         "policy_id": "POLICY_TEST",
         "requirements": [{"requirement_id": "REQ_MUSIC", "artifact_type": "MUSIC_INTENT", "description": "music", "severity": "WARNING"}],
     }

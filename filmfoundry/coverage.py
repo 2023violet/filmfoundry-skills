@@ -21,7 +21,7 @@ def validate_location_coverage(value: LocationCoverageSet | Mapping[str, Any], *
     issue = lambda c,m,p: ValidationIssue("ERROR", c, m, source=source, json_pointer=p)
     if not isinstance(data, Mapping): return ValidationReport("location_coverage", [], [issue("INVALID_TYPE", "location coverage: top-level object required", "")])
     issues = _unknown(data, _ROOT, "", source)
-    if data.get("schema_version") != "location-coverage-set.v2": issues.append(issue("INVALID_SCHEMA_VERSION", "schema_version: expected location-coverage-set.v2", "/schema_version"))
+    if data.get("schema_version") != "location-coverage-set.v3": issues.append(issue("INVALID_SCHEMA_VERSION", "schema_version: expected location-coverage-set.v3", "/schema_version"))
     for name in ("coverage_id", "location_id"):
         if not isinstance(data.get(name), str) or not ID_RE.fullmatch(data[name]): issues.append(issue("INVALID_ID", f"/{name}: stable ASCII ID required", f"/{name}"))
     views = data.get("views")

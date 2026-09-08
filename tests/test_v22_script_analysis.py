@@ -15,7 +15,7 @@ from filmfoundry import (
 
 def valid_analysis() -> dict:
     return {
-        "schema_version": "script-analysis.v2",
+        "schema_version": "script-analysis.v3",
         "script_analysis_id": "SCRIPT_EP01_ANALYSIS",
         "source_script": {"path": "02_story/EP01.md", "sha256": "a" * 64},
         "facts": [
@@ -52,7 +52,7 @@ def valid_beat_map() -> dict:
         "review_status": "REVIEWED",
     }
     return {
-        "schema_version": "emotional-beat-map.v2",
+        "schema_version": "emotional-beat-map.v3",
         "beat_map_id": "BEATMAP_EP01",
         "production_unit": "EP01",
         "beats": [beat, {**beat, "beat_id": "BEAT_EP01_02", "sequence": 2, "turning_point": True}],

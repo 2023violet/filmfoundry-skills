@@ -20,7 +20,7 @@ def validate_look_bible(value: LookBible | Mapping[str, Any], *, source: str = "
     d = value.to_dict() if isinstance(value, LookBible) else value; issue=lambda c,m,p: ValidationIssue("ERROR",c,m,source=source,json_pointer=p)
     if not isinstance(d, Mapping): return ValidationReport("look_bible",[],[issue("INVALID_TYPE","look bible: top-level object required","")])
     issues=_unknown(d,_ROOT,"",source)
-    if d.get("schema_version")!="look-bible.v2": issues.append(issue("INVALID_SCHEMA_VERSION","schema_version: expected look-bible.v2","/schema_version"))
+    if d.get("schema_version")!="look-bible.v3": issues.append(issue("INVALID_SCHEMA_VERSION","schema_version: expected look-bible.v3","/schema_version"))
     if not isinstance(d.get("look_id"),str) or not ID_RE.fullmatch(d["look_id"]): issues.append(issue("INVALID_ID","/look_id: stable ASCII ID required","/look_id"))
     for n in ("scope","composition_language","camera_behavior","contrast","saturation","color_temperature","light_direction","light_quality","weather","skin_tone_protection","does_not_control","review_status"):
         if not isinstance(d.get(n),str) or not d[n].strip(): issues.append(issue("REQUIRED_FIELD",f"/{n}: non-empty string required",f"/{n}"))

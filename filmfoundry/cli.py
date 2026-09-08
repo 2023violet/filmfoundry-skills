@@ -11,6 +11,9 @@ from typing import Any
 
 from .compiler import PromptCompilationError, compile_canonical, compile_prompt
 from .ledger import evaluate_requirements, production_ledger_report, validate_production_ledger
+from .creator_sources import discover_creator_sources
+from .creator_read_model import build_creator_read_model
+from .render import FORMAT_NAMES, render_read_model
 from . import (
     parse_prompt_metadata,
     validate_asset_registry,
@@ -68,7 +71,7 @@ def _default_manifest() -> dict[str, Any]:
 def _cmd_init(args: argparse.Namespace) -> int:
     root = _root(args.root)
     root.mkdir(parents=True, exist_ok=True)
-    manifest_path = root / "workspace-manifest.v2.json"
+    manifest_path = root / "workspace-manifest.v3.json"
     if manifest_path.exists() and not args.force:
         _emit({"ok": False, "errors": [f"manifest exists: {manifest_path}"]}, args.format)
         return 1
@@ -78,7 +81,7 @@ def _cmd_init(args: argparse.Namespace) -> int:
 
 
 def _load_manifest(root: Path) -> tuple[dict[str, Any] | None, list[str]]:
-    path = root / "workspace-manifest.v2.json"
+    path = root / "workspace-manifest.v3.json"
     if not path.exists():
         return None, [f"missing workspace manifest: {path}"]
     try:
@@ -95,7 +98,7 @@ def _cmd_validate(args: argparse.Namespace) -> int:
     warnings: list[str] = []
     checked: list[str] = []
     if manifest is not None and args.stage in {"all", "workspace"}:
-        checked.append("workspace-manifest.v2.json")
+        checked.append("workspace-manifest.v3.json")
     if manifest is not None and args.stage in {"all", "prompt"}:
         for path in sorted(root.rglob("*.md")):
             if "99_归档" in path.parts or path.name.lower() == "readme.md":
@@ -110,7 +113,7 @@ def _cmd_validate(args: argparse.Namespace) -> int:
                 errors.extend(f"{path.relative_to(root)}: {error}" for error in validate_prompt_markdown(text))
     if manifest is not None and args.stage in {"all", "shot", "runtime", "evidence", "visual-control"}:
         for path in sorted(root.rglob("*.json")):
-            if "99_归档" in path.parts or path.name == "workspace-manifest.v2.json":
+            if "99_归档" in path.parts or path.name == "workspace-manifest.v3.json":
                 continue
             try:
                 value = json.loads(path.read_text(encoding="utf-8"))
@@ -160,10 +163,10 @@ def _cmd_index(args: argparse.Namespace) -> int:
     if not root.exists():
         _emit({"ok": False, "errors": [f"root does not exist: {root}"]}, args.format)
         return 1
-    files = [str(p.relative_to(root).as_posix()) for p in root.rglob("*") if p.is_file() and "99_归档" not in p.parts and p.name != "workspace-index.v2.json"]
+    files = [str(p.relative_to(root).as_posix()) for p in root.rglob("*") if p.is_file() and "99_归档" not in p.parts and p.name != "workspace-index.v3.json"]
     files.sort()
-    index_path = root / "workspace-index.v2.json"
-    index_path.write_text(json.dumps({"schema_version": "index.v2", "files": files}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    index_path = root / "workspace-index.v3.json"
+    index_path.write_text(json.dumps({"schema_version": "index.v3", "files": files}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     _emit({"ok": True, "root": str(root), "files": files, "count": len(files), "index": str(index_path)}, args.format)
     return 0
 
@@ -265,6 +268,21 @@ def _cmd_ledger_report(args: argparse.Namespace) -> int:
     return 0 if payload.get("ok") else 1
 
 
+def _cmd_render(args: argparse.Namespace) -> int:
+    root = _root(args.root)
+    output = _root(args.out)
+    try:
+        catalog = discover_creator_sources(root)
+        model = build_creator_read_model(root, catalog)
+        formats = tuple(args.formats.split(",")) if args.formats else FORMAT_NAMES
+        manifest = render_read_model(model, output, formats=formats)
+    except (OSError, ValueError) as exc:
+        _emit({"ok": False, "errors": [str(exc)], "root": str(root), "out": str(output)}, args.format)
+        return 1
+    _emit({"ok": True, "root": str(root), "out": str(output), "manifest": str(output / "render-manifest.json"), "views": manifest["views"], "formats": manifest["formats"]}, args.format)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="ff", description="FilmFoundry Skills v3 CLI")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -318,6 +336,13 @@ def build_parser() -> argparse.ArgumentParser:
     ledger_report.add_argument("--ledger", required=True)
     ledger_report.add_argument("--format", choices=("text", "json"), default="text")
     ledger_report.set_defaults(func=_cmd_ledger_report)
+
+    render = sub.add_parser("render", help="render the generic Creator Read Model")
+    render.add_argument("--root", required=True)
+    render.add_argument("--out", required=True)
+    render.add_argument("--formats", default=",".join(FORMAT_NAMES), help="comma-separated html,markdown,svg")
+    render.add_argument("--format", choices=("text", "json"), default="text")
+    render.set_defaults(func=_cmd_render)
     return parser
 
 

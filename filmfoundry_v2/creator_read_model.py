@@ -1,13 +1,14 @@
 """Typed, read-only Creator Snapshot collection."""
 from __future__ import annotations
 
-from dataclasses import dataclass, fields, is_dataclass
+from dataclasses import dataclass, field, fields, is_dataclass
 import hashlib
 import json
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, Mapping
 
 from .creator_sources import CreatorCatalogSource, CreatorSourceCatalog, CreatorSourceCoverageGap
+from .contracts import LIFECYCLE_STATES, STATE_RANK
 
 
 Derivation = Literal["DIRECT", "VALIDATED", "AGGREGATED"]
@@ -20,6 +21,154 @@ ObservedReadiness = Literal[
     "NOT_APPLICABLE",
     "UNKNOWN",
 ]
+
+
+TERMINOLOGY_SCHEMA_VERSION = "creator-terminology.v1"
+
+_TERMINOLOGY: dict[str, dict[str, dict[str, str]]] = {
+    "lifecycle": {
+        "DRAFT": {"zh-CN": "草稿", "en": "Draft"},
+        "SPEC_RESOLVED": {"zh-CN": "规格已解析", "en": "Specification resolved"},
+        "PREFLIGHT_PASS": {"zh-CN": "预检通过", "en": "Preflight passed"},
+        "READY_FOR_KF": {"zh-CN": "待生成关键帧", "en": "Ready for keyframe"},
+        "KF_GENERATED": {"zh-CN": "关键帧已生成", "en": "Keyframe generated"},
+        "KF_QC_PASS": {"zh-CN": "关键帧质检通过", "en": "Keyframe QC passed"},
+        "READY_FOR_VIDEO": {"zh-CN": "待生成视频", "en": "Ready for video"},
+        "VIDEO_GENERATED": {"zh-CN": "视频已生成", "en": "Video generated"},
+        "VIDEO_QC_PASS": {"zh-CN": "视频质检通过", "en": "Video QC passed"},
+        "SELECT": {"zh-CN": "已选片", "en": "Selected"},
+        "OBSERVED_STATE_RECORDED": {"zh-CN": "已记录观察状态", "en": "Observed State recorded"},
+        "EDIT_READY": {"zh-CN": "可剪辑", "en": "Ready for edit"},
+    },
+    "asset_state": {
+        "PLANNED": {"zh-CN": "已规划", "en": "Planned"},
+        "CANDIDATE": {"zh-CN": "候选", "en": "Candidate"},
+        "LOCKED": {"zh-CN": "已锁定", "en": "Locked"},
+        "RETIRED": {"zh-CN": "已退役", "en": "Retired"},
+        "MISSING": {"zh-CN": "缺失", "en": "Missing"},
+        "LEGACY_FORMAT": {"zh-CN": "旧格式", "en": "Legacy format"},
+    },
+    "evidence_level": {
+        "UNVERIFIED": {"zh-CN": "未验证", "en": "Unverified"},
+        "OBSERVED_ONCE": {"zh-CN": "观察一次", "en": "Observed once"},
+        "REPEATED": {"zh-CN": "重复验证", "en": "Repeated"},
+        "PROJECT_VERIFIED": {"zh-CN": "项目内验证", "en": "Project verified"},
+        "CROSS_PROJECT_VERIFIED": {"zh-CN": "跨项目验证", "en": "Cross-project verified"},
+    },
+    "select_type": {
+        "FULL": {"zh-CN": "完整选片", "en": "Full select"},
+        "FULL_SELECT": {"zh-CN": "完整选片", "en": "Full select"},
+        "PARTIAL_SELECT": {"zh-CN": "部分选片", "en": "Partial select"},
+    },
+    "authority": {
+        "CURRENT": {"zh-CN": "当前权威", "en": "Current authority"},
+        "HISTORICAL": {"zh-CN": "历史参考", "en": "Historical reference"},
+        "SUPPORTING": {"zh-CN": "辅助来源", "en": "Supporting source"},
+    },
+    "severity": {
+        "CRITICAL": {"zh-CN": "严重", "en": "Critical"},
+        "ERROR": {"zh-CN": "错误", "en": "Error"},
+        "BLOCKER": {"zh-CN": "阻塞", "en": "Blocker"},
+        "WARNING": {"zh-CN": "警告", "en": "Warning"},
+        "INFO": {"zh-CN": "信息", "en": "Info"},
+        "ADVISORY": {"zh-CN": "建议", "en": "Advisory"},
+    },
+    "support_boundary": {
+        "filesystem observation": {"zh-CN": "文件系统观察", "en": "Filesystem observation"},
+        "Creator Layer": {"zh-CN": "Creator Layer 可报告", "en": "Creator Layer reporting"},
+        "source validation": {"zh-CN": "来源校验", "en": "Source validation"},
+    },
+    "observed_readiness": {
+        "PRESENT_HASH_OK": {"zh-CN": "文件存在且哈希匹配", "en": "Present, hash verified"},
+        "PRESENT_HASH_UNVERIFIED": {"zh-CN": "文件存在但哈希未验证", "en": "Present, hash unverified"},
+        "PRESENT_HASH_MISMATCH": {"zh-CN": "文件存在但哈希不匹配", "en": "Present, hash mismatch"},
+        "MISSING": {"zh-CN": "文件缺失", "en": "Missing"},
+        "NOT_APPLICABLE": {"zh-CN": "不适用", "en": "Not applicable"},
+        "UNKNOWN": {"zh-CN": "未知", "en": "Unknown"},
+    },
+}
+
+_TERM_CATEGORY_ALIASES = {
+    "asset": "asset_state",
+    "assetstate": "asset_state",
+    "asset_state": "asset_state",
+    "evidence": "evidence_level",
+    "evidencelevel": "evidence_level",
+    "observed": "observed_readiness",
+    "observedreadiness": "observed_readiness",
+    "readiness": "observed_readiness",
+    "select": "select_type",
+    "selecttype": "select_type",
+    "support": "support_boundary",
+    "supportboundary": "support_boundary",
+}
+
+
+def _term_category(category: object) -> str:
+    normalized = str(category).strip().lower().replace("-", "_").replace(" ", "_")
+    return _TERM_CATEGORY_ALIASES.get(normalized, normalized)
+
+
+def _unknown_term(value: object, language: str) -> str:
+    raw = "UNKNOWN" if value is None else str(value)
+    if language == "zh-CN":
+        return f"{raw}（无解释）"
+    return f"{raw} (no explanation)"
+
+
+@dataclass(frozen=True)
+class CreatorTerminologyRegistry:
+    """Versioned labels shared by Creator views and navigation."""
+
+    schema_version: Literal["creator-terminology.v1"] = TERMINOLOGY_SCHEMA_VERSION
+    terms: Mapping[str, Mapping[str, Mapping[str, str]]] = field(default_factory=lambda: _TERMINOLOGY)
+
+    @property
+    def version(self) -> str:
+        return self.schema_version
+
+    @property
+    def registry(self) -> Mapping[str, Mapping[str, Mapping[str, str]]]:
+        return self.terms
+
+    def label(self, category: str, value: object, *, language: str = "zh-CN") -> str:
+        category_terms = self.terms.get(_term_category(category), {})
+        value_terms = category_terms.get(str(value))
+        if not isinstance(value_terms, Mapping):
+            return _unknown_term(value, language if language == "zh-CN" else "en")
+        requested = language if isinstance(language, str) and language else "zh-CN"
+        candidates = (requested, "zh-CN", "en") if requested in {"zh-CN", "en"} else (requested, "en")
+        for candidate in candidates:
+            label = value_terms.get(candidate)
+            if isinstance(label, str) and label:
+                return label
+        return _unknown_term(value, requested if requested == "zh-CN" else "en")
+
+    def lookup(self, category: str, value: object, *, language: str = "zh-CN") -> str:
+        return self.label(category, value, language=language)
+
+    def translate(self, category: str, value: object, *, language: str = "zh-CN") -> str:
+        return self.label(category, value, language=language)
+
+    def __getitem__(self, category: str) -> Mapping[str, Mapping[str, str]]:
+        return self.terms[_term_category(category)]
+
+
+TERMINOLOGY_REGISTRY = CreatorTerminologyRegistry()
+
+
+def get_creator_terminology(language: str = "zh-CN") -> CreatorTerminologyRegistry:
+    """Return the immutable-versioned registry; language is selected at lookup time."""
+    del language
+    return TERMINOLOGY_REGISTRY
+
+
+def terminology_label(category: str, value: object, *, language: str = "zh-CN") -> str:
+    return TERMINOLOGY_REGISTRY.label(category, value, language=language)
+
+
+def translate_creator_term(category: str, value: object, *, language: str = "zh-CN") -> str:
+    return terminology_label(category, value, language=language)
 
 
 @dataclass(frozen=True)
@@ -159,7 +308,7 @@ class CreatorAction:
     priority: int
     severity: str
     reason: str
-    rule_id: str | None
+    rule_id: str
     prerequisites: tuple[str, ...]
     support_boundary: str
     provenance: CreatorProvenance
@@ -179,6 +328,62 @@ class CreatorSnapshot:
     blockers: tuple[CreatorBlocker, ...]
     conflicts: tuple[CreatorConflict, ...]
     coverage: tuple[CreatorCoverage, ...]
+
+    def to_dict(self) -> dict[str, Any]:
+        return _jsonable(self)
+
+    def to_json(self) -> str:
+        return json.dumps(self.to_dict(), ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+
+@dataclass(frozen=True)
+class CreatorNavigation:
+    """Deterministic, read-only actions derived from a CreatorSnapshot."""
+
+    actions: tuple[CreatorAction, ...]
+    primary_action: CreatorAction | None
+    parallel_actions: tuple[CreatorAction, ...]
+    terminology_version: Literal["creator-terminology.v1"] = TERMINOLOGY_SCHEMA_VERSION
+
+    @property
+    def primary(self) -> CreatorAction | None:
+        return self.primary_action
+
+    @property
+    def parallel(self) -> tuple[CreatorAction, ...]:
+        return self.parallel_actions
+
+    @property
+    def primary_action_id(self) -> str | None:
+        return self.primary_action.action_id if self.primary_action else None
+
+    @property
+    def parallel_action_ids(self) -> tuple[str, ...]:
+        return tuple(action.action_id for action in self.parallel_actions)
+
+    @property
+    def terminology(self) -> CreatorTerminologyRegistry:
+        return TERMINOLOGY_REGISTRY
+
+    @property
+    def same_priority_actions(self) -> tuple[CreatorAction, ...]:
+        if self.primary_action is None:
+            return ()
+        return (self.primary_action, *self.parallel_actions)
+
+    def to_dict(self) -> dict[str, Any]:
+        return _jsonable(self)
+
+    def to_json(self) -> str:
+        return json.dumps(self.to_dict(), ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+
+@dataclass(frozen=True)
+class CreatorReadModel:
+    """Composition of immutable snapshot facts and derived navigation."""
+
+    snapshot: CreatorSnapshot
+    navigation: CreatorNavigation
 
     def to_dict(self) -> dict[str, Any]:
         return _jsonable(self)
@@ -512,8 +717,274 @@ def collect_creator_snapshot(root: Path, catalog: CreatorSourceCatalog) -> Creat
     return CreatorSnapshot("creator-snapshot.v1", catalog.project_id, overview, metrics, tuple(narrative_nodes), tuple(emotion_points), tuple(sorted(assets, key=lambda item: item.asset_id)), tuple(sorted(shots, key=lambda item: item.shot_id)), tuple(continuity_edges), blockers, tuple(conflicts), tuple(sorted(coverage, key=lambda item: item.coverage_id)))
 
 
+_NAV_PRIORITY_SOURCE = 1
+_NAV_PRIORITY_HARD_BLOCKER = 2
+_NAV_PRIORITY_MISSING_ARTIFACT = 3
+_NAV_PRIORITY_OBSERVED_STATE = 4
+_NAV_PRIORITY_LIFECYCLE = 5
+_NAV_PRIORITY_ADVICE = 6
+_HARD_SEVERITIES = {"CRITICAL", "ERROR", "BLOCKER"}
+_SEVERITY_ORDER = {
+    "CRITICAL": 0,
+    "ERROR": 1,
+    "BLOCKER": 1,
+    "WARNING": 2,
+    "INFO": 3,
+    "ADVISORY": 4,
+}
+
+
+def _severity_key(value: object) -> tuple[int, str]:
+    normalized = str(value).upper()
+    return (_SEVERITY_ORDER.get(normalized, len(_SEVERITY_ORDER)), normalized)
+
+
+def _nonempty_rule(value: object, fallback: str) -> str:
+    return value if isinstance(value, str) and value else fallback
+
+
+def _nonempty_reason(value: object, fallback: str) -> str:
+    return value if isinstance(value, str) and value else fallback
+
+
+def _nonempty_boundary(value: object, fallback: str) -> str:
+    return value if isinstance(value, str) and value else fallback
+
+
+def _refs(*provenances: CreatorProvenance) -> tuple[CreatorSourceRef, ...]:
+    result: list[CreatorSourceRef] = []
+    for provenance in provenances:
+        for source_ref in provenance.source_refs:
+            if source_ref not in result:
+                result.append(source_ref)
+    return tuple(result)
+
+
+def _action(
+    action_id: str,
+    entity_id: str | None,
+    priority: int,
+    severity: str,
+    reason: str,
+    rule_id: str,
+    prerequisites: tuple[str, ...],
+    support_boundary: str,
+    provenance: CreatorProvenance,
+) -> CreatorAction:
+    action_provenance = CreatorProvenance(
+        provenance.source_refs,
+        "AGGREGATED" if len(provenance.source_refs) > 1 else "VALIDATED",
+        rule_id,
+    )
+    return CreatorAction(
+        action_id,
+        entity_id,
+        priority,
+        severity,
+        reason,
+        rule_id,
+        prerequisites or ("source facts must remain available",),
+        support_boundary or "Creator Layer reports facts; it does not mutate source authorities",
+        action_provenance,
+    )
+
+
+def _blocker_priority(blocker: CreatorBlocker) -> int:
+    rule = str(blocker.rule_id or "").lower()
+    reason = str(blocker.reason or "").lower()
+    if "observed_state" in rule or "previous" in rule:
+        return _NAV_PRIORITY_OBSERVED_STATE
+    if str(blocker.severity).upper() in _HARD_SEVERITIES:
+        return _NAV_PRIORITY_HARD_BLOCKER
+    if "missing" in rule or "missing" in reason or "missing" in blocker.blocker_id.lower():
+        return _NAV_PRIORITY_MISSING_ARTIFACT
+    return _NAV_PRIORITY_ADVICE
+
+
+def _missing_observed_state_actions(snapshot: CreatorSnapshot) -> list[CreatorAction]:
+    actions: list[CreatorAction] = []
+    seen: set[str] = set()
+    shot_by_id = {shot.shot_id: shot for shot in snapshot.shots}
+    for shot in sorted(snapshot.shots, key=lambda item: item.shot_id):
+        status = str(shot.runtime_status or "").upper()
+        if shot.observed_state in (None, "") and status in STATE_RANK and STATE_RANK[status] >= STATE_RANK["SELECT"]:
+            action_id = f"OBSERVED_STATE_{shot.shot_id}"
+            actions.append(
+                _action(
+                    action_id,
+                    shot.shot_id,
+                    _NAV_PRIORITY_OBSERVED_STATE,
+                    "WARNING",
+                    f"shot {shot.shot_id} has no Observed State",
+                    "creator.navigation.previous_observed_state",
+                    ("record the shot's Observed State before continuing",),
+                    "Creator Layer reports missing observations; it does not invent state",
+                    shot.provenance,
+                )
+            )
+            seen.add(shot.shot_id)
+    for edge in sorted(snapshot.continuity_edges, key=lambda item: (item.from_shot_id, item.to_shot_id, item.field, item.chain_id)):
+        source_shot = shot_by_id.get(edge.from_shot_id)
+        if source_shot is None or source_shot.observed_state not in (None, "") or edge.from_shot_id in seen:
+            continue
+        action_id = f"OBSERVED_STATE_{edge.from_shot_id}_BEFORE_{edge.to_shot_id}"
+        actions.append(
+            _action(
+                action_id,
+                edge.from_shot_id,
+                _NAV_PRIORITY_OBSERVED_STATE,
+                "WARNING",
+                f"previous shot {edge.from_shot_id} has no Observed State before {edge.to_shot_id}",
+                "creator.navigation.previous_observed_state",
+                ("record the predecessor Observed State for the continuity handoff",),
+                "Creator Layer reports missing observations; it does not invent state",
+                CreatorProvenance(_refs(edge.provenance, source_shot.provenance), "AGGREGATED", "creator.navigation.previous_observed_state"),
+            )
+        )
+        seen.add(edge.from_shot_id)
+    return actions
+
+
+def _lifecycle_actions(snapshot: CreatorSnapshot) -> list[CreatorAction]:
+    actions: list[CreatorAction] = []
+    for shot in sorted(snapshot.shots, key=lambda item: item.shot_id):
+        status = str(shot.runtime_status or "").upper()
+        if status not in STATE_RANK or status == LIFECYCLE_STATES[-1]:
+            continue
+        next_state = LIFECYCLE_STATES[STATE_RANK[status] + 1]
+        actions.append(
+            _action(
+                f"LIFECYCLE_{shot.shot_id}_{next_state}",
+                shot.shot_id,
+                _NAV_PRIORITY_LIFECYCLE,
+                "INFO",
+                f"advance {shot.shot_id} from {status} to {next_state}",
+                "creator.navigation.lifecycle.next",
+                (f"complete the prerequisites for {next_state}",),
+                "Creator Layer reports the next state; it does not change lifecycle state",
+                shot.provenance,
+            )
+        )
+    return actions
+
+
+def _advice_actions(snapshot: CreatorSnapshot) -> list[CreatorAction]:
+    actions: list[CreatorAction] = []
+    for asset in sorted(snapshot.assets, key=lambda item: item.asset_id):
+        if asset.observed_readiness != "PRESENT_HASH_UNVERIFIED":
+            continue
+        actions.append(
+            _action(
+                f"ADVICE_ASSET_{asset.asset_id}",
+                asset.asset_id,
+                _NAV_PRIORITY_ADVICE,
+                "INFO",
+                f"verify the observed media hash for {asset.asset_id}",
+                "creator.navigation.asset.hash",
+                ("compute and compare the declared media hash",),
+                "Creator Layer reports filesystem observations; it does not rewrite asset declarations",
+                asset.provenance,
+            )
+        )
+    return actions
+
+
+def _asset_integrity_actions(snapshot: CreatorSnapshot) -> list[CreatorAction]:
+    actions: list[CreatorAction] = []
+    for asset in sorted(snapshot.assets, key=lambda item: item.asset_id):
+        if asset.observed_readiness != "PRESENT_HASH_MISMATCH":
+            continue
+        actions.append(
+            _action(
+                f"INTEGRITY_ASSET_{asset.asset_id}",
+                asset.asset_id,
+                _NAV_PRIORITY_HARD_BLOCKER,
+                "ERROR",
+                f"observed media hash does not match the declaration for {asset.asset_id}",
+                "creator.navigation.asset.integrity",
+                ("inspect the media and reconcile its declared hash",),
+                "Creator Layer reports filesystem observations; it does not rewrite asset declarations",
+                asset.provenance,
+            )
+        )
+    return actions
+
+
+def derive_creator_navigation(snapshot: CreatorSnapshot) -> CreatorNavigation:
+    """Derive deterministic actions from Snapshot facts without source access."""
+    actions: list[CreatorAction] = []
+
+    for coverage in snapshot.coverage:
+        if coverage.data_status not in {"UNKNOWN", "INVALID"}:
+            continue
+        severity = "ERROR" if coverage.data_status == "INVALID" else "WARNING"
+        actions.append(
+            _action(
+                f"SOURCE_{coverage.coverage_id}",
+                coverage.coverage_id,
+                _NAV_PRIORITY_SOURCE,
+                severity,
+                _nonempty_reason(coverage.reason, "source is unavailable"),
+                _nonempty_rule(coverage.provenance.rule_id, "creator.navigation.source_coverage"),
+                ("make the declared source readable and parseable",),
+                "Creator Layer reports source coverage; it does not repair source files",
+                coverage.provenance,
+            )
+        )
+
+    for conflict in snapshot.conflicts:
+        actions.append(
+            _action(
+                f"CONFLICT_{conflict.conflict_id}",
+                conflict.entity_id,
+                _NAV_PRIORITY_SOURCE,
+                "ERROR",
+                _nonempty_reason(conflict.reason, "authority conflict requires review"),
+                _nonempty_rule(conflict.provenance.rule_id, "creator.navigation.authority_conflict"),
+                ("review the competing source authorities",),
+                "Creator Layer reports authority conflicts; it does not choose an authority",
+                conflict.provenance,
+            )
+        )
+
+    for blocker in snapshot.blockers:
+        priority = _blocker_priority(blocker)
+        actions.append(
+            _action(
+                f"BLOCKER_{blocker.blocker_id}",
+                blocker.entity_id,
+                priority,
+                str(blocker.severity),
+                _nonempty_reason(blocker.reason, "production blocker requires review"),
+                _nonempty_rule(blocker.rule_id, "creator.navigation.blocker"),
+                (f"resolve blocker {blocker.blocker_id}",),
+                _nonempty_boundary(blocker.support_boundary, "Creator Layer reports the blocker; source owners resolve it"),
+                blocker.provenance,
+            )
+        )
+
+    actions.extend(_missing_observed_state_actions(snapshot))
+    actions.extend(_lifecycle_actions(snapshot))
+    actions.extend(_asset_integrity_actions(snapshot))
+    actions.extend(_advice_actions(snapshot))
+
+    actions.sort(key=lambda item: (item.priority, _severity_key(item.severity), item.entity_id or "", item.action_id))
+    ordered = tuple(actions)
+    primary = ordered[0] if ordered else None
+    parallel = tuple(action for action in ordered[1:] if primary is not None and action.priority == primary.priority)
+    return CreatorNavigation(ordered, primary, parallel)
+
+
+def build_creator_read_model(root: Path, catalog: CreatorSourceCatalog) -> CreatorReadModel:
+    snapshot = collect_creator_snapshot(root, catalog)
+    return CreatorReadModel(snapshot, derive_creator_navigation(snapshot))
+
+
 __all__ = [
     "CreatorAction", "CreatorAsset", "CreatorBlocker", "CreatorConflict", "CreatorContinuityEdge", "CreatorCoverage",
-    "CreatorEmotionPoint", "CreatorMetric", "CreatorNarrativeNode", "CreatorOverview", "CreatorProvenance",
-    "CreatorShot", "CreatorSnapshot", "CreatorSourceRef", "collect_creator_snapshot",
+    "CreatorEmotionPoint", "CreatorMetric", "CreatorNarrativeNode", "CreatorNavigation", "CreatorOverview",
+    "CreatorProvenance", "CreatorReadModel", "CreatorShot", "CreatorSnapshot", "CreatorSourceRef",
+    "CreatorTerminologyRegistry", "TERMINOLOGY_REGISTRY", "TERMINOLOGY_SCHEMA_VERSION",
+    "build_creator_read_model", "collect_creator_snapshot", "derive_creator_navigation", "get_creator_terminology",
+    "terminology_label", "translate_creator_term",
 ]

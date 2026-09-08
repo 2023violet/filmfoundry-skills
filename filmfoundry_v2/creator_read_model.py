@@ -5,6 +5,7 @@ from dataclasses import dataclass, field, fields, is_dataclass
 import hashlib
 import json
 from pathlib import Path
+from types import MappingProxyType
 from typing import Any, Literal, Mapping
 
 from .creator_sources import CreatorCatalogSource, CreatorSourceCatalog, CreatorSourceCoverageGap
@@ -25,7 +26,15 @@ ObservedReadiness = Literal[
 
 TERMINOLOGY_SCHEMA_VERSION = "creator-terminology.v1"
 
-_TERMINOLOGY: dict[str, dict[str, dict[str, str]]] = {
+
+def _freeze_mapping(value: Mapping[str, Any]) -> Mapping[str, Any]:
+    return MappingProxyType({
+        key: _freeze_mapping(item) if isinstance(item, Mapping) else item
+        for key, item in value.items()
+    })
+
+
+_TERMINOLOGY: Mapping[str, Mapping[str, Mapping[str, str]]] = _freeze_mapping({
     "lifecycle": {
         "DRAFT": {"zh-CN": "草稿", "en": "Draft"},
         "SPEC_RESOLVED": {"zh-CN": "规格已解析", "en": "Specification resolved"},
@@ -74,9 +83,14 @@ _TERMINOLOGY: dict[str, dict[str, dict[str, str]]] = {
         "ADVISORY": {"zh-CN": "建议", "en": "Advisory"},
     },
     "support_boundary": {
-        "filesystem observation": {"zh-CN": "文件系统观察", "en": "Filesystem observation"},
-        "Creator Layer": {"zh-CN": "Creator Layer 可报告", "en": "Creator Layer reporting"},
-        "source validation": {"zh-CN": "来源校验", "en": "Source validation"},
+        "SOURCE_VALIDATION": {"zh-CN": "来源校验；Creator Layer 不修复来源", "en": "Source validation; Creator Layer does not repair sources"},
+        "AUTHORITY_REVIEW": {"zh-CN": "权威来源复核；Creator Layer 不选择权威", "en": "Authority review; Creator Layer does not choose authority"},
+        "HARD_BLOCKER_REVIEW": {"zh-CN": "硬阻塞复核；由来源所有者解决", "en": "Hard-blocker review; source owners resolve it"},
+        "MISSING_ARTIFACT": {"zh-CN": "缺失制品复核；Creator Layer 不生成制品", "en": "Missing-artifact review; Creator Layer does not create artifacts"},
+        "OBSERVED_STATE_HANDOFF": {"zh-CN": "观察状态交接；Creator Layer 不推测状态", "en": "Observed State handoff; Creator Layer does not infer state"},
+        "LIFECYCLE_GUIDANCE": {"zh-CN": "生命周期指引；Creator Layer 不变更状态", "en": "Lifecycle guidance; Creator Layer does not change state"},
+        "ASSET_INTEGRITY": {"zh-CN": "资产完整性复核；Creator Layer 不改写声明", "en": "Asset integrity review; Creator Layer does not rewrite declarations"},
+        "NON_BLOCKING_ADVICE": {"zh-CN": "非阻塞建议；Creator Layer 仅报告", "en": "Non-blocking advice; Creator Layer only reports"},
     },
     "observed_readiness": {
         "PRESENT_HASH_OK": {"zh-CN": "文件存在且哈希匹配", "en": "Present, hash verified"},
@@ -86,7 +100,7 @@ _TERMINOLOGY: dict[str, dict[str, dict[str, str]]] = {
         "NOT_APPLICABLE": {"zh-CN": "不适用", "en": "Not applicable"},
         "UNKNOWN": {"zh-CN": "未知", "en": "Unknown"},
     },
-}
+})
 
 _TERM_CATEGORY_ALIASES = {
     "asset": "asset_state",
@@ -122,6 +136,9 @@ class CreatorTerminologyRegistry:
 
     schema_version: Literal["creator-terminology.v1"] = TERMINOLOGY_SCHEMA_VERSION
     terms: Mapping[str, Mapping[str, Mapping[str, str]]] = field(default_factory=lambda: _TERMINOLOGY)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "terms", _freeze_mapping(self.terms))
 
     @property
     def version(self) -> str:
@@ -344,6 +361,7 @@ class CreatorNavigation:
     primary_action: CreatorAction | None
     parallel_actions: tuple[CreatorAction, ...]
     terminology_version: Literal["creator-terminology.v1"] = TERMINOLOGY_SCHEMA_VERSION
+    schema_version: Literal["creator-navigation.v1"] = "creator-navigation.v1"
 
     @property
     def primary(self) -> CreatorAction | None:
@@ -384,6 +402,7 @@ class CreatorReadModel:
 
     snapshot: CreatorSnapshot
     navigation: CreatorNavigation
+    schema_version: Literal["creator-read-model.v1"] = "creator-read-model.v1"
 
     def to_dict(self) -> dict[str, Any]:
         return _jsonable(self)
@@ -723,6 +742,14 @@ _NAV_PRIORITY_MISSING_ARTIFACT = 3
 _NAV_PRIORITY_OBSERVED_STATE = 4
 _NAV_PRIORITY_LIFECYCLE = 5
 _NAV_PRIORITY_ADVICE = 6
+_SUPPORT_SOURCE_VALIDATION = "SOURCE_VALIDATION"
+_SUPPORT_AUTHORITY_REVIEW = "AUTHORITY_REVIEW"
+_SUPPORT_HARD_BLOCKER_REVIEW = "HARD_BLOCKER_REVIEW"
+_SUPPORT_MISSING_ARTIFACT = "MISSING_ARTIFACT"
+_SUPPORT_OBSERVED_STATE_HANDOFF = "OBSERVED_STATE_HANDOFF"
+_SUPPORT_LIFECYCLE_GUIDANCE = "LIFECYCLE_GUIDANCE"
+_SUPPORT_ASSET_INTEGRITY = "ASSET_INTEGRITY"
+_SUPPORT_NON_BLOCKING_ADVICE = "NON_BLOCKING_ADVICE"
 _HARD_SEVERITIES = {"CRITICAL", "ERROR", "BLOCKER"}
 _SEVERITY_ORDER = {
     "CRITICAL": 0,
@@ -751,6 +778,12 @@ def _nonempty_boundary(value: object, fallback: str) -> str:
     return value if isinstance(value, str) and value else fallback
 
 
+def _support_boundary(value: object, fallback: str) -> str:
+    if isinstance(value, str) and value in TERMINOLOGY_REGISTRY.registry.get("support_boundary", {}):
+        return value
+    return fallback
+
+
 def _refs(*provenances: CreatorProvenance) -> tuple[CreatorSourceRef, ...]:
     result: list[CreatorSourceRef] = []
     for provenance in provenances:
@@ -771,6 +804,8 @@ def _action(
     support_boundary: str,
     provenance: CreatorProvenance,
 ) -> CreatorAction:
+    if not provenance.source_refs:
+        raise ValueError("CREATOR_NAVIGATION_PROVENANCE: derived action requires non-empty provenance")
     action_provenance = CreatorProvenance(
         provenance.source_refs,
         "AGGREGATED" if len(provenance.source_refs) > 1 else "VALIDATED",
@@ -792,10 +827,10 @@ def _action(
 def _blocker_priority(blocker: CreatorBlocker) -> int:
     rule = str(blocker.rule_id or "").lower()
     reason = str(blocker.reason or "").lower()
-    if "observed_state" in rule or "previous" in rule:
-        return _NAV_PRIORITY_OBSERVED_STATE
     if str(blocker.severity).upper() in _HARD_SEVERITIES:
         return _NAV_PRIORITY_HARD_BLOCKER
+    if "observed_state" in rule or "previous" in rule:
+        return _NAV_PRIORITY_OBSERVED_STATE
     if "missing" in rule or "missing" in reason or "missing" in blocker.blocker_id.lower():
         return _NAV_PRIORITY_MISSING_ARTIFACT
     return _NAV_PRIORITY_ADVICE
@@ -803,11 +838,20 @@ def _blocker_priority(blocker: CreatorBlocker) -> int:
 
 def _missing_observed_state_actions(snapshot: CreatorSnapshot) -> list[CreatorAction]:
     actions: list[CreatorAction] = []
-    seen: set[str] = set()
     shot_by_id = {shot.shot_id: shot for shot in snapshot.shots}
+    handoff_predecessors = {
+        edge.from_shot_id
+        for edge in snapshot.continuity_edges
+        if edge.to_shot_id in shot_by_id
+    }
     for shot in sorted(snapshot.shots, key=lambda item: item.shot_id):
         status = str(shot.runtime_status or "").upper()
-        if shot.observed_state in (None, "") and status in STATE_RANK and STATE_RANK[status] >= STATE_RANK["SELECT"]:
+        if (
+            shot.shot_id not in handoff_predecessors
+            and shot.observed_state in (None, "")
+            and status in STATE_RANK
+            and STATE_RANK[status] >= STATE_RANK["SELECT"]
+        ):
             action_id = f"OBSERVED_STATE_{shot.shot_id}"
             actions.append(
                 _action(
@@ -818,14 +862,22 @@ def _missing_observed_state_actions(snapshot: CreatorSnapshot) -> list[CreatorAc
                     f"shot {shot.shot_id} has no Observed State",
                     "creator.navigation.previous_observed_state",
                     ("record the shot's Observed State before continuing",),
-                    "Creator Layer reports missing observations; it does not invent state",
+                    _SUPPORT_OBSERVED_STATE_HANDOFF,
                     shot.provenance,
                 )
             )
-            seen.add(shot.shot_id)
     for edge in sorted(snapshot.continuity_edges, key=lambda item: (item.from_shot_id, item.to_shot_id, item.field, item.chain_id)):
         source_shot = shot_by_id.get(edge.from_shot_id)
-        if source_shot is None or source_shot.observed_state not in (None, "") or edge.from_shot_id in seen:
+        successor = shot_by_id.get(edge.to_shot_id)
+        source_status = str(source_shot.runtime_status or "").upper() if source_shot else ""
+        successor_status = str(successor.runtime_status or "").upper() if successor else ""
+        if (
+            source_shot is None
+            or successor is None
+            or source_shot.observed_state not in (None, "")
+            or source_status not in STATE_RANK
+            or STATE_RANK[source_status] < STATE_RANK["SELECT"]
+        ):
             continue
         action_id = f"OBSERVED_STATE_{edge.from_shot_id}_BEFORE_{edge.to_shot_id}"
         actions.append(
@@ -837,11 +889,10 @@ def _missing_observed_state_actions(snapshot: CreatorSnapshot) -> list[CreatorAc
                 f"previous shot {edge.from_shot_id} has no Observed State before {edge.to_shot_id}",
                 "creator.navigation.previous_observed_state",
                 ("record the predecessor Observed State for the continuity handoff",),
-                "Creator Layer reports missing observations; it does not invent state",
+                _SUPPORT_OBSERVED_STATE_HANDOFF,
                 CreatorProvenance(_refs(edge.provenance, source_shot.provenance), "AGGREGATED", "creator.navigation.previous_observed_state"),
             )
         )
-        seen.add(edge.from_shot_id)
     return actions
 
 
@@ -861,7 +912,7 @@ def _lifecycle_actions(snapshot: CreatorSnapshot) -> list[CreatorAction]:
                 f"advance {shot.shot_id} from {status} to {next_state}",
                 "creator.navigation.lifecycle.next",
                 (f"complete the prerequisites for {next_state}",),
-                "Creator Layer reports the next state; it does not change lifecycle state",
+                _SUPPORT_LIFECYCLE_GUIDANCE,
                 shot.provenance,
             )
         )
@@ -882,7 +933,7 @@ def _advice_actions(snapshot: CreatorSnapshot) -> list[CreatorAction]:
                 f"verify the observed media hash for {asset.asset_id}",
                 "creator.navigation.asset.hash",
                 ("compute and compare the declared media hash",),
-                "Creator Layer reports filesystem observations; it does not rewrite asset declarations",
+                _SUPPORT_NON_BLOCKING_ADVICE,
                 asset.provenance,
             )
         )
@@ -903,7 +954,7 @@ def _asset_integrity_actions(snapshot: CreatorSnapshot) -> list[CreatorAction]:
                 f"observed media hash does not match the declaration for {asset.asset_id}",
                 "creator.navigation.asset.integrity",
                 ("inspect the media and reconcile its declared hash",),
-                "Creator Layer reports filesystem observations; it does not rewrite asset declarations",
+                _SUPPORT_ASSET_INTEGRITY,
                 asset.provenance,
             )
         )
@@ -927,7 +978,7 @@ def derive_creator_navigation(snapshot: CreatorSnapshot) -> CreatorNavigation:
                 _nonempty_reason(coverage.reason, "source is unavailable"),
                 _nonempty_rule(coverage.provenance.rule_id, "creator.navigation.source_coverage"),
                 ("make the declared source readable and parseable",),
-                "Creator Layer reports source coverage; it does not repair source files",
+                _SUPPORT_SOURCE_VALIDATION,
                 coverage.provenance,
             )
         )
@@ -942,7 +993,7 @@ def derive_creator_navigation(snapshot: CreatorSnapshot) -> CreatorNavigation:
                 _nonempty_reason(conflict.reason, "authority conflict requires review"),
                 _nonempty_rule(conflict.provenance.rule_id, "creator.navigation.authority_conflict"),
                 ("review the competing source authorities",),
-                "Creator Layer reports authority conflicts; it does not choose an authority",
+                _SUPPORT_AUTHORITY_REVIEW,
                 conflict.provenance,
             )
         )
@@ -958,7 +1009,7 @@ def derive_creator_navigation(snapshot: CreatorSnapshot) -> CreatorNavigation:
                 _nonempty_reason(blocker.reason, "production blocker requires review"),
                 _nonempty_rule(blocker.rule_id, "creator.navigation.blocker"),
                 (f"resolve blocker {blocker.blocker_id}",),
-                _nonempty_boundary(blocker.support_boundary, "Creator Layer reports the blocker; source owners resolve it"),
+                _support_boundary(blocker.support_boundary, _SUPPORT_HARD_BLOCKER_REVIEW),
                 blocker.provenance,
             )
         )

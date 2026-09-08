@@ -7,6 +7,8 @@
 - Added deterministic navigation rules for source coverage and authority conflicts, hard blockers, missing artifacts, missing Observed State, next lifecycle state, and non-blocking advice.
 - Actions sort by priority, severity, entity ID, and action ID. Every derived action carries source provenance, a non-null rule ID, prerequisites, and support boundary. One primary action and all same-priority parallel actions remain available.
 - Core implementation contains no Wucheng/project-specific branch.
+- Review fixes add hard-severity precedence, lifecycle-gated continuity handoffs, non-empty action provenance enforcement, deeply immutable terminology mappings, stable terminology-backed support-boundary IDs, and versioned Navigation/ReadModel schemas.
+- Review-fix commit: `bcd2898`.
 
 ## TDD Evidence
 
@@ -14,6 +16,7 @@
 - RED follow-up: the hash-mismatch integrity contract failed with `StopIteration` when its action derivation was temporarily absent.
 - GREEN: `python -m pytest tests/test_v23_creator_read_model_navigation.py -q` -> `7 passed` after restoring the integrity rule.
 - Focused regression: `python -m pytest tests/test_v23_creator_read_model_contract.py tests/test_v23_creator_read_model_fixtures.py tests/test_v23_creator_read_model_navigation.py -q` -> `54 passed`.
+- Review-fix focused regression: `python -m pytest tests/test_v23_creator_read_model_contract.py tests/test_v23_creator_read_model_fixtures.py tests/test_v23_creator_read_model_navigation.py -q` -> `61 passed`.
 
 ## Verification
 

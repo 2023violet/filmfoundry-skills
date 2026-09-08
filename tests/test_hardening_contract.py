@@ -45,8 +45,8 @@ def test_release_version_is_consistent_across_metadata_and_readme():
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
     changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
-    assert "**Version:** 1.3.3" in readme
-    assert 'version = "1.3.3"' in pyproject
+    assert "**Version:** 3.0.0" in readme
+    assert 'version = "3.0.0"' in pyproject
     assert "## 1.2.0" in changelog and "## 1.1.0" in changelog
 
 

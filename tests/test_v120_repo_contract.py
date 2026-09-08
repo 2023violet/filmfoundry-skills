@@ -11,8 +11,8 @@ def test_v120_metadata_and_skill_market_first_contract():
     pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     skill = (SKILL / "SKILL.md").read_text(encoding="utf-8")
-    assert 'version = "1.3.3"' in pyproject
-    assert "**Version:** 1.3.3" in readme
+    assert 'version = "3.0.0"' in pyproject
+    assert "**Version:** 3.0.0" in readme
     for token in ("Content Market Gate", "MVP", "PARTIAL_SELECT", "edit target", "eyeline"):
         assert token.lower() in skill.lower(), token
 
@@ -52,7 +52,7 @@ def test_v120_published_examples_pass_new_validators():
 
 def test_v120_eval_suite_has_26_cases_and_new_market_production_risks():
     data = json.loads((ROOT / "evals" / "evals.json").read_text(encoding="utf-8"))
-    assert data["version"] == "1.3.3"
+    assert data["version"] == "3.0.0"
     assert len(data["evals"]) == 26
     ids = {case["id"] for case in data["evals"]}
     for prefix in (

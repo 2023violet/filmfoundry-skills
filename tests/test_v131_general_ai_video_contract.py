@@ -7,7 +7,7 @@ SKILL = ROOT / "skills" / "generative-film-production"
 def test_v131_general_visual_planning_contract():
     readme = (ROOT / "README.md").read_text(encoding="utf-8").lower()
     skill = (SKILL / "SKILL.md").read_text(encoding="utf-8").lower()
-    assert "**version:** 1.3.3" in readme
+    assert "**version:** 3.0.0" in readme
     for token in ("visual planning", "capability", "edit timeline", "picture lock"):
         assert token in skill
     for rel in (

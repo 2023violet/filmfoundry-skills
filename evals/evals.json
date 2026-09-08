@@ -1,6 +1,6 @@
 {
   "skill_name": "generative-film-production",
-  "version": "1.3.3",
+  "version": "3.0.0",
   "evals": [
     {
       "id": "E01-overstuffed-clip",

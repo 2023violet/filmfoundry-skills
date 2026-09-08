@@ -7,8 +7,8 @@ SKILL = ROOT / "skills" / "generative-film-production"
 def test_v132_metadata_and_state_alignment_reference_exist():
     pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    assert 'version = "1.3.3"' in pyproject
-    assert "**Version:** 1.3.3" in readme
+    assert 'version = "3.0.0"' in pyproject
+    assert "**Version:** 3.0.0" in readme
     assert (SKILL / "references" / "31-visual-control-state-alignment.md").is_file()
     assert (SKILL / "templates" / "visual-control-state-audit.csv").is_file()
 

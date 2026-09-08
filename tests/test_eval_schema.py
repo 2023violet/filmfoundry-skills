@@ -11,7 +11,7 @@ VALIDATOR = ROOT / "scripts" / "validate_evals.py"
 def test_eval_file_has_twenty_six_realistic_cases():
     data = json.loads(EVAL_PATH.read_text(encoding="utf-8"))
     assert data["skill_name"] == "generative-film-production"
-    assert data["version"] == "1.3.3"
+    assert data["version"] == "3.0.0"
     assert len(data["evals"]) == 26
     ids = [case["id"] for case in data["evals"]]
     assert len(ids) == len(set(ids))

@@ -5,7 +5,7 @@ from dataclasses import dataclass
 import json
 from pathlib import Path, PurePosixPath, PureWindowsPath
 import re
-from typing import Callable, Mapping, Protocol
+from typing import Callable, Literal, Mapping, Protocol
 
 from .beat_map import parse_emotional_beat_map, validate_emotional_beat_map
 from .contracts import (
@@ -61,8 +61,12 @@ class CreatorCatalogSource:
 class CreatorSourceCoverageGap:
     source_id: str
     source_kind: str
+    path: Path
     parser_id: str
     schema_version: str
+    authority_role: str
+    scope: str
+    data_status: Literal["UNKNOWN", "INVALID"]
     reason: str
 
 
@@ -358,6 +362,7 @@ def discover_creator_sources(root: Path, adapter: CreatorProjectAdapter | None =
     discovered: list[CreatorCatalogSource] = []
     gaps: list[CreatorSourceCoverageGap] = []
     parsed_data: dict[str, object] = {}
+    gap_source_ids: set[str] = set()
     archive_paths: list[Path] = []
     for source, resolved_path in resolved_sources:
         if source["source_kind"] != "workspace_manifest":
@@ -372,7 +377,44 @@ def discover_creator_sources(root: Path, adapter: CreatorProjectAdapter | None =
             if required:
                 raise ValueError(_UNKNOWN_SCHEMA_ERROR)
             continue
-        data = parser(_load_json(resolved_path))
+        if not resolved_path.exists():
+            if required:
+                _load_json(resolved_path)
+            gaps.append(
+                CreatorSourceCoverageGap(
+                    source_id,
+                    str(source["source_kind"]),
+                    resolved_path,
+                    parser_id,
+                    schema_version,
+                    str(source["authority_role"]),
+                    str(source["scope"]),
+                    "UNKNOWN",
+                    "source file missing",
+                )
+            )
+            gap_source_ids.add(source_id)
+            continue
+        try:
+            data = parser(_load_json(resolved_path))
+        except ValueError:
+            if required:
+                raise
+            gaps.append(
+                CreatorSourceCoverageGap(
+                    source_id,
+                    str(source["source_kind"]),
+                    resolved_path,
+                    parser_id,
+                    schema_version,
+                    str(source["authority_role"]),
+                    str(source["scope"]),
+                    "INVALID",
+                    "source validation failed",
+                )
+            )
+            gap_source_ids.add(source_id)
+            continue
         parsed_data[source_id] = data
         assert isinstance(data, Mapping)
         boundary = data["archive_boundary"]
@@ -391,15 +433,64 @@ def discover_creator_sources(root: Path, adapter: CreatorProjectAdapter | None =
         assert isinstance(required, bool)
         if role == "CURRENT" and _is_active_archive_path(resolved_path, tuple(archive_paths)):
             raise ValueError(_ARCHIVE_ACTIVE_ERROR)
+        if source_id in gap_source_ids:
+            continue
         parser = _PARSERS.get((parser_id, schema_version))
         if parser is None:
             if required:
                 raise ValueError(_UNKNOWN_SCHEMA_ERROR)
-            gaps.append(CreatorSourceCoverageGap(source_id, source_kind, parser_id, schema_version, "unsupported source schema"))
+            gaps.append(
+                CreatorSourceCoverageGap(
+                    source_id,
+                    source_kind,
+                    resolved_path,
+                    parser_id,
+                    schema_version,
+                    role,
+                    scope,
+                    "UNKNOWN",
+                    "unsupported source schema",
+                )
+            )
             continue
         data = parsed_data.get(source_id)
         if data is None:
-            data = parser(_load_json(resolved_path))
+            if not resolved_path.exists():
+                if required:
+                    _load_json(resolved_path)
+                gaps.append(
+                    CreatorSourceCoverageGap(
+                        source_id,
+                        source_kind,
+                        resolved_path,
+                        parser_id,
+                        schema_version,
+                        role,
+                        scope,
+                        "UNKNOWN",
+                        "source file missing",
+                    )
+                )
+                continue
+            try:
+                data = parser(_load_json(resolved_path))
+            except ValueError:
+                if required:
+                    raise
+                gaps.append(
+                    CreatorSourceCoverageGap(
+                        source_id,
+                        source_kind,
+                        resolved_path,
+                        parser_id,
+                        schema_version,
+                        role,
+                        scope,
+                        "INVALID",
+                        "source validation failed",
+                    )
+                )
+                continue
         discovered.append(
             CreatorCatalogSource(source_id, source_kind, resolved_path, parser_id, schema_version, role, scope, required, data)
         )

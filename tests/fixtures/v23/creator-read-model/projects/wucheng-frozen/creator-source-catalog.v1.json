@@ -9,4 +9,3 @@
     {"source_id": "SRC_PRODUCTION_HISTORICAL", "source_kind": "production_state", "path": "historical/production-mapping.v2.json", "path_base": "WORKSPACE_ROOT", "parser_id": "production-state-json", "schema_version": "production-state.v2", "authority_role": "HISTORICAL", "scope": "STORY_V3", "required": true}
   ]
 }
-

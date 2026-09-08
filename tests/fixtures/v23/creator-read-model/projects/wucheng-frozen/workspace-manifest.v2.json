@@ -8,4 +8,3 @@
   "adapter_compatibility": {"filmfoundry": ">=2.0.0,<3.0.0", "project": "frozen-boundary-v3"},
   "required_tools": ["python>=3.11"]
 }
-

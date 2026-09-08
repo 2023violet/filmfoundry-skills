@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 from typing import Any, Literal
 
-from .creator_sources import CreatorCatalogSource, CreatorSourceCatalog
+from .creator_sources import CreatorCatalogSource, CreatorSourceCatalog, CreatorSourceCoverageGap
 
 
 Derivation = Literal["DIRECT", "VALIDATED", "AGGREGATED"]
@@ -166,19 +166,8 @@ class CreatorAction:
 
 
 @dataclass(frozen=True)
-class CreatorNavigation:
-    actions: tuple[CreatorAction, ...]
-
-
-@dataclass(frozen=True)
-class CreatorReadModel:
-    snapshot: "CreatorSnapshot"
-    navigation: CreatorNavigation
-
-
-@dataclass(frozen=True)
 class CreatorSnapshot:
-    schema_version: str | Literal["creator-snapshot.v1"]
+    schema_version: Literal["creator-snapshot.v1"]
     project_id: str
     overview: CreatorOverview
     metrics: tuple[CreatorMetric, ...]
@@ -237,6 +226,18 @@ def _source_ref(root: Path, source: CreatorCatalogSource, pointer: str = "/") ->
         sha256=_sha256(source.path),
         authority_role=source.authority_role,
         version=source.schema_version,
+    )
+
+
+def _gap_ref(root: Path, gap: CreatorSourceCoverageGap) -> CreatorSourceRef:
+    return CreatorSourceRef(
+        source_id=gap.source_id,
+        source_kind=gap.source_kind,
+        path=_relative_path(root, gap.path),
+        pointer="/",
+        sha256=_sha256(gap.path),
+        authority_role=gap.authority_role,
+        version=gap.schema_version,
     )
 
 
@@ -302,6 +303,17 @@ def _metric(metric_id: str, value: int | float | str | None, status: DataStatus,
     return CreatorMetric(metric_id, value, status, _provenance(refs, "AGGREGATED", rule))
 
 
+def _aggregate_status(
+    successful_sources: list[CreatorCatalogSource],
+    gaps: list[CreatorSourceCoverageGap],
+) -> DataStatus:
+    if any(gap.data_status == "INVALID" for gap in gaps):
+        return "INVALID"
+    if gaps or not successful_sources:
+        return "UNKNOWN"
+    return "KNOWN"
+
+
 def collect_creator_snapshot(root: Path, catalog: CreatorSourceCatalog) -> CreatorSnapshot:
     workspace_root = Path(root).resolve()
     assets: list[CreatorAsset] = []
@@ -311,6 +323,7 @@ def collect_creator_snapshot(root: Path, catalog: CreatorSourceCatalog) -> Creat
     continuity_edges: list[CreatorContinuityEdge] = []
     coverage: list[CreatorCoverage] = []
     source_by_kind: dict[str, list[CreatorCatalogSource]] = {}
+    gaps_by_kind: dict[str, list[CreatorSourceCoverageGap]] = {}
 
     for source in catalog.sources:
         source_by_kind.setdefault(source.source_kind, []).append(source)
@@ -358,6 +371,21 @@ def collect_creator_snapshot(root: Path, catalog: CreatorSourceCatalog) -> Creat
                     if isinstance(edge, dict):
                         continuity_edges.append(CreatorContinuityEdge(str(chain.get("chain_id", "")), str(chain.get("entity_id", "")), *(str(edge.get(name, "")) for name in ("from_shot_id", "to_shot_id", "field", "from_value", "to_value")), _provenance((ref,), "DIRECT")))
 
+    for gap in catalog.coverage_gaps:
+        gaps_by_kind.setdefault(gap.source_kind, []).append(gap)
+        gap_ref = _gap_ref(workspace_root, gap)
+        coverage.append(
+            CreatorCoverage(
+                gap.source_id,
+                gap.source_kind,
+                gap.data_status,
+                0,
+                1,
+                gap.reason,
+                _provenance((gap_ref,), "VALIDATED", "creator.coverage.gap"),
+            )
+        )
+
     runtime_data: dict[str, Any] = {}
     try:
         loaded = json.loads(catalog.runtime_path.read_text(encoding="utf-8"))
@@ -372,8 +400,33 @@ def collect_creator_snapshot(root: Path, catalog: CreatorSourceCatalog) -> Creat
     historical_sources = [source for source in catalog.sources if source.authority_role == "HISTORICAL"]
     overview = CreatorOverview(catalog.project_id, str(runtime_data.get("phase", "UNKNOWN")), "CURRENT" if current_sources else "UNKNOWN", "HISTORICAL" if historical_sources else None, _provenance(overview_refs, "AGGREGATED", "creator.overview"))
 
-    production_sources = source_by_kind.get("production_state", [])
-    state_rows: list[tuple[dict[str, Any], CreatorSourceRef]] = []
+    declared_production_sources = source_by_kind.get("production_state", [])
+    production_sources: list[CreatorCatalogSource] = []
+    production_by_scope: dict[str, list[CreatorCatalogSource]] = {}
+    production_gaps_by_scope: dict[str, list[CreatorSourceCoverageGap]] = {}
+    for source in declared_production_sources:
+        production_by_scope.setdefault(source.scope, []).append(source)
+    for gap in gaps_by_kind.get("production_state", []):
+        production_gaps_by_scope.setdefault(gap.scope, []).append(gap)
+    production_scopes = list(production_by_scope)
+    production_scopes.extend(
+        gap.scope
+        for gap in gaps_by_kind.get("production_state", [])
+        if gap.scope not in production_by_scope and gap.scope not in production_scopes
+    )
+    for scope in production_scopes:
+        sources = production_by_scope.get(scope, [])
+        scope_gaps = production_gaps_by_scope.get(scope, [])
+        current = [source for source in sources if source.authority_role == "CURRENT"]
+        historical = [source for source in sources if source.authority_role == "HISTORICAL"]
+        if current:
+            production_sources.extend(current)
+        elif any(gap.authority_role == "CURRENT" for gap in scope_gaps):
+            continue
+        elif len(historical) == 1 and not any(gap.authority_role == "HISTORICAL" for gap in scope_gaps):
+            production_sources.extend(historical)
+
+    state_rows: list[tuple[str, dict[str, Any], CreatorSourceRef]] = []
     for source in production_sources:
         ref = _source_ref(workspace_root, source)
         data = source.data if isinstance(source.data, dict) else {}
@@ -381,45 +434,75 @@ def collect_creator_snapshot(root: Path, catalog: CreatorSourceCatalog) -> Creat
         if isinstance(units, dict):
             for unit_id, unit in units.items():
                 if isinstance(unit, dict):
-                    state_rows.append((unit, CreatorSourceRef(ref.source_id, ref.source_kind, ref.path, _json_pointer(str(unit_id)), ref.sha256, ref.authority_role, ref.version)))
+                    pointer = "/units" + _json_pointer(str(unit_id))
+                    state_rows.append((str(unit_id), unit, CreatorSourceRef(ref.source_id, ref.source_kind, ref.path, pointer, ref.sha256, ref.authority_role, ref.version)))
     for index, shot in enumerate(shots):
-        matching = next(((row, ref) for row, ref in state_rows if shot.generation_unit_id == ref.pointer.rsplit("/", 1)[-1]), None)
+        matching = next(((row, ref) for unit_id, row, ref in state_rows if shot.generation_unit_id == unit_id), None)
         if matching:
             row, ref = matching
             shots[index] = CreatorShot(shot.shot_id, shot.generation_unit_id, row.get("runtime_status"), row.get("select_type"), row.get("observed_state"), _provenance((shot.provenance.source_refs[0], ref), "VALIDATED"))
 
-    metric_refs = tuple(_source_ref(workspace_root, source) for source in catalog.sources if source.source_kind in {"asset_registry", "production_state"})
+    asset_sources = source_by_kind.get("asset_registry", [])
+    asset_gaps = gaps_by_kind.get("asset_registry", [])
+    production_gaps = gaps_by_kind.get("production_state", [])
+    asset_status = _aggregate_status(asset_sources, asset_gaps)
+    production_status = _aggregate_status(production_sources, production_gaps)
+    asset_refs = tuple(_source_ref(workspace_root, source) for source in asset_sources) + tuple(
+        _gap_ref(workspace_root, gap) for gap in asset_gaps
+    )
+    production_refs = tuple(_source_ref(workspace_root, source) for source in production_sources) + tuple(
+        _gap_ref(workspace_root, gap) for gap in production_gaps
+    )
     generated_statuses = {"KF_GENERATED", "KF_QC_PASS", "READY_FOR_VIDEO", "VIDEO_GENERATED", "VIDEO_QC_PASS", "SELECT", "OBSERVED_STATE_RECORDED", "EDIT_READY"}
-    selected_count = sum(str(row.get("runtime_status", "")).upper() == "SELECT" for row, _ in state_rows)
-    generated_count = sum(str(row.get("runtime_status", "")).upper() in generated_statuses for row, _ in state_rows)
+    selected_count = sum(str(row.get("runtime_status", "")).upper() == "SELECT" for _, row, _ in state_rows)
+    generated_count = sum(str(row.get("runtime_status", "")).upper() in generated_statuses for _, row, _ in state_rows)
     missing_characters = sum(asset.asset_type.lower() == "character" and asset.observed_readiness == "MISSING" for asset in assets)
     metrics = (
-        _metric("assets.total", len(assets) if source_by_kind.get("asset_registry") else None, "KNOWN" if source_by_kind.get("asset_registry") else "UNKNOWN", metric_refs, "creator.assets.total"),
-        _metric("production_units.total", len(state_rows) if production_sources else None, "KNOWN" if production_sources else "UNKNOWN", metric_refs, "creator.production.total"),
-        _metric("character_media.missing", missing_characters if source_by_kind.get("asset_registry") else None, "KNOWN" if source_by_kind.get("asset_registry") else "UNKNOWN", metric_refs, "creator.media.missing"),
-        _metric("generation.total", generated_count if production_sources else None, "KNOWN" if production_sources else "UNKNOWN", metric_refs, "creator.generation.total"),
-        _metric("select.total", selected_count if production_sources else None, "KNOWN" if production_sources else "UNKNOWN", metric_refs, "creator.select.total"),
+        _metric("assets.total", len(assets) if asset_status == "KNOWN" else None, asset_status, asset_refs, "creator.assets.total"),
+        _metric("production_units.total", len(state_rows) if production_status == "KNOWN" else None, production_status, production_refs, "creator.production.total"),
+        _metric("character_media.missing", missing_characters if asset_status == "KNOWN" else None, asset_status, asset_refs, "creator.media.missing"),
+        _metric("generation.total", generated_count if production_status == "KNOWN" else None, production_status, production_refs, "creator.generation.total"),
+        _metric("select.total", selected_count if production_status == "KNOWN" else None, production_status, production_refs, "creator.select.total"),
     )
 
     conflicts: list[CreatorConflict] = []
-    if any(source.source_kind == "narrative_index" and source.authority_role == "CURRENT" for source in catalog.sources) and any(source.source_kind == "production_state" and source.authority_role == "HISTORICAL" for source in catalog.sources):
-        refs = tuple(_source_ref(workspace_root, source) for source in catalog.sources if source.source_kind in {"narrative_index", "production_state"})
+    current_narrative_scopes = {
+        source.scope
+        for source in catalog.sources
+        if source.source_kind == "narrative_index" and source.authority_role == "CURRENT"
+    }
+    mismatch_sources = [
+        source
+        for source in catalog.sources
+        if (
+            source.source_kind == "narrative_index"
+            and source.authority_role == "CURRENT"
+            and source.scope in {
+                production.scope
+                for production in catalog.sources
+                if production.source_kind == "production_state" and production.authority_role == "HISTORICAL"
+            }
+        )
+        or (
+            source.source_kind == "production_state"
+            and source.authority_role == "HISTORICAL"
+            and source.scope in current_narrative_scopes
+        )
+    ]
+    if mismatch_sources:
+        refs = tuple(_source_ref(workspace_root, source) for source in mismatch_sources)
         conflicts.append(CreatorConflict("AUTHORITY_MISMATCH", "AUTHORITY_MISMATCH", None, "current story authority conflicts with historical production mapping", _provenance(refs, "VALIDATED", "creator.authority.mismatch")))
 
     blockers = tuple(
-        CreatorBlocker(f"MISSING_{asset.asset_id}", "WARNING", asset.asset_id, "creator.asset.media", f"media is {asset.observed_readiness}", "filesystem observation", asset.provenance)
+        CreatorBlocker(f"MISSING_{asset.asset_id}", "WARNING", asset.asset_id, "creator.asset.media", f"media is {asset.observed_readiness}", "filesystem observation", _provenance(asset.provenance.source_refs, "VALIDATED", "creator.asset.media"))
         for asset in assets
         if asset.observed_readiness == "MISSING"
     )
-    for gap in catalog.coverage_gaps:
-        status: DataStatus = "INVALID" if gap.reason == "invalid source" else "UNKNOWN"
-        coverage.append(CreatorCoverage(gap.source_id, gap.source_kind, status, 0, 1, gap.reason, _provenance((), "VALIDATED", "creator.coverage.gap")))
-
     return CreatorSnapshot("creator-snapshot.v1", catalog.project_id, overview, metrics, tuple(narrative_nodes), tuple(emotion_points), tuple(sorted(assets, key=lambda item: item.asset_id)), tuple(sorted(shots, key=lambda item: item.shot_id)), tuple(continuity_edges), blockers, tuple(conflicts), tuple(sorted(coverage, key=lambda item: item.coverage_id)))
 
 
 __all__ = [
     "CreatorAction", "CreatorAsset", "CreatorBlocker", "CreatorConflict", "CreatorContinuityEdge", "CreatorCoverage",
-    "CreatorEmotionPoint", "CreatorMetric", "CreatorNarrativeNode", "CreatorNavigation", "CreatorOverview", "CreatorProvenance",
-    "CreatorReadModel", "CreatorShot", "CreatorSnapshot", "CreatorSourceRef", "collect_creator_snapshot",
+    "CreatorEmotionPoint", "CreatorMetric", "CreatorNarrativeNode", "CreatorOverview", "CreatorProvenance",
+    "CreatorShot", "CreatorSnapshot", "CreatorSourceRef", "collect_creator_snapshot",
 ]

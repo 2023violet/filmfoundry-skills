@@ -1,7 +1,7 @@
 """Deliberately RED v2.3 contracts for the Creator Read Model."""
 from __future__ import annotations
 
-from dataclasses import MISSING, fields, is_dataclass, replace
+from dataclasses import MISSING, fields, is_dataclass
 import json
 from pathlib import Path
 import shutil
@@ -120,6 +120,10 @@ def test_creator_snapshot_keeps_locked_asset_when_media_is_missing(tmp_path: Pat
     asset = next(asset for asset in snapshot.assets if asset.asset_id == "CHAR_RIVER")
     assert asset.declared_state == "LOCKED"
     assert asset.observed_readiness == "MISSING"
+    blocker = next(blocker for blocker in snapshot.blockers if blocker.entity_id == "CHAR_RIVER")
+    assert blocker.provenance.derivation == "VALIDATED"
+    assert blocker.provenance.rule_id == "creator.asset.media"
+    assert [ref.source_id for ref in blocker.provenance.source_refs] == ["SRC_ASSETS"]
 
 
 def test_creator_snapshot_reports_present_media_hash_mismatch(tmp_path: Path):
@@ -156,7 +160,14 @@ def test_creator_snapshot_preserves_current_and_historical_authority_mismatch(tm
     root = copied_smoke_project(tmp_path)
     path, catalog = source_catalog(root)
     historical = root / "historical-production-state.v2.json"
-    shutil.copy2(root / "runtime" / "sources" / "production-state.v2.json", historical)
+    historical_data = read_json(root / "runtime" / "sources" / "production-state.v2.json")
+    for unit in historical_data["units"].values():
+        unit.update(
+            runtime_status="SELECT",
+            visual_control_state_alignment="PASS",
+            provider_evidence_id="EVIDENCE_HISTORICAL",
+        )
+    write_json(historical, historical_data)
     historical_source = dict(next(source for source in catalog["sources"] if source["source_id"] == "SRC_STATE"))
     historical_source.update(
         source_id="SRC_HISTORICAL_PRODUCTION",
@@ -165,22 +176,64 @@ def test_creator_snapshot_preserves_current_and_historical_authority_mismatch(tm
         path_base="WORKSPACE_ROOT",
         authority_role="HISTORICAL",
     )
+    current_index = next(
+        index for index, source in enumerate(catalog["sources"])
+        if source["source_id"] == "SRC_STATE"
+    )
+    catalog["sources"].insert(current_index, historical_source)
+    write_json(path, catalog)
+
+    snapshot = collect_snapshot(root)
+
+    conflict = next(conflict for conflict in snapshot.conflicts if conflict.conflict_type == "AUTHORITY_MISMATCH")
+    assert {ref.source_id for ref in conflict.provenance.source_refs} == {
+        "SRC_NARRATIVE",
+        "SRC_HISTORICAL_PRODUCTION",
+    }
+    assert snapshot.overview.current_authority == "CURRENT"
+    assert snapshot.overview.historical_authority == "HISTORICAL"
+    metrics = {metric.metric_id: metric for metric in snapshot.metrics}
+    assert {metric_id: metric.value for metric_id, metric in metrics.items()} == {
+        "assets.total": 5,
+        "production_units.total": 4,
+        "character_media.missing": 0,
+        "generation.total": 0,
+        "select.total": 0,
+    }
+    assert [ref.source_kind for ref in metrics["assets.total"].provenance.source_refs] == ["asset_registry"]
+    assert [ref.source_id for ref in metrics["production_units.total"].provenance.source_refs] == ["SRC_STATE"]
+    shot = next(shot for shot in snapshot.shots if shot.shot_id == "EP01_SH001")
+    assert shot.runtime_status == "DRAFT"
+    assert [ref.source_id for ref in shot.provenance.source_refs] == ["SRC_SHOT_ONE", "SRC_STATE"]
+    assert shot.provenance.source_refs[1].pointer == "/units/EP01_SH001_G01"
+
+
+def test_creator_snapshot_ignores_unrelated_authority_scopes(tmp_path: Path):
+    root = copied_smoke_project(tmp_path)
+    path, catalog = source_catalog(root)
+    historical = root / "historical-production-state.v2.json"
+    shutil.copy2(root / "runtime" / "sources" / "production-state.v2.json", historical)
+    historical_source = dict(next(source for source in catalog["sources"] if source["source_id"] == "SRC_STATE"))
+    historical_source.update(
+        source_id="SRC_OTHER_STORY_PRODUCTION",
+        path="historical-production-state.v2.json",
+        path_base="WORKSPACE_ROOT",
+        authority_role="HISTORICAL",
+        scope="OTHER_STORY",
+    )
     catalog["sources"].append(historical_source)
     write_json(path, catalog)
 
     snapshot = collect_snapshot(root)
 
-    assert any(conflict.conflict_type == "AUTHORITY_MISMATCH" for conflict in snapshot.conflicts)
-    assert snapshot.overview.current_authority == "CURRENT"
-    assert snapshot.overview.historical_authority == "HISTORICAL"
-    assert next(metric for metric in snapshot.metrics if metric.metric_id == "assets.total").data_status == "KNOWN"
+    assert not any(conflict.conflict_type == "AUTHORITY_MISMATCH" for conflict in snapshot.conflicts)
 
 
 def test_frozen_wucheng_snapshot_keeps_exact_boundary_facts():
     snapshot = collect_snapshot(FROZEN_WUCHENG_PROJECT)
-    metrics = {metric.metric_id: metric.value for metric in snapshot.metrics}
+    metrics = {metric.metric_id: metric for metric in snapshot.metrics}
 
-    assert metrics == {
+    assert {metric_id: metric.value for metric_id, metric in metrics.items()} == {
         "assets.total": 75,
         "production_units.total": 19,
         "character_media.missing": 21,
@@ -190,6 +243,13 @@ def test_frozen_wucheng_snapshot_keeps_exact_boundary_facts():
     assert snapshot.overview.current_authority == "CURRENT"
     assert snapshot.overview.historical_authority == "HISTORICAL"
     assert any(conflict.conflict_type == "AUTHORITY_MISMATCH" for conflict in snapshot.conflicts)
+    for metric_id in ("production_units.total", "generation.total", "select.total"):
+        metric = metrics[metric_id]
+        assert metric.data_status == "KNOWN"
+        assert [ref.source_id for ref in metric.provenance.source_refs] == ["SRC_PRODUCTION_HISTORICAL"]
+        assert [ref.authority_role for ref in metric.provenance.source_refs] == ["HISTORICAL"]
+    for metric_id in ("assets.total", "character_media.missing"):
+        assert [ref.source_id for ref in metrics[metric_id].provenance.source_refs] == ["SRC_ASSETS"]
 
 
 def test_creator_catalog_rejects_required_unknown_schema(tmp_path: Path):
@@ -259,28 +319,97 @@ def test_creator_catalog_reports_optional_unsupported_source_as_coverage_gap(tmp
     discovered = creator_api("discover_creator_sources")(root)
 
     assert all(source.source_id != "SRC_OPTIONAL_FUTURE" for source in discovered.sources)
-    assert [(gap.source_id, gap.reason) for gap in discovered.coverage_gaps] == [
-        ("SRC_OPTIONAL_FUTURE", "unsupported source schema")
+    assert [(gap.source_id, gap.data_status, gap.reason) for gap in discovered.coverage_gaps] == [
+        ("SRC_OPTIONAL_FUTURE", "UNKNOWN", "unsupported source schema")
     ]
+    snapshot = creator_api("collect_creator_snapshot")(root, discovered)
+    gap = next(item for item in snapshot.coverage if item.coverage_id == "SRC_OPTIONAL_FUTURE")
+    assert gap.data_status == "UNKNOWN"
+    assert [ref.source_id for ref in gap.provenance.source_refs] == ["SRC_OPTIONAL_FUTURE"]
 
 
-def test_creator_snapshot_marks_optional_invalid_source_as_invalid_coverage(tmp_path: Path):
+@pytest.mark.parametrize("failure", ["malformed_json", "invalid_records"])
+def test_creator_snapshot_marks_optional_invalid_source_and_metrics_invalid(tmp_path: Path, failure: str):
     root = copied_smoke_project(tmp_path)
+    path, catalog = source_catalog(root)
+    asset_source = next(source for source in catalog["sources"] if source["source_id"] == "SRC_ASSETS")
+    asset_source["required"] = False
+    write_json(path, catalog)
+    registry_path = root / "runtime" / "sources" / "asset-registry.v2.json"
+    if failure == "malformed_json":
+        registry_path.write_text("{", encoding="utf-8")
+    else:
+        write_json(registry_path, {})
+
     discovered = creator_api("discover_creator_sources")(root)
-    discovered = replace(
-        discovered,
-        coverage_gaps=(
-            *discovered.coverage_gaps,
-            filmfoundry_v2.CreatorSourceCoverageGap(
-                "SRC_OPTIONAL_INVALID", "asset_registry", "asset-registry-json", "asset-registry.v2", "invalid source"
-            ),
-        ),
-    )
     snapshot = creator_api("collect_creator_snapshot")(root, discovered)
 
-    invalid = next(item for item in snapshot.coverage if item.coverage_id == "SRC_OPTIONAL_INVALID")
+    assert all(source.source_id != "SRC_ASSETS" for source in discovered.sources)
+    source_gap = next(gap for gap in discovered.coverage_gaps if gap.source_id == "SRC_ASSETS")
+    assert source_gap.data_status == "INVALID"
+    assert source_gap.path == registry_path
+    assert source_gap.authority_role == "CURRENT"
+    assert source_gap.scope == "project"
+    invalid = next(item for item in snapshot.coverage if item.coverage_id == "SRC_ASSETS")
     assert invalid.data_status == "INVALID"
     assert invalid.successful_sources == 0
+    assert [ref.source_id for ref in invalid.provenance.source_refs] == ["SRC_ASSETS"]
+    metrics = {metric.metric_id: metric for metric in snapshot.metrics}
+    for metric_id in ("assets.total", "character_media.missing"):
+        assert metrics[metric_id].value is None
+        assert metrics[metric_id].data_status == "INVALID"
+        assert [ref.source_id for ref in metrics[metric_id].provenance.source_refs] == ["SRC_ASSETS"]
+
+
+def test_creator_snapshot_marks_optional_missing_source_and_metrics_unknown(tmp_path: Path):
+    root = copied_smoke_project(tmp_path)
+    path, catalog = source_catalog(root)
+    asset_source = next(source for source in catalog["sources"] if source["source_id"] == "SRC_ASSETS")
+    asset_source["required"] = False
+    write_json(path, catalog)
+    registry_path = root / "runtime" / "sources" / "asset-registry.v2.json"
+    registry_path.unlink()
+
+    discovered = creator_api("discover_creator_sources")(root)
+    snapshot = creator_api("collect_creator_snapshot")(root, discovered)
+
+    source_gap = next(gap for gap in discovered.coverage_gaps if gap.source_id == "SRC_ASSETS")
+    assert source_gap.data_status == "UNKNOWN"
+    assert source_gap.reason == "source file missing"
+    metrics = {metric.metric_id: metric for metric in snapshot.metrics}
+    for metric_id in ("assets.total", "character_media.missing"):
+        assert metrics[metric_id].value is None
+        assert metrics[metric_id].data_status == "UNKNOWN"
+        assert [ref.source_id for ref in metrics[metric_id].provenance.source_refs] == ["SRC_ASSETS"]
+
+
+def test_creator_snapshot_does_not_fall_back_to_historical_when_current_scope_is_invalid(tmp_path: Path):
+    root = copied_smoke_project(tmp_path)
+    path, catalog = source_catalog(root)
+    current_source = next(source for source in catalog["sources"] if source["source_id"] == "SRC_STATE")
+    current_source["required"] = False
+    historical_path = root / "historical-production-state.v2.json"
+    shutil.copy2(root / "runtime" / "sources" / "production-state.v2.json", historical_path)
+    historical_source = dict(current_source)
+    historical_source.update(
+        source_id="SRC_HISTORICAL_PRODUCTION",
+        path="historical-production-state.v2.json",
+        path_base="WORKSPACE_ROOT",
+        authority_role="HISTORICAL",
+    )
+    catalog["sources"].append(historical_source)
+    write_json(path, catalog)
+    write_json(root / "runtime" / "sources" / "production-state.v2.json", {})
+
+    snapshot = collect_snapshot(root)
+
+    shot = next(shot for shot in snapshot.shots if shot.shot_id == "EP01_SH001")
+    assert shot.runtime_status is None
+    metrics = {metric.metric_id: metric for metric in snapshot.metrics}
+    for metric_id in ("production_units.total", "generation.total", "select.total"):
+        assert metrics[metric_id].value is None
+        assert metrics[metric_id].data_status == "INVALID"
+        assert [ref.source_id for ref in metrics[metric_id].provenance.source_refs] == ["SRC_STATE"]
 
 
 def test_creator_catalog_uses_an_adapter_catalog_path(tmp_path: Path):
@@ -403,6 +532,10 @@ def test_creator_catalog_rejects_invalid_narrative_index_records(tmp_path: Path,
 @pytest.mark.parametrize("mutation", ["unknown_field", "missing_field", "invalid_id", "self_edge"])
 def test_creator_catalog_rejects_invalid_continuity_records(tmp_path: Path, mutation: str):
     root = copied_smoke_project(tmp_path)
+    catalog_path, catalog = source_catalog(root)
+    continuity_source = next(source for source in catalog["sources"] if source["source_id"] == "SRC_CONTINUITY")
+    continuity_source["required"] = True
+    write_json(catalog_path, catalog)
     continuity_path = root / "continuity-chain.v1.json"
     continuity = read_json(continuity_path)
     edge = continuity["chains"][0]["edges"][0]
@@ -488,6 +621,7 @@ def test_creator_snapshot_dataclass_and_schema_stay_aligned():
         assert field.default_factory is MISSING
 
     type_hints = get_type_hints(snapshot_type)
+    assert type_hints["schema_version"] == Literal["creator-snapshot.v1"]
     json_types = {
         "string": {str},
         "integer": {int},
@@ -508,6 +642,12 @@ def test_creator_snapshot_dataclass_and_schema_stay_aligned():
             for option in annotation_options
             if option is not type(None)
         }
+        annotation_origins.update(
+            type(value)
+            for option in annotation_options
+            if get_origin(option) is Literal
+            for value in get_args(option)
+        )
         schema_types = definition.get("type", [])
         if isinstance(schema_types, str):
             schema_types = [schema_types]
@@ -522,3 +662,49 @@ def test_creator_snapshot_dataclass_and_schema_stay_aligned():
                 for value in get_args(option)
             }
             assert literal_values == set(definition["enum"])
+
+    dataclass_definitions = {
+        "source_ref": filmfoundry_v2.CreatorSourceRef,
+        "provenance": filmfoundry_v2.CreatorProvenance,
+        "overview": filmfoundry_v2.CreatorOverview,
+        "metric": filmfoundry_v2.CreatorMetric,
+        "narrative_node": filmfoundry_v2.CreatorNarrativeNode,
+        "emotion_point": filmfoundry_v2.CreatorEmotionPoint,
+        "asset": filmfoundry_v2.CreatorAsset,
+        "shot": filmfoundry_v2.CreatorShot,
+        "continuity_edge": filmfoundry_v2.CreatorContinuityEdge,
+        "blocker": filmfoundry_v2.CreatorBlocker,
+        "conflict": filmfoundry_v2.CreatorConflict,
+        "coverage": filmfoundry_v2.CreatorCoverage,
+    }
+    for definition_name, dataclass_type in dataclass_definitions.items():
+        definition = schema["$defs"][definition_name]
+        dataclass_field_names = {field.name for field in fields(dataclass_type)}
+        assert set(definition["properties"]) == dataclass_field_names
+        assert set(definition["required"]) == dataclass_field_names
+
+    enum_fields = {
+        ("provenance", "derivation"): (filmfoundry_v2.CreatorProvenance, "derivation"),
+        ("metric", "data_status"): (filmfoundry_v2.CreatorMetric, "data_status"),
+        ("asset", "observed_readiness"): (filmfoundry_v2.CreatorAsset, "observed_readiness"),
+        ("coverage", "data_status"): (filmfoundry_v2.CreatorCoverage, "data_status"),
+    }
+    for (definition_name, property_name), (dataclass_type, field_name) in enum_fields.items():
+        annotation = get_type_hints(dataclass_type)[field_name]
+        assert get_origin(annotation) is Literal
+        assert set(get_args(annotation)) == set(schema["$defs"][definition_name]["properties"][property_name]["enum"])
+
+    for definition_name, dataclass_type in dataclass_definitions.items():
+        definition = schema["$defs"][definition_name]
+        hints = get_type_hints(dataclass_type)
+        for field_name, property_definition in definition["properties"].items():
+            annotation = hints[field_name]
+            options = get_args(annotation) if get_origin(annotation) in {Union, types.UnionType} else (annotation,)
+            options = tuple(option for option in options if option is not type(None))
+            if "$ref" in property_definition:
+                expected_type = dataclass_definitions[property_definition["$ref"].rsplit("/", 1)[-1]]
+                assert expected_type in options
+            items = property_definition.get("items", {})
+            if "$ref" in items:
+                expected_type = dataclass_definitions[items["$ref"].rsplit("/", 1)[-1]]
+                assert any(expected_type in get_args(option) for option in options)

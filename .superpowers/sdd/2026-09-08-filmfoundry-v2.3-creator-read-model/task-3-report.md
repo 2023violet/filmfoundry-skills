@@ -1,41 +1,24 @@
 # Task 3 Report: Typed Creator Snapshot
 
-## RED/GREEN
+## Fix Round 1 TDD
 
-- RED: `python -m pytest tests/test_v23_creator_read_model_contract.py -q` -> 5 failed, 30 passed. Failures were the missing Snapshot API/dataclass/schema and the two asset observations.
-- GREEN: `python -m pytest tests/test_v23_creator_read_model_contract.py tests/test_v23_creator_read_model_fixtures.py -q` -> 42 passed.
-- Regression: `python -m pytest -q` -> 276 passed.
-- Additional checks: `git diff --check`, Python compilation, fixture-wide Snapshot collection, and JSON Schema validation passed.
+- RED: `python -m pytest tests/test_v23_creator_read_model_contract.py -q` -> 8 failed, 31 passed after adding the authority, invalid-source, provenance, version, and recursive-schema behavioral tests.
+- RED follow-ups: the missing-source test and the invalid-current/historical-fallback test each failed once for the expected missing behavior.
+- GREEN: `python -m pytest tests/test_v23_creator_read_model_contract.py -q` -> 41 passed.
+- Focused regression: `python -m pytest tests/test_v23_creator_read_model_contract.py tests/test_v23_creator_read_model_fixtures.py -q` -> 46 passed.
+- Full regression: `python -m pytest -q` -> 280 passed.
+- `python -m compileall -q filmfoundry_v2`, working-tree `git diff --check`, and committed-range `git diff --check 3bfc32a..HEAD` passed.
 
-## Files
+## Fixes
 
-- Added `filmfoundry_v2/creator_read_model.py` with frozen typed entities, provenance, read-only collection, deterministic `to_dict()`/`to_json()`, asset observations, aggregates, coverage, and authority conflicts.
-- Exported the v2.3 Snapshot entities and `collect_creator_snapshot` from `filmfoundry_v2/__init__.py`.
-- Added `schemas/creator-snapshot.v1.json`.
-- Added focused contract tests for deterministic serialization, stable provenance, authority mismatch, invalid coverage, and the frozen boundary fixture.
-- Added the self-contained `wucheng-frozen` fixture and registered it in the v2.3 fixture index.
+- Production mapping is grouped by `source_kind + scope`; `CURRENT` wins in a scope, and a sole `HISTORICAL` source supplies explicitly historical facts only when that scope has no current declaration. Invalid current sources prevent historical fallback.
+- Optional known-parser files that are missing become typed `UNKNOWN` gaps; present unreadable or parser-invalid files become typed `INVALID` gaps. Required invalid sources still fail fast. Invalid/unknown source-kind status taints only the affected aggregates, which exclude failed sources.
+- Metrics cite only their contributing sources; production row pointers use `/units/<escaped-id>`; missing-media blockers carry the derived `creator.asset.media` rule; gaps carry source-backed provenance; `AUTHORITY_MISMATCH` compares matching scopes only.
+- `CreatorSnapshot.schema_version` is the fixed `Literal["creator-snapshot.v1"]`; tests recursively guard nested dataclass fields, references, and enums against the Snapshot schema. `CreatorNavigation` and `CreatorReadModel` are held for Task 4 and are no longer package exports.
+- Removed the six surplus JSON EOF blank lines from the frozen Wucheng fixture.
 
-## Decisions
+## Scope
 
-- Snapshot contains facts, provenance, blockers, conflicts, and coverage only; Actions and Navigation are separate typed entities and are not Snapshot fields.
-- Registry declarations remain `declared_state`; filesystem observations become the exact readiness enum without rewriting declarations.
-- Provenance paths are workspace-relative POSIX paths with source-byte SHA-256 and JSON pointers.
-- Current and historical source facts are both parsed; a current narrative source plus historical production mapping emits `AUTHORITY_MISMATCH`.
-- Unsupported catalog gaps are `UNKNOWN`; explicitly invalid gaps are `INVALID`; neither contributes a successful aggregate.
-- The frozen fixture declares story v3 as `CURRENT` and production mapping as `HISTORICAL`, and proves `75 / 19 / 21 / 0 / 0`.
-
-## Self-review
-
-- No Wucheng identifier, name, or directory branching exists in core code or the Snapshot schema.
-- Existing Task 2 source-catalog behavior and all pre-existing tests remain green.
-- Snapshot serialization is stable under repeated calls and contains no action/navigation data.
-- No live AI-Short-Drama files were read or modified.
-
-## Commit
-
-Implementation commit: `2c91082` (`feat(v2.3): add typed creator snapshot`)
-
-## Concerns
-
+- No Wucheng branch was added to core code or the Snapshot schema. The frozen fixture still proves `75 / 19 / 21 / 0 / 0`.
 - Navigation derivation and rendering remain intentionally unimplemented for later v2.3 tasks.
-- Required invalid catalog sources retain Task 2 fail-fast behavior; `INVALID` Snapshot coverage is represented when a catalog supplies an invalid coverage gap.
+- No live AI-Short-Drama files, Canon, Registry, media, state, provider evidence, or archive paths were read or modified.

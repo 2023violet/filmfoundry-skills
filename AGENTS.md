@@ -15,7 +15,10 @@ FilmFoundry is a general, creator-first Skill for script development and visual-
 
 ```powershell
 python -m pytest -q
+$env:SOURCE_DATE_EPOCH = "0"
+python -m pip wheel . --no-deps --no-build-isolation --wheel-dir .dist
 python scripts/build_release_artifacts.py --out .dist
+Remove-Item Env:SOURCE_DATE_EPOCH -ErrorAction SilentlyContinue
 python scripts/check_clean_extraction.py --wheel .dist/filmfoundry_skills-3.0.0-py3-none-any.whl --archive .dist/filmfoundry-skills-v3.0.0.zip
 git diff --check
 ```

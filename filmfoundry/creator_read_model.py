@@ -273,6 +273,7 @@ class CreatorShot:
     select_type: str | None
     observed_state: str | None
     provenance: CreatorProvenance
+    historical_runtime_status: str | None
 
 
 @dataclass(frozen=True)
@@ -497,6 +498,9 @@ def _media_path(root: Path, source: CreatorCatalogSource, value: Any) -> Path | 
 
 
 def _asset_readiness(root: Path, source: CreatorCatalogSource, row: dict[str, Any]) -> tuple[ObservedReadiness, str | None]:
+    declared_path = row.get("path")
+    if isinstance(declared_path, str) and declared_path.replace("\\", "/").startswith("__ADAPTER_UNKNOWN__/"):
+        return "MISSING", None
     path = _media_path(root, source, row.get("path"))
     if path is None:
         return ("NOT_APPLICABLE", None) if not row.get("path") else ("UNKNOWN", None)
@@ -586,7 +590,7 @@ def collect_creator_snapshot(root: Path, catalog: CreatorSourceCatalog) -> Creat
         elif source.source_kind == "shot_spec" and isinstance(source.data, dict):
             shot_id = str(source.data.get("shot_id", ""))
             generation_unit_id = str(source.data.get("generation_unit_id", ""))
-            shots.append(CreatorShot(shot_id, generation_unit_id, None, None, None, _provenance((ref,), "DIRECT")))
+            shots.append(CreatorShot(shot_id, generation_unit_id, None, None, None, _provenance((ref,), "DIRECT"), None))
         elif source.source_kind == "continuity_chain" and isinstance(source.data, dict):
             for chain in source.data.get("chains", []):
                 if not isinstance(chain, dict):
@@ -675,7 +679,8 @@ def collect_creator_snapshot(root: Path, catalog: CreatorSourceCatalog) -> Creat
         matching = next(((row, ref) for unit_id, row, ref in state_rows if shot.generation_unit_id == unit_id), None)
         if matching:
             row, ref = matching
-            shots[index] = CreatorShot(shot.shot_id, shot.generation_unit_id, row.get("runtime_status"), row.get("select_type"), row.get("observed_state"), _provenance((shot.provenance.source_refs[0], ref), "VALIDATED"))
+            history = row.get("history") if isinstance(row.get("history"), dict) else {}
+            shots[index] = CreatorShot(shot.shot_id, shot.generation_unit_id, row.get("runtime_status"), row.get("select_type"), row.get("observed_state"), _provenance((shot.provenance.source_refs[0], ref), "VALIDATED"), history.get("source_runtime_status"))
 
     asset_sources = source_by_kind.get("asset_registry", [])
     asset_gaps = gaps_by_kind.get("asset_registry", [])
@@ -691,7 +696,7 @@ def collect_creator_snapshot(root: Path, catalog: CreatorSourceCatalog) -> Creat
     generated_statuses = {"KF_GENERATED", "KF_QC_PASS", "READY_FOR_VIDEO", "VIDEO_GENERATED", "VIDEO_QC_PASS", "SELECT", "OBSERVED_STATE_RECORDED", "EDIT_READY"}
     selected_count = sum(str(row.get("runtime_status", "")).upper() == "SELECT" for _, row, _ in state_rows)
     generated_count = sum(str(row.get("runtime_status", "")).upper() in generated_statuses for _, row, _ in state_rows)
-    missing_characters = sum(asset.asset_type.lower() == "character" and asset.observed_readiness == "MISSING" for asset in assets)
+    missing_characters = sum(asset.asset_type.lower().startswith("character") and asset.observed_readiness == "MISSING" for asset in assets)
     metrics = (
         _metric("assets.total", len(assets) if asset_status == "KNOWN" else None, asset_status, asset_refs, "creator.assets.total"),
         _metric("production_units.total", len(state_rows) if production_status == "KNOWN" else None, production_status, production_refs, "creator.production.total"),

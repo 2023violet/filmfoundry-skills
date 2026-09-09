@@ -41,12 +41,12 @@ python -m filmfoundry validate --root <workspace> --format json
 python -m filmfoundry index --root <workspace>
 ```
 
-雾城项目使用：
+项目适配器使用（由项目自己提供，不属于 FilmFoundry Core）：
 
 ```text
-python 08_工具与技能/雾城项目适配器/scripts/validate_workspace.py --root <project>
-python 08_工具与技能/雾城项目适配器/scripts/audit_media.py --root <project>
-python 08_工具与技能/雾城项目适配器/scripts/build_indexes.py --root <project>
+python <project-adapter>/scripts/validate_workspace.py --root <project>
+python <project-adapter>/scripts/audit_media.py --root <project>
+python <project-adapter>/scripts/build_indexes.py --root <project>
 ```
 
 先检查是否触碰 `99_归档`；它只读，不能移动、改名或重写。
@@ -170,11 +170,11 @@ python -m filmfoundry compile --prompt <prompt.md> --visual-control <plan.json> 
 
 先读取 `16-model-evidence.md`、`29-capability-scoped-model-gates.md` 和对应 adapter。检查准确的 Provider surface、版本、参考数量、First/Last、音频、时长、画幅、语言、身份和手/道具行为证据。未知能力保持未知。
 
-对雾城 H3 当前切片：
+对某个项目的 H3 当前切片：
 
 ```text
-python 08_工具与技能/雾城项目适配器/scripts/build_visual_control_plan.py --root <project> --out <plan.json>
-python 08_工具与技能/雾城项目适配器/scripts/prepare_h3_vertical_slice.py --root <project> --visual-control <plan.json> --out <handoff.json>
+python <project-adapter>/scripts/build_visual_control_plan.py --root <project> --out <plan.json>
+python <project-adapter>/scripts/prepare_h3_vertical_slice.py --root <project> --visual-control <plan.json> --out <handoff.json>
 ```
 
 当前参数固定为 5 秒、768P、adaptive、`NONE`。这一步只生成执行卡，不调用付费 Provider。
@@ -197,10 +197,10 @@ DRAFT → SPEC_RESOLVED → PREFLIGHT_PASS → READY_FOR_KF → KF_GENERATED
 
 `KF_QC_PASS` 不等于完整 Start/End Authority；先做 Visual Control State Alignment。`OBSERVED_ONCE` 不得提升成默认模型能力。
 
-回填 H3 外部材料：
+回填 H3 外部材料（由项目适配器执行）：
 
 ```text
-python 08_工具与技能/雾城项目适配器/scripts/ingest_h3_evidence.py --root <project> --mp4 <raw.mp4> --screenshot <settings.png> --generation-id <id> --out <evidence.json>
+python <project-adapter>/scripts/ingest_h3_evidence.py --root <project> --mp4 <raw.mp4> --screenshot <settings.png> --generation-id <id> --out <evidence.json>
 ```
 
 该脚本只记录哈希、参数和 `OBSERVED_ONCE`，不会自动 PASS、重试或解锁 E01/E02。
@@ -224,9 +224,9 @@ FilmFoundry 可以记录这些事实和证据，但不会替你操作 NLE、编�
 - 是否记录 generation、Select、QC 和 observed state？
 - 最终镜头是否覆盖时间线、声音、字幕、画幅和交付要求？
 
-## 12. 雾城当前推荐顺序
+## 12. 项目当前推荐顺序
 
-先用 EP01/EP02 的现有锁定资产和 routed units 做一条技术切片，不改 Canon、不重做全套角色表。为 `TEST_H3_06_A` 建立最小视觉控制计划，拿到真实 MP4、设置截图和 generation ID 后，登记一次观察，再决定是否继续 `TEST_H3_01_A`。任何路线升级都等待对应证据和 state alignment。
+先用项目已有的锁定资产和 routed units 做一条技术切片，不改 Canon、不重做全套角色表。为一个代表性测试建立最小视觉控制计划，拿到真实 MP4、设置截图和 generation ID 后，登记一次观察，再决定是否扩大测试矩阵。任何路线升级都等待对应证据和 state alignment。
 
 ## 13. 第一次创作的可复制清单
 

@@ -22,7 +22,7 @@ def test_render_smoke_project_writes_all_views_and_stable_manifest(tmp_path: Pat
     second = render_read_model(model, tmp_path / "second")
 
     assert tuple(first["views"]) == VIEW_NAMES
-    assert first["schema_version"] == "render-manifest.v1"
+    assert first["schema_version"] == "render-manifest.v2"
     assert first["project_id"] == "SMOKE_PROJECT"
     assert first["formats"] == ["html", "markdown", "svg"]
     assert json.dumps(first, ensure_ascii=False, sort_keys=True) == json.dumps(second, ensure_ascii=False, sort_keys=True)

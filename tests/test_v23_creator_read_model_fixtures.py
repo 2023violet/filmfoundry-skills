@@ -1,4 +1,4 @@
-"""Fixture integrity checks for the additive v2.3 Creator Read Model."""
+"""Fixture integrity checks for the generic Creator Read Model."""
 from __future__ import annotations
 
 import hashlib
@@ -42,7 +42,6 @@ EXPECTED_FIXTURES = {
     "chinese-project",
     "english-project",
     "smoke-project",
-    "wucheng-frozen",
 }
 SUPPORTED_SOURCE_KINDS = {
     "workspace_manifest",
@@ -167,7 +166,7 @@ def fixture_counts(project_root: Path, catalog: dict) -> dict[str, int]:
 def test_fixture_inventory_is_complete_and_each_catalog_is_resolvable():
     entries = fixture_index()
     assert {entry["fixture_id"] for entry in entries} == EXPECTED_FIXTURES
-    assert len(entries) == 14
+    assert len(entries) == 13
 
     for entry in entries:
         project_root = FIXTURES / entry["path"]

@@ -11,7 +11,7 @@ from filmfoundry import (
     validate_production_ledger,
     validate_production_policy,
 )
-from test_v2_cli import run_ff
+from test_support_cli import run_ff
 
 
 def _event_hash(event: dict) -> str:

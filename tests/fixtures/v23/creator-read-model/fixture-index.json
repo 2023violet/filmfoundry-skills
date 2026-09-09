@@ -11,6 +11,5 @@
   {"fixture_id": "episode-emotion", "path": "projects/episode-emotion", "expected": {"seasons": 0, "episodes": 1, "assets": 0, "shots": 0, "continuity_chains": 0}},
   {"fixture_id": "chinese-project", "path": "projects/chinese-project", "expected": {"seasons": 1, "episodes": 1, "assets": 0, "shots": 0, "continuity_chains": 0}},
   {"fixture_id": "english-project", "path": "projects/english-project", "expected": {"seasons": 1, "episodes": 1, "assets": 0, "shots": 0, "continuity_chains": 0}},
-  {"fixture_id": "smoke-project", "path": "smoke-project", "expected": {"seasons": 1, "episodes": 2, "assets": 5, "shots": 4, "continuity_chains": 1}},
-  {"fixture_id": "wucheng-frozen", "path": "projects/wucheng-frozen", "expected": {"seasons": 0, "episodes": 0, "assets": 75, "shots": 0, "continuity_chains": 0}}
+  {"fixture_id": "smoke-project", "path": "smoke-project", "expected": {"seasons": 1, "episodes": 2, "assets": 5, "shots": 4, "continuity_chains": 1}}
 ]

@@ -3,11 +3,11 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from test_v2_cli import run_ff
+from test_support_cli import run_ff
 
 
 def test_cli_compile_accepts_visual_control_option(tmp_path: Path):
-    source = Path(__file__).parents[1] / "tests/fixtures/v2/visual-control/visual-control-plan.golden.json"
+    source = Path(__file__).parents[1] / "tests/historical/fixtures/v2/visual-control/visual-control-plan.golden.json"
     prompt = tmp_path / "prompt.md"
     prompt.write_text(
         "```json\n" + json.dumps({

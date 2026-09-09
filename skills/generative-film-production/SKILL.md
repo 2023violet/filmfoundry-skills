@@ -120,7 +120,7 @@ Do not skip gates. A unit may be design-ready while runtime-blocked by an upstre
 
 Do not force every shot to fill the same thirty fields. Require every applicable field.
 
-**Core (v1.2):** narrative shot ID, generation-unit ID, generation duration, edit target duration, narrative goal, one dominant action, location, initial state, observable end state, shot size, composition, camera move, action stages/event order, transition, reference bindings, failure risks, quality bar.
+**Canonical shot core:** narrative shot ID, generation-unit ID, generation duration, edit target duration, narrative goal, one dominant action, location, initial state, observable end state, shot size, composition, camera move, action stages/event order, transition, reference bindings, failure risks, quality bar. The active v3 contract is defined by the package schemas and validators; historical version labels are not runtime compatibility promises.
 
 **Conditional:**
 

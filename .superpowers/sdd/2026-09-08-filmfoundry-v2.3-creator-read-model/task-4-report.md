@@ -8,7 +8,6 @@
 - Actions sort by priority, severity, entity ID, and action ID. Every derived action carries source provenance, a non-null rule ID, prerequisites, and support boundary. One primary action and all same-priority parallel actions remain available.
 - Core implementation contains no Wucheng/project-specific branch.
 - Review fixes add hard-severity precedence, lifecycle-gated continuity handoffs, non-empty action provenance enforcement, deeply immutable terminology mappings, stable terminology-backed support-boundary IDs, and versioned Navigation/ReadModel schemas.
-- Review-fix commit: `bcd2898`.
 
 ## TDD Evidence
 

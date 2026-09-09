@@ -93,9 +93,9 @@
       }, "additionalProperties": false
     },
     "shot": {
-      "type": "object", "required": ["shot_id", "generation_unit_id", "runtime_status", "select_type", "observed_state", "provenance"],
+      "type": "object", "required": ["shot_id", "generation_unit_id", "runtime_status", "select_type", "observed_state", "provenance", "historical_runtime_status"],
       "properties": {
-        "shot_id": {"type": "string"}, "generation_unit_id": {"type": "string"}, "runtime_status": {"type": ["string", "null"]},
+        "shot_id": {"type": "string"}, "generation_unit_id": {"type": "string"}, "runtime_status": {"type": ["string", "null"]}, "historical_runtime_status": {"type": ["string", "null"]},
         "select_type": {"type": ["string", "null"]}, "observed_state": {"type": ["string", "null"]}, "provenance": {"$ref": "#/$defs/provenance"}
       }, "additionalProperties": false
     },

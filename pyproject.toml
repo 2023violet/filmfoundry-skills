@@ -13,3 +13,4 @@ include = ["filmfoundry*"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"
+norecursedirs = ["historical"]

@@ -1,10 +1,12 @@
 # Changelog
 
-## 3.0.0 — 2026-09-09
+## 3.0.0-rc1 — 2026-09-09
 
 - Replaced the active `filmfoundry_v2` package with the canonical `filmfoundry` v3 package and removed the migration command and old schema acceptance.
 - Added Creative, Commit, Production, and Gate work modes with progressive reference loading and explicit draft/deferred-check labels.
-- Added deterministic Creator Read Model HTML, Markdown, and SVG renderers plus `ff render` and `render-manifest.v1` output.
+- Added deterministic Creator Read Model HTML, Markdown, and SVG dashboard renderers plus `ff render` and `render-manifest.v2` output.
+- Moved Wucheng boundary fixtures and adapter assertions to the consuming project; the release acceptance path now uses only the generic Smoke Project.
+- Counted character media by the generic `character-*` asset family while preserving historical runtime status outside the active v3 state.
 - Renamed active production contracts and fixtures to v3; historical v1/v2 files are not part of the active package.
 
 ## 2.1.0 — 2026-09-07

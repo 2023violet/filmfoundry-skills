@@ -7,12 +7,12 @@ history and are not accepted by the v3 package.
 
 **Repository:** `filmfoundry-skills`  
 **Primary skill:** `generative-film-production`  
-**Version:** 3.0.0
+**Version:** 3.0.0-rc1
 
-开始使用：阅读[AI 视频全流程操作指南](docs/ai-video-production-guide-zh.md)。评分与边界见[全面评分报告](docs/reports/2026-09-07-filmfoundry-skills-v2.1-score.md)。
+开始使用：阅读[AI 视频全流程操作指南](docs/ai-video-production-guide-zh.md)。RC 评审和边界见[全面评分报告](docs/reports/2026-09-09-v3-rc-review.md)。
 
 FilmFoundry Skills is a production-oriented Agent Skill suite for AI filmmaking. v3.0 keeps the **Content-Market-First** front end while separating creative exploration from production and gate work, so a hook or prompt draft does not trigger full workspace and provider validation.
-FilmFoundry Skills v1.3.3 keeps the **format-agnostic visual-planning and edit-timeline layer** and hardens state alignment between Shot Specs and visual-control assets. Storyboards, first/last frames, keyframes, character sheets, scene sheets, and model-specific prompts are optional control artifacts chosen by production risk; none of them is the parent workflow.
+The v3.0 core keeps the **format-agnostic visual-planning and edit-timeline layer** and hardens state alignment between Shot Specs and visual-control assets. Storyboards, first/last frames, keyframes, character sheets, scene sheets, and model-specific prompts are optional control artifacts chosen by production risk; none of them is the parent workflow. The v1.3.3 wording below is retained only as historical release context, not as an active compatibility contract.
 
 
 ## Status
@@ -52,7 +52,9 @@ Idea
 
 Non-market work such as a client-locked commission, pure art piece, portfolio study, or model-capability test may explicitly bypass the market gate with a recorded reason.
 
-## What changed in 1.3.3
+## Historical release notes (not active v3 behavior)
+
+### What changed in 1.3.3
 
 - Made CSV validators BOM-safe with `utf-8-sig`, including Asset Registry, aggregate Project Runtime asset loading, Selects Log, and Continuity Ledger. This fixes a real production integration failure where a valid Excel/Windows-style UTF-8 BOM made the first CSV header appear as `\ufeffasset_id`.
 - Added regression tests proving both standalone Asset Registry validation and aggregate Project Runtime validation accept BOM-prefixed registries.
@@ -127,6 +129,18 @@ python skills/generative-film-production/scripts/validate_selects_log.py \
   skills/generative-film-production/templates/selects-log.csv
 python scripts/validate_evals.py evals/evals.json
 ```
+
+## Work-mode routing and Creator Dashboard
+
+Use `ff route --request "..." --format json` to select the lightest safe mode. Creative requests return draft labels without Runtime, media, or provider calls; Production and Gate are explicit boundaries.
+
+```bash
+ff route --request "给我三个 hook" --format json
+ff render --root path/to/project --out path/to/render --format json
+python scripts/benchmark_work_modes.py --format json
+```
+
+`ff render` is a read-only dashboard export. A successful render does not mean that Gate Mode or a provider route is approved; inspect `render-manifest.json` for coverage, warnings, blockers, and `data_status`.
 
 ## Evidence boundary
 

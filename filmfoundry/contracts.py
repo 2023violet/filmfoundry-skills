@@ -79,8 +79,11 @@ def validate_workspace_manifest(data: dict[str, Any]) -> list[str]:
     policy = data.get("id_policy")
     if not isinstance(policy, dict) or policy.get("charset") != "ASCII":
         errors.append("id_policy: ASCII charset required")
-    if not isinstance(data.get("adapter_compatibility"), dict) or not data["adapter_compatibility"]:
-        errors.append("adapter_compatibility: non-empty object required")
+    compatibility = data.get("adapter_compatibility")
+    if not isinstance(compatibility, dict) or not compatibility:
+        errors.append("adapter_compatibility: non-empty object required; expected filmfoundry >=3.0.0,<4.0.0")
+    elif compatibility.get("filmfoundry") != ">=3.0.0,<4.0.0":
+        errors.append("adapter_compatibility.filmfoundry: expected >=3.0.0,<4.0.0")
     if not isinstance(data.get("required_tools"), list) or not data["required_tools"]:
         errors.append("required_tools: non-empty list required")
     return errors

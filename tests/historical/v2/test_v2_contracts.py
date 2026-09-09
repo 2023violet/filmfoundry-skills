@@ -38,7 +38,7 @@ def valid_manifest() -> dict:
         },
         "archive_boundary": {"path": "99_归档", "mode": "read_only"},
         "id_policy": {"pattern": "^[A-Z][A-Z0-9_]{2,63}$", "charset": "ASCII"},
-        "adapter_compatibility": {"filmfoundry": ">=2.0.0,<3.0.0", "project": "wucheng-v2"},
+        "adapter_compatibility": {"filmfoundry": ">=3.0.0,<4.0.0", "project": "wucheng-v3"},
         "required_tools": ["python>=3.11"],
     }
 

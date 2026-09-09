@@ -14,6 +14,7 @@ from .ledger import evaluate_requirements, production_ledger_report, validate_pr
 from .creator_sources import discover_creator_sources
 from .creator_read_model import build_creator_read_model
 from .render import FORMAT_NAMES, render_read_model
+from .modes import route_request
 from . import (
     parse_prompt_metadata,
     validate_asset_registry,
@@ -283,6 +284,26 @@ def _cmd_render(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_route(args: argparse.Namespace) -> int:
+    try:
+        decision = route_request(args.request, explicit_mode=args.mode)
+    except (TypeError, ValueError) as exc:
+        _emit({"ok": False, "errors": [str(exc)]}, args.format)
+        return 1
+    _emit({
+        "ok": True,
+        "mode": decision.mode,
+        "reason": decision.reason,
+        "references": list(decision.references),
+        "validators": list(decision.validators),
+        "output_labels": list(decision.output_labels),
+        "run_full_validation": decision.run_full_validation,
+        "allow_provider_calls": decision.allow_provider_calls,
+        "allow_source_writes": decision.allow_source_writes,
+    }, args.format)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="ff", description="FilmFoundry Skills v3 CLI")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -343,6 +364,11 @@ def build_parser() -> argparse.ArgumentParser:
     render.add_argument("--formats", default=",".join(FORMAT_NAMES), help="comma-separated html,markdown,svg")
     render.add_argument("--format", choices=("text", "json"), default="text")
     render.set_defaults(func=_cmd_render)
+    route = sub.add_parser("route", help="route a request to the lightest safe work mode")
+    route.add_argument("--request", required=True)
+    route.add_argument("--mode", required=False, choices=("creative", "commit", "production", "gate", "创作", "确认", "生产", "验收"))
+    route.add_argument("--format", choices=("text", "json"), default="text")
+    route.set_defaults(func=_cmd_route)
     return parser
 
 

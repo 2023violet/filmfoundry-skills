@@ -1,4 +1,4 @@
-"""Deliberately RED v2.3 contracts for the Creator Read Model."""
+"""Contracts for the v3 Creator Read Model."""
 from __future__ import annotations
 
 from dataclasses import MISSING, fields, is_dataclass
@@ -14,7 +14,6 @@ import filmfoundry
 
 ROOT = Path(__file__).resolve().parents[1]
 SMOKE_PROJECT = ROOT / "tests" / "fixtures" / "v23" / "creator-read-model" / "smoke-project"
-FROZEN_WUCHENG_PROJECT = ROOT / "tests" / "fixtures" / "v23" / "creator-read-model" / "projects" / "wucheng-frozen"
 PATH_ESCAPE_ERROR = "CREATOR_SOURCE_PATH_ESCAPE: source path escapes workspace"
 ARCHIVE_ACTIVE_ERROR = "CREATOR_ARCHIVE_SOURCE_ACTIVE: active source is inside archive"
 MULTIPLE_CURRENT_ERROR = "CREATOR_MULTIPLE_CURRENT: multiple CURRENT sources for source_kind and scope"
@@ -227,29 +226,6 @@ def test_creator_snapshot_ignores_unrelated_authority_scopes(tmp_path: Path):
     snapshot = collect_snapshot(root)
 
     assert not any(conflict.conflict_type == "AUTHORITY_MISMATCH" for conflict in snapshot.conflicts)
-
-
-def test_frozen_wucheng_snapshot_keeps_exact_boundary_facts():
-    snapshot = collect_snapshot(FROZEN_WUCHENG_PROJECT)
-    metrics = {metric.metric_id: metric for metric in snapshot.metrics}
-
-    assert {metric_id: metric.value for metric_id, metric in metrics.items()} == {
-        "assets.total": 75,
-        "production_units.total": 19,
-        "character_media.missing": 21,
-        "generation.total": 0,
-        "select.total": 0,
-    }
-    assert snapshot.overview.current_authority == "CURRENT"
-    assert snapshot.overview.historical_authority == "HISTORICAL"
-    assert any(conflict.conflict_type == "AUTHORITY_MISMATCH" for conflict in snapshot.conflicts)
-    for metric_id in ("production_units.total", "generation.total", "select.total"):
-        metric = metrics[metric_id]
-        assert metric.data_status == "KNOWN"
-        assert [ref.source_id for ref in metric.provenance.source_refs] == ["SRC_PRODUCTION_HISTORICAL"]
-        assert [ref.authority_role for ref in metric.provenance.source_refs] == ["HISTORICAL"]
-    for metric_id in ("assets.total", "character_media.missing"):
-        assert [ref.source_id for ref in metrics[metric_id].provenance.source_refs] == ["SRC_ASSETS"]
 
 
 def test_creator_catalog_rejects_required_unknown_schema(tmp_path: Path):

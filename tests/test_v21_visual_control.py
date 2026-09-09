@@ -155,6 +155,6 @@ def test_alignment_rejects_camera_side_and_state_mismatch():
 
 def test_visual_control_fixture_files_cover_golden_and_invalid_cases():
     from pathlib import Path
-    root = Path(__file__).resolve().parents[1] / "tests" / "fixtures" / "v2" / "visual-control"
+    root = Path(__file__).resolve().parents[1] / "tests" / "historical" / "fixtures" / "v2" / "visual-control"
     assert (root / "visual-control-plan.golden.json").is_file()
     assert (root / "visual-control-plan.invalid.json").is_file()

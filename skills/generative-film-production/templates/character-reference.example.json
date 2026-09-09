@@ -1,0 +1,17 @@
+{
+  "asset_id": "CHAR_WATCHER",
+  "reference_kind": "CORE_RECURRING_IDENTITY",
+  "face_closeup_asset_id": "ASSET_WATCHER_FACE",
+  "front_body_asset_id": "ASSET_WATCHER_FRONT",
+  "back_body_asset_id": "ASSET_WATCHER_BACK",
+  "headless_body_strategy": "OPTIONAL",
+  "state_variant": "BASE_NIGHT_DRY",
+  "parent_asset_id": null,
+  "mask_regions": [
+    "background"
+  ],
+  "controls": "face identity, body proportion, wardrobe structure, silhouette",
+  "does_not_control": "camera, location, lighting, action, story state, or dialogue timing",
+  "qc_status": "PASS_STATIC",
+  "extensions": {}
+}

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "creator-read-model.v1",
+  "title": "FilmFoundry Creator Read Model",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "snapshot", "navigation"],
+  "properties": {
+    "schema_version": {"type": "string", "enum": ["creator-read-model.v1"]},
+    "snapshot": {"$ref": "creator-snapshot.v1"},
+    "navigation": {"$ref": "creator-navigation.v1"}
+  }
+}

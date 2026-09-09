@@ -1,0 +1,8 @@
+{
+  "schema_version": "creator-source-catalog.v1",
+  "project_id": "CONTINUITY_CONFLICT",
+  "runtime_path": "runtime.json",
+  "sources": [
+    {"source_id": "SRC_CONTINUITY", "source_kind": "continuity_chain", "path": "continuity-chain.v1.json", "path_base": "WORKSPACE_ROOT", "parser_id": "continuity-chain-json", "schema_version": "continuity-chain.v1", "authority_role": "CURRENT", "scope": "project", "required": true}
+  ]
+}

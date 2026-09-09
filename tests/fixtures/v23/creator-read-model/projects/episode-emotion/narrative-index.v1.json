@@ -1,0 +1,6 @@
+{
+  "schema_version": "narrative-index.v1",
+  "nodes": [
+    {"node_id": "EPISODE_ONE", "node_type": "EPISODE", "display_name": "Episode One", "narrative_responsibility": "Episode turn", "parent_id": null, "canon_source": "story/episode-one.md"}
+  ]
+}

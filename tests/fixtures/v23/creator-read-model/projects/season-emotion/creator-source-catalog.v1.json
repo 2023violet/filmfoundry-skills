@@ -1,0 +1,9 @@
+{
+  "schema_version": "creator-source-catalog.v1",
+  "project_id": "SEASON_EMOTION",
+  "runtime_path": "runtime.json",
+  "sources": [
+    {"source_id": "SRC_NARRATIVE", "source_kind": "narrative_index", "path": "narrative-index.v1.json", "path_base": "WORKSPACE_ROOT", "parser_id": "narrative-index-json", "schema_version": "narrative-index.v1", "authority_role": "CURRENT", "scope": "project", "required": true},
+    {"source_id": "SRC_EMOTION", "source_kind": "emotional_beat_map", "path": "season-emotion.v3.json", "path_base": "WORKSPACE_ROOT", "parser_id": "emotional-beat-map-json", "schema_version": "emotional-beat-map.v3", "authority_role": "CURRENT", "scope": "SEASON_ONE", "required": true}
+  ]
+}

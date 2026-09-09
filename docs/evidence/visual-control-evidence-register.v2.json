@@ -1,0 +1,27 @@
+{
+  "schema_version": "visual-control-evidence.v2",
+  "register_id": "VISUAL_CONTROL_EVIDENCE",
+  "updated_at": "2026-09-07",
+  "baseline": {
+    "release_head": "cef6ee2a27846b3ea9686be8edf80a63fd61af71",
+    "v1_checkpoint": "1005872",
+    "v1_tests": 167,
+    "v2_tests": 199,
+    "wucheng": {"registry_assets": 75, "active_media": 109, "prompts": 21, "routed_units": 19, "h3_real_outputs": 0}
+  },
+  "sources": [
+    {"source_id": "HF_SKILLS", "kind": "official_repository", "locator": "https://github.com/higgsfield-ai/skills", "revision": "fb18134", "captured_at": "2026-09-07", "evidence_level": "UNVERIFIED"},
+    {"source_id": "HF_HELL_GRIND", "kind": "official_project_page", "locator": "https://higgsfield.ai/@higgsfield.studio/projects/hell-grind", "captured_at": "2026-09-07", "evidence_level": "HUMAN_REVIEW"},
+    {"source_id": "BLOG_SUMMARY", "kind": "secondary_summary", "locator": "user-supplied transcript", "captured_at": "2026-09-07", "evidence_level": "UNVERIFIED"}
+  ],
+  "practices": [
+    {"practice_id": "NEUTRAL_GRAY_BACKGROUND", "status": "UNVERIFIED", "claim": "A neutral gray background may reduce irrelevant background variation; identity benefit requires a controlled experiment."},
+    {"practice_id": "HEADLESS_BODY_REFERENCE", "status": "UNVERIFIED", "claim": "A headless body reference may force face identity to come from a close-up reference."},
+    {"practice_id": "THREE_QUARTER_LOCATION", "status": "UNVERIFIED", "claim": "A three-quarter view may expose more spatial geometry than a frontal view."},
+    {"practice_id": "SPATIAL_MAP", "status": "CONTRACTED", "claim": "Explicit subject, anchor, camera-side and light relationships can be represented and validated."},
+    {"practice_id": "VISIBLE_SCALE_EVIDENCE", "status": "CONTRACTED", "claim": "Scale intent can be paired with an observable reference relation."},
+    {"practice_id": "PHYSICS_RESULT_CUES", "status": "HUMAN_REVIEW", "claim": "Force and material response cues can be represented; realism remains a human judgment."},
+    {"practice_id": "PREVIS_ROUTE", "status": "UNVERIFIED", "claim": "A short establishment pass may reduce spatial drift for some routes."},
+    {"practice_id": "FOV_WITH_VISIBLE_RESULT", "status": "HUMAN_REVIEW", "claim": "Numeric camera guidance should be paired with the intended visible result."}
+  ]
+}

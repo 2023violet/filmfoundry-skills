@@ -1,0 +1,95 @@
+{
+  "visual_control_id": "EP01_SH001_VC",
+  "production_unit": "EP01_SH001_G01",
+  "character_references": [
+    {
+      "asset_id": "CHAR_WATCHER",
+      "reference_kind": "CORE_RECURRING_IDENTITY",
+      "face_closeup_asset_id": "ASSET_WATCHER_FACE",
+      "front_body_asset_id": "ASSET_WATCHER_FRONT",
+      "back_body_asset_id": "ASSET_WATCHER_BACK",
+      "headless_body_strategy": "OPTIONAL",
+      "state_variant": "BASE_NIGHT_DRY",
+      "parent_asset_id": null,
+      "mask_regions": [
+        "background"
+      ],
+      "controls": "face identity, body proportion, wardrobe structure, silhouette",
+      "does_not_control": "camera movement, location geometry, lantern state, or dialogue timing",
+      "qc_status": "PASS_STATIC",
+      "extensions": {}
+    }
+  ],
+  "location_reference": {
+    "location_id": "LOC_INN_ENTRANCE",
+    "preferred_view": "three-quarter view from the east gate",
+    "anchor_objects": [
+      "LOC_INN_GATE",
+      "LOC_INN_STONE_STEP",
+      "PROP_LANTERN"
+    ],
+    "camera_side": "north side of the entrance axis",
+    "light_sources": [
+      "moonlight from frame left",
+      "lantern practical near the door"
+    ],
+    "geometry_controls": "gate width, stone step count, door position, wall corner",
+    "does_not_control": "actor identity, acting, final crop, or provider motion behavior",
+    "extensions": {}
+  },
+  "spatial_map": {
+    "relations": [
+      {
+        "subject_id": "CHAR_WATCHER",
+        "anchor_id": "LOC_INN_GATE",
+        "relation": "two steps inside and frame right of",
+        "distance": "about two body lengths",
+        "facing": "toward the lantern",
+        "screen_direction": "holds frame right",
+        "camera_side": "north side of the entrance axis",
+        "light_direction": "moonlight from frame left"
+      }
+    ],
+    "extensions": {}
+  },
+  "scale_references": [
+    {
+      "subject_id": "CHAR_WATCHER",
+      "reference_object_id": "LOC_INN_GATE",
+      "visible_relation": "the watcher is shorter than the gate opening and reaches only halfway up the frame",
+      "intended_scale": "human scale within a standard doorway",
+      "scale_confidence": "UNVERIFIED"
+    }
+  ],
+  "physics_cues": [
+    {
+      "material": "aged wood door and damp wool coat",
+      "force": "one shoulder push toward frame left",
+      "weight": "door feels heavy; coat has visible wet drag",
+      "inertia": "door starts after a brief resistance and coat settles after the turn",
+      "gravity": "dust falls from the lintel and the coat hem hangs downward",
+      "observable_result": "the door opens one handspan and the coat stops after the watcher stops"
+    }
+  ],
+  "previsualization": {
+    "duration_seconds": 3,
+    "state_alignment": "PASS",
+    "initial_state": "watcher stands frame right; lantern dark",
+    "end_state": "watcher remains frame right; gate stays readable",
+    "asset_id": "PREVIS_EP01_SH001",
+    "route": "SHORT_ESTABLISHMENT_PASS",
+    "observable_result": "one slow push-in preserves entrance geography",
+    "extensions": {}
+  },
+  "lens_result": {
+    "fov_degrees": 40,
+    "focal_length_mm": 24,
+    "observable_framing": "gate and watcher remain readable without obvious edge stretch",
+    "extensions": {}
+  },
+  "review_status": "HUMAN_REVIEW",
+  "experiment_ids": [
+    "EXP_VISUAL_CONTROL_001"
+  ],
+  "extensions": {}
+}

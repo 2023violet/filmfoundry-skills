@@ -1,0 +1,6 @@
+{
+  "schema_version": "narrative-index.v1",
+  "nodes": [
+    {"node_id": "SEASON_ONE", "node_type": "SEASON", "display_name": "Season One", "narrative_responsibility": "Season arc", "parent_id": null, "canon_source": "story/season-one.md"}
+  ]
+}

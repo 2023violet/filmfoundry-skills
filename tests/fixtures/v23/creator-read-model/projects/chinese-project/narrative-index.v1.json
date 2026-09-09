@@ -1,0 +1,7 @@
+{
+  "schema_version": "narrative-index.v1",
+  "nodes": [
+    {"node_id": "SEASON_ONE", "node_type": "SEASON", "display_name": "第一季", "narrative_responsibility": "主线", "parent_id": null, "canon_source": "story/season-one.md"},
+    {"node_id": "EPISODE_ONE", "node_type": "EPISODE", "display_name": "第一集", "narrative_responsibility": "开场", "parent_id": "SEASON_ONE", "canon_source": "story/episode-one.md"}
+  ]
+}

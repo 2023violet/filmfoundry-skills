@@ -1,0 +1,89 @@
+{
+  "model_id": "minimax-h3",
+  "provider": "MiniMax",
+  "product_surface": "UNVERIFIED",
+  "model_version": "UNVERIFIED",
+  "tested_date": "UNVERIFIED",
+  "verification_status": "UNVERIFIED",
+  "reference_role_binding": {
+    "status": "UNVERIFIED",
+    "evidence_ids": []
+  },
+  "prompt_language_strategy": {
+    "instruction_language": "UNVERIFIED",
+    "dialogue_language": "zh"
+  },
+  "smoke_tests": [
+    {
+      "test_id": "TEST_H3_01",
+      "verdict": "UNVERIFIED",
+      "attempts": 0,
+      "passes": 0,
+      "fails": 0
+    },
+    {
+      "test_id": "TEST_H3_02",
+      "verdict": "UNVERIFIED",
+      "attempts": 0,
+      "passes": 0,
+      "fails": 0
+    },
+    {
+      "test_id": "TEST_H3_03",
+      "verdict": "UNVERIFIED",
+      "attempts": 0,
+      "passes": 0,
+      "fails": 0
+    },
+    {
+      "test_id": "TEST_H3_04",
+      "verdict": "UNVERIFIED",
+      "attempts": 0,
+      "passes": 0,
+      "fails": 0
+    },
+    {
+      "test_id": "TEST_H3_05",
+      "verdict": "UNVERIFIED",
+      "attempts": 0,
+      "passes": 0,
+      "fails": 0
+    },
+    {
+      "test_id": "TEST_H3_06",
+      "verdict": "UNVERIFIED",
+      "attempts": 0,
+      "passes": 0,
+      "fails": 0
+    },
+    {
+      "test_id": "TEST_H3_07",
+      "verdict": "UNVERIFIED",
+      "attempts": 0,
+      "passes": 0,
+      "fails": 0
+    },
+    {
+      "test_id": "TEST_H3_08",
+      "verdict": "UNVERIFIED",
+      "attempts": 0,
+      "passes": 0,
+      "fails": 0
+    },
+    {
+      "test_id": "TEST_H3_09",
+      "verdict": "UNVERIFIED",
+      "attempts": 0,
+      "passes": 0,
+      "fails": 0
+    },
+    {
+      "test_id": "TEST_H3_10",
+      "verdict": "UNVERIFIED",
+      "attempts": 0,
+      "passes": 0,
+      "fails": 0
+    }
+  ],
+  "behavior_observations": []
+}

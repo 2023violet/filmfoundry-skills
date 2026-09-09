@@ -1,0 +1,8 @@
+{
+  "schema_version": "creator-source-catalog.v1",
+  "project_id": "CHINESE_PROJECT",
+  "runtime_path": "runtime.json",
+  "sources": [
+    {"source_id": "SRC_NARRATIVE", "source_kind": "narrative_index", "path": "narrative-index.v1.json", "path_base": "WORKSPACE_ROOT", "parser_id": "narrative-index-json", "schema_version": "narrative-index.v1", "authority_role": "CURRENT", "scope": "project", "required": true}
+  ]
+}

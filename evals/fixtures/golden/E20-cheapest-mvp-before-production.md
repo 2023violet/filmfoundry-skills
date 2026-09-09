@@ -1,0 +1,1 @@
+Use an **MVP** first. The **cheapest** useful test is a small set of episodes with **minimal** canon and production burden. Only scale thirty episodes after real evidence passes the declared criteria.

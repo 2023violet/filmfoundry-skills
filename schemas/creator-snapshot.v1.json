@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "creator-snapshot.v1",
+  "title": "FilmFoundry Creator Snapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "project_id",
+    "overview",
+    "metrics",
+    "narrative_nodes",
+    "emotion_points",
+    "assets",
+    "shots",
+    "continuity_edges",
+    "blockers",
+    "conflicts",
+    "coverage"
+  ],
+  "properties": {
+    "schema_version": {"type": "string", "enum": ["creator-snapshot.v1"]},
+    "project_id": {"type": "string"},
+    "overview": {"$ref": "#/$defs/overview"},
+    "metrics": {"type": "array", "items": {"$ref": "#/$defs/metric"}},
+    "narrative_nodes": {"type": "array", "items": {"$ref": "#/$defs/narrative_node"}},
+    "emotion_points": {"type": "array", "items": {"$ref": "#/$defs/emotion_point"}},
+    "assets": {"type": "array", "items": {"$ref": "#/$defs/asset"}},
+    "shots": {"type": "array", "items": {"$ref": "#/$defs/shot"}},
+    "continuity_edges": {"type": "array", "items": {"$ref": "#/$defs/continuity_edge"}},
+    "blockers": {"type": "array", "items": {"$ref": "#/$defs/blocker"}},
+    "conflicts": {"type": "array", "items": {"$ref": "#/$defs/conflict"}},
+    "coverage": {"type": "array", "items": {"$ref": "#/$defs/coverage"}}
+  },
+  "$defs": {
+    "source_ref": {
+      "type": "object",
+      "required": ["source_id", "source_kind", "path", "pointer", "sha256", "authority_role", "version"],
+      "properties": {
+        "source_id": {"type": "string"}, "source_kind": {"type": "string"}, "path": {"type": "string"},
+        "pointer": {"type": "string"}, "sha256": {"type": "string"}, "authority_role": {"type": "string"},
+        "version": {"type": ["string", "null"]}
+      },
+      "additionalProperties": false
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["source_refs", "derivation", "rule_id"],
+      "properties": {
+        "source_refs": {"type": "array", "items": {"$ref": "#/$defs/source_ref"}},
+        "derivation": {"type": "string", "enum": ["DIRECT", "VALIDATED", "AGGREGATED"]},
+        "rule_id": {"type": ["string", "null"]}
+      },
+      "additionalProperties": false
+    },
+    "overview": {
+      "type": "object",
+      "required": ["project_id", "phase", "current_authority", "historical_authority", "provenance"],
+      "properties": {
+        "project_id": {"type": "string"}, "phase": {"type": "string"}, "current_authority": {"type": "string"},
+        "historical_authority": {"type": ["string", "null"]}, "provenance": {"$ref": "#/$defs/provenance"}
+      },
+      "additionalProperties": false
+    },
+    "metric": {
+      "type": "object", "required": ["metric_id", "value", "data_status", "provenance"],
+      "properties": {
+        "metric_id": {"type": "string"}, "value": {"type": ["integer", "number", "string", "null"]},
+        "data_status": {"type": "string", "enum": ["KNOWN", "UNKNOWN", "INVALID"]}, "provenance": {"$ref": "#/$defs/provenance"}
+      }, "additionalProperties": false
+    },
+    "narrative_node": {
+      "type": "object", "required": ["node_id", "node_type", "display_name", "narrative_responsibility", "parent_id", "canon_source", "provenance"],
+      "properties": {
+        "node_id": {"type": "string"}, "node_type": {"type": "string"}, "display_name": {"type": "string"},
+        "narrative_responsibility": {"type": "string"}, "parent_id": {"type": ["string", "null"]}, "canon_source": {"type": "string"}, "provenance": {"$ref": "#/$defs/provenance"}
+      }, "additionalProperties": false
+    },
+    "emotion_point": {
+      "type": "object", "required": ["beat_id", "production_unit", "sequence", "narrative_function", "primary_emotion", "tension_level", "direction", "turning_point", "provenance"],
+      "properties": {
+        "beat_id": {"type": "string"}, "production_unit": {"type": "string"}, "sequence": {"type": "integer"},
+        "narrative_function": {"type": "string"}, "primary_emotion": {"type": "string"}, "tension_level": {"type": "integer"},
+        "direction": {"type": "string"}, "turning_point": {"type": "boolean"}, "provenance": {"$ref": "#/$defs/provenance"}
+      }, "additionalProperties": false
+    },
+    "asset": {
+      "type": "object", "required": ["asset_id", "asset_type", "display_name", "path", "declared_state", "observed_readiness", "declared_sha256", "observed_sha256", "provenance"],
+      "properties": {
+        "asset_id": {"type": "string"}, "asset_type": {"type": "string"}, "display_name": {"type": "string"}, "path": {"type": "string"},
+        "declared_state": {"type": "string"}, "observed_readiness": {"type": "string", "enum": ["PRESENT_HASH_OK", "PRESENT_HASH_UNVERIFIED", "PRESENT_HASH_MISMATCH", "MISSING", "NOT_APPLICABLE", "UNKNOWN"]},
+        "declared_sha256": {"type": ["string", "null"]}, "observed_sha256": {"type": ["string", "null"]}, "provenance": {"$ref": "#/$defs/provenance"}
+      }, "additionalProperties": false
+    },
+    "shot": {
+      "type": "object", "required": ["shot_id", "generation_unit_id", "runtime_status", "select_type", "observed_state", "provenance", "historical_runtime_status"],
+      "properties": {
+        "shot_id": {"type": "string"}, "generation_unit_id": {"type": "string"}, "runtime_status": {"type": ["string", "null"]}, "historical_runtime_status": {"type": ["string", "null"]},
+        "select_type": {"type": ["string", "null"]}, "observed_state": {"type": ["string", "null"]}, "provenance": {"$ref": "#/$defs/provenance"}
+      }, "additionalProperties": false
+    },
+    "continuity_edge": {
+      "type": "object", "required": ["chain_id", "entity_id", "from_shot_id", "to_shot_id", "field", "from_value", "to_value", "provenance"],
+      "properties": {
+        "chain_id": {"type": "string"}, "entity_id": {"type": "string"}, "from_shot_id": {"type": "string"}, "to_shot_id": {"type": "string"},
+        "field": {"type": "string"}, "from_value": {"type": "string"}, "to_value": {"type": "string"}, "provenance": {"$ref": "#/$defs/provenance"}
+      }, "additionalProperties": false
+    },
+    "blocker": {
+      "type": "object", "required": ["blocker_id", "severity", "entity_id", "rule_id", "reason", "support_boundary", "provenance"],
+      "properties": {
+        "blocker_id": {"type": "string"}, "severity": {"type": "string"}, "entity_id": {"type": ["string", "null"]}, "rule_id": {"type": ["string", "null"]},
+        "reason": {"type": "string"}, "support_boundary": {"type": "string"}, "provenance": {"$ref": "#/$defs/provenance"}
+      }, "additionalProperties": false
+    },
+    "conflict": {
+      "type": "object", "required": ["conflict_id", "conflict_type", "entity_id", "reason", "provenance"],
+      "properties": {
+        "conflict_id": {"type": "string"}, "conflict_type": {"type": "string"}, "entity_id": {"type": ["string", "null"]}, "reason": {"type": "string"}, "provenance": {"$ref": "#/$defs/provenance"}
+      }, "additionalProperties": false
+    },
+    "coverage": {
+      "type": "object", "required": ["coverage_id", "source_kind", "data_status", "successful_sources", "declared_sources", "reason", "provenance"],
+      "properties": {
+        "coverage_id": {"type": "string"}, "source_kind": {"type": "string"}, "data_status": {"type": "string", "enum": ["KNOWN", "UNKNOWN", "INVALID"]},
+        "successful_sources": {"type": "integer"}, "declared_sources": {"type": "integer"}, "reason": {"type": ["string", "null"]}, "provenance": {"$ref": "#/$defs/provenance"}
+      }, "additionalProperties": false
+    }
+  }
+}

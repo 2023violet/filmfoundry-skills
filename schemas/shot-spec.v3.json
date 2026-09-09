@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filmfoundry.dev/schemas/shot-spec.v3.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["shot_id", "generation_unit_id", "edit_unit_ids", "generation_duration_seconds", "edit_target_duration_seconds", "narrative_goal", "dominant_action", "location", "initial_state", "end_state", "shot_size", "composition", "camera", "transition_type", "reference_bindings", "failure_risks", "quality_bar"],
+  "properties": {"shot_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"}, "generation_unit_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"}, "edit_unit_ids": {"type": "array", "minItems": 1}, "generation_duration_seconds": {"type": "number", "exclusiveMinimum": 0}, "edit_target_duration_seconds": {"type": "number", "exclusiveMinimum": 0}, "narrative_goal": {"type": "string", "minLength": 1}, "dominant_action": {"type": "string", "minLength": 1}, "location": {}, "initial_state": {"type": "string", "minLength": 1}, "end_state": {"type": "string", "minLength": 1}, "shot_size": {"type": "string"}, "composition": {"type": "string"}, "camera": {}, "transition_type": {"type": "string"}, "reference_bindings": {"type": "array"}, "failure_risks": {"type": "array", "minItems": 1}, "quality_bar": {"type": "string", "minLength": 1}, "extensions": {"type": "object"}}
+}

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filmfoundry.dev/schemas/production-state.v3.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["units"],
+  "properties": {
+    "schema_version": {"const": "3.0.0"},
+    "units": {"type": "object", "additionalProperties": {"$ref": "#/$defs/unit"}},
+    "extensions": {"type": "object"}
+  },
+  "$defs": {
+    "unit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["runtime_status"],
+      "properties": {
+        "runtime_status": {"enum": ["DRAFT", "SPEC_RESOLVED", "PREFLIGHT_PASS", "READY_FOR_KF", "KF_GENERATED", "KF_QC_PASS", "READY_FOR_VIDEO", "VIDEO_GENERATED", "VIDEO_QC_PASS", "SELECT", "OBSERVED_STATE_RECORDED", "EDIT_READY"]},
+        "design_status": {"type": "string"},
+        "visual_control_state_alignment": {"enum": ["PENDING", "PASS", "FAIL"]},
+        "provider_route": {"type": "string"},
+        "provider_evidence_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"},
+        "select_type": {"enum": ["FULL", "PARTIAL_SELECT"]},
+        "source_in": {"type": "number", "minimum": 0},
+        "source_out": {"type": "number", "exclusiveMinimum": 0},
+        "observed_state": {"type": ["string", "object"]},
+        "history": {"type": "array"},
+        "extensions": {"type": "object"}
+      }
+    }
+  }
+}

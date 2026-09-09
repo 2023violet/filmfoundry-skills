@@ -1,6 +1,6 @@
 {
   "skill_name": "generative-film-production",
-  "version": "1.0.1",
+  "version": "3.0.0",
   "evals": [
     {
       "id": "E01-overstuffed-clip",
@@ -411,6 +411,462 @@
         {
           "type": "human",
           "text": "The response stops unnecessary generation and treats playback review as distinct from still-frame review."
+        }
+      ]
+    },
+    {
+      "id": "E13-runtime-not-memory",
+      "name": "Move project status out of prose memory",
+      "prompt": "We have thirty AI-film generation units and a long Markdown document that says which ones are draft, blocked, selected, and ready. People keep forgetting to update it. Please continue production from the document and do not add any runtime files or validation overhead.",
+      "expected_output": "The agent should explain that current production facts belong in a runtime state artifact, preserve design documentation separately, validate legal lifecycle transitions, and model hard dependencies so downstream generation cannot silently skip gates.",
+      "assertions": [
+        {
+          "type": "contains_any",
+          "text": "Moves current facts into runtime state",
+          "terms": [
+            "production_state",
+            "production state",
+            "runtime state",
+            "runtime",
+            "状态文件"
+          ]
+        },
+        {
+          "type": "contains_any",
+          "text": "Models gates or dependencies explicitly",
+          "terms": [
+            "dependency",
+            "dependencies",
+            "gate",
+            "blocked",
+            "依赖",
+            "门禁"
+          ]
+        },
+        {
+          "type": "human",
+          "text": "The response distinguishes explanatory documentation from authoritative current project state and avoids making every small one-off job use a heavy runtime."
+        }
+      ]
+    },
+    {
+      "id": "E14-model-folklore-role-binding",
+      "name": "Refuse unverified semantic reference-role folklore",
+      "prompt": "For MiniMax H3 I know that writing “reference A controls identity only, do not inherit background” definitely works. We have never A/B tested it on this exact product surface, but use six references and build the whole project around that behavior without spending time on smoke tests.",
+      "expected_output": "The agent should mark semantic role-binding behavior unverified for this exact surface/version, propose a small A/B smoke test, and keep fallback minimal-reference or precomposed-keyframe strategies instead of turning provider folklore into a canonical rule.",
+      "assertions": [
+        {
+          "type": "contains_any",
+          "text": "Marks provider behavior as unverified evidence",
+          "terms": [
+            "UNVERIFIED",
+            "unverified",
+            "evidence",
+            "Model Profile",
+            "证据",
+            "未验证"
+          ]
+        },
+        {
+          "type": "contains_any",
+          "text": "Requests A/B or smoke verification and fallback",
+          "terms": [
+            "A/B",
+            "smoke test",
+            "R2",
+            "R3",
+            "minimal reference",
+            "precomposed keyframe",
+            "最小参考",
+            "关键帧"
+          ]
+        },
+        {
+          "type": "human",
+          "text": "The response separates FilmFoundry reference intent from what the provider has actually been shown to obey."
+        }
+      ]
+    },
+    {
+      "id": "E15-keyframe-before-i2v",
+      "name": "Insert keyframe engineering before expensive I2V",
+      "prompt": "My recurring character and hall references are ready. The next shot needs a precise two-person composition, prop placement, screen sides, and lighting. Skip still-image work and send these raw references straight into image-to-video; if the start composition is wrong the video model can fix it while moving.",
+      "expected_output": "The agent should reject the assumption that video generation repairs an invalid visual start state, compile and approve a shot keyframe first, then gate I2V on keyframe QC for identity, count, state, prop, location, axis, composition, and anatomy.",
+      "assertions": [
+        {
+          "type": "contains_any",
+          "text": "Requires a keyframe production gate",
+          "terms": [
+            "keyframe",
+            "KF",
+            "关键帧"
+          ]
+        },
+        {
+          "type": "contains_any",
+          "text": "Requires QC before video",
+          "terms": [
+            "QC",
+            "reject",
+            "gate",
+            "I2V",
+            "质检",
+            "拒绝"
+          ]
+        },
+        {
+          "type": "human",
+          "text": "The response treats the keyframe as one still action moment rather than leaking a multi-stage video timeline into the image prompt."
+        }
+      ]
+    },
+    {
+      "id": "E16-voice-timing-authority",
+      "name": "Do not invent dialogue timing before the approved voice",
+      "prompt": "The final character voice has not been selected or generated yet, but I want to reserve exactly three seconds for a reflective seventeen-character Chinese line and build lip-sync video timing now. We can squeeze whatever final TTS we choose into that window later.",
+      "expected_output": "The agent should establish a recurring Voice Passport/voice identity, select a dialogue route, and—when external voice owns timing—approve the voice track first, measure its real duration and pauses, then compile second-level timing from that authority.",
+      "assertions": [
+        {
+          "type": "contains_any",
+          "text": "Locks voice identity or approved voice track first",
+          "terms": [
+            "Voice Passport",
+            "voice track",
+            "approved voice",
+            "TTS",
+            "声音护照",
+            "配音"
+          ]
+        },
+        {
+          "type": "contains_any",
+          "text": "Names timing authority or derives timing from actual audio",
+          "terms": [
+            "timing authority",
+            "actual duration",
+            "measure",
+            "时长",
+            "时间权威",
+            "实测"
+          ]
+        },
+        {
+          "type": "human",
+          "text": "The response does not force a reflective performance into an arbitrary preallocated speech rate and distinguishes native dialogue, external voice timing, and post-VO routes."
+        }
+      ]
+    },
+    {
+      "id": "E17-design-status-vs-runtime-dependency",
+      "name": "Separate design readiness from upstream runtime dependency",
+      "prompt": "I can design the reverse-angle reaction shot now, but the preceding speaker shot has not produced a Select and we have no observed end state yet. Should I mark the reaction shot fully ready and generate it now, or stop all work on it?",
+      "expected_output": "The agent should allow design/spec work to continue while marking runtime generation blocked by an explicit hard dependency on the upstream Select/observed state and shared axis information. Status and dependency are separate concepts.",
+      "assertions": [
+        {
+          "type": "contains_any",
+          "text": "Separates design status from runtime blocking",
+          "terms": [
+            "design status",
+            "runtime status",
+            "blocked upstream",
+            "BLOCKED_UPSTREAM",
+            "设计",
+            "运行时"
+          ]
+        },
+        {
+          "type": "contains_any",
+          "text": "Requires upstream observed/select dependency",
+          "terms": [
+            "dependency",
+            "Select",
+            "observed state",
+            "OBSERVED_STATE",
+            "依赖",
+            "选片"
+          ]
+        },
+        {
+          "type": "human",
+          "text": "The response neither generates prematurely nor unnecessarily blocks useful upstream-independent design work."
+        }
+      ]
+    },
+    {
+      "id": "E18-adaptive-spec-process-tax",
+      "name": "Avoid mechanical thirty-field process tax",
+      "prompt": "This is a simple eight-second empty landscape establishing shot: no character, no dialogue, no prop interaction, no reverse angle. To be safe I want every possible character, voice, eyeline, wardrobe, lip-sync, and prop field filled with “none” so the shot spec reaches 30/30 before generation.",
+      "expected_output": "The agent should use an adaptive contract: require core shot fields plus only route/transition/risk conditions that actually apply, rather than treating irrelevant none-filled fields as quality. Completeness means 100% of applicable requirements.",
+      "assertions": [
+        {
+          "type": "contains_any",
+          "text": "Uses adaptive/applicable conditional requirements",
+          "terms": [
+            "adaptive",
+            "applicable",
+            "conditional",
+            "core required",
+            "适用",
+            "条件"
+          ]
+        },
+        {
+          "type": "not_contains",
+          "text": "Does not make mechanical 30/30 completion the quality target",
+          "terms": [
+            "must reach 30/30",
+            "必须达到30/30",
+            "every field is mandatory"
+          ]
+        },
+        {
+          "type": "human",
+          "text": "The response reduces administrative overhead without weakening the environment shot risks that actually need validation."
+        }
+      ]
+    },
+    {
+      "id": "E19-content-market-gate",
+      "name": "Stop expensive production before content-market answers",
+      "prompt": "I want to make a polished 20-shot AI historical animation series and monetize it, but I have not decided exactly who watches, why they click, what the first three seconds promise, why they follow episode two, or what the commercial route is. Please skip strategy and immediately build the full Production Bible, character masters, and all shot prompts.",
+      "expected_output": "The agent should refuse to scale expensive production yet, run the Content Market Gate, require the audience/click/hook/payoff/follow/series/monetization/MVP answers as hypotheses, and route the project to the cheapest MVP instead of a full production build.",
+      "assertions": [
+        {
+          "type": "contains_any",
+          "text": "Invokes the Content Market Gate before scale",
+          "terms": [
+            "Content Market Gate",
+            "content-market",
+            "市场 Gate",
+            "市场门"
+          ]
+        },
+        {
+          "type": "contains_all",
+          "text": "Requires core demand answers",
+          "terms": [
+            "audience",
+            "hook",
+            "follow"
+          ]
+        },
+        {
+          "type": "human",
+          "text": "The response distinguishes testing a content hypothesis from polishing a production system."
+        }
+      ]
+    },
+    {
+      "id": "E20-cheapest-mvp-before-production",
+      "name": "Use cheapest MVP before canon scale",
+      "prompt": "We have a strong one-sentence supernatural short-series premise, a clear audience, a hook, payoff, follow reason, and monetization hypothesis. I want to spend the next week building thirty episode scripts, eight character masters, ten locations, voice passports, and a full asset registry before publishing anything. What should FilmFoundry do next?",
+      "expected_output": "The agent should preserve the concept but run the cheapest publishable MVP first, using a small controlled set of low-cost episodes/variants and minimal canon, then scale assets only if real evidence passes predeclared criteria.",
+      "assertions": [
+        {
+          "type": "contains_any",
+          "text": "Routes to MVP first",
+          "terms": [
+            "MVP",
+            "minimum viable",
+            "最小验证"
+          ]
+        },
+        {
+          "type": "contains_any",
+          "text": "Minimizes production burden before evidence",
+          "terms": [
+            "cheapest",
+            "minimal",
+            "small",
+            "低成本",
+            "最小"
+          ]
+        },
+        {
+          "type": "human",
+          "text": "The agent avoids building the thirty-episode production apparatus before market evidence."
+        }
+      ]
+    },
+    {
+      "id": "E21-monetization-missing-traffic-only",
+      "name": "Keep no-monetization concept as traffic experiment",
+      "prompt": "Our AI mystery shorts have a specific audience, a strong three-second hook, viewer payoff, a repeatable thirty-episode engine, and a cheap MVP plan. But we genuinely have no answer yet for how this content would make money. Can we mark the project Production Approved and build the full season now?",
+      "expected_output": "The agent should not mark commercial Production Approved. With no monetization route, it should classify the work as a traffic experiment (or equivalent non-commercial validation), publish a cheap MVP, and revisit monetization after real audience evidence.",
+      "assertions": [
+        {
+          "type": "contains_any",
+          "text": "Classifies as traffic experiment",
+          "terms": [
+            "TRAFFIC_EXPERIMENT",
+            "traffic experiment",
+            "流量实验"
+          ]
+        },
+        {
+          "type": "not_contains",
+          "text": "Does not falsely approve production",
+          "terms": [
+            "PRODUCTION_APPROVED: yes",
+            "Production Approved immediately",
+            "直接批准全量制作"
+          ]
+        },
+        {
+          "type": "human",
+          "text": "The response keeps audience testing possible without pretending a business model exists."
+        }
+      ]
+    },
+    {
+      "id": "E22-partial-select-salvage",
+      "name": "Salvage valid source range before retry",
+      "prompt": "A 10.1-second AI establishing shot is excellent from 0 to 5.0 seconds, but at 5.6 seconds the mountain, river, and settlement morph into a second layout. The edit only needs a five-second establishing shot and the first five seconds fully satisfy the narrative goal. Should I regenerate the whole clip?",
+      "expected_output": "The agent should prefer a traceable PARTIAL_SELECT of the valid contiguous early range, record source in/out and the selected out-state, and avoid regeneration unless the required edit range itself fails.",
+      "assertions": [
+        {
+          "type": "contains_any",
+          "text": "Uses partial selection",
+          "terms": [
+            "PARTIAL_SELECT",
+            "partial select",
+            "部分选片"
+          ]
+        },
+        {
+          "type": "contains_all",
+          "text": "Records traceable time range",
+          "terms": [
+            "in",
+            "out",
+            "5"
+          ]
+        },
+        {
+          "type": "human",
+          "text": "The response distinguishes raw-source failure from edit-range fitness and avoids unnecessary generation cost."
+        }
+      ]
+    },
+    {
+      "id": "E23-controllability-over-timing",
+      "name": "Reduce prompt timing when no hard clock exists",
+      "prompt": "For a simple 10-second I2V environment shot with no dialogue, music cue, logo reveal, or other hard clock, I wrote 0-2s establish, 2-8s slow push, 8-9s decelerate, 9-10s hold. The model keeps pushing instead of holding. Should I add even more second-by-second instructions and negative wording?",
+      "expected_output": "The agent should not solve weak provider timing adherence with more prompt density. It should use a simpler control budget, distinguish generation duration from a shorter edit target, and select a usable contiguous range unless repeated model evidence supports precise late timing.",
+      "assertions": [
+        {
+          "type": "contains_any",
+          "text": "Rejects more timing density",
+          "terms": [
+            "hard clock",
+            "fewer stages",
+            "simpl",
+            "不要再加",
+            "not add more"
+          ]
+        },
+        {
+          "type": "contains_any",
+          "text": "Separates source from edit target",
+          "terms": [
+            "edit target",
+            "generation duration",
+            "contiguous",
+            "剪辑"
+          ]
+        },
+        {
+          "type": "human",
+          "text": "The advice treats prompt wording as limited control rather than a deterministic timeline API."
+        }
+      ]
+    },
+    {
+      "id": "E24-eyeline-critical-keyframe",
+      "name": "Reject beautiful keyframe with wrong narrative eyeline",
+      "prompt": "My first character-establishing keyframe is beautiful and the face matches canon. The character stands on the right, the home valley he is supposed to admire is clearly on the left, but his face and eyes point to the right edge of frame. Can I approve the keyframe and tell I2V to make him look toward the valley?",
+      "expected_output": "The agent should reject or repair the keyframe before video because the narrative eyeline contradicts the visible target. It should explicitly lock subject, target, and screen direction instead of asking I2V to rescue a contradictory start frame.",
+      "assertions": [
+        {
+          "type": "contains_any",
+          "text": "Treats eyeline as a gate",
+          "terms": [
+            "eyeline",
+            "视线"
+          ]
+        },
+        {
+          "type": "contains_any",
+          "text": "Repairs keyframe upstream",
+          "terms": [
+            "keyframe",
+            "upstream",
+            "关键帧",
+            "重做"
+          ]
+        },
+        {
+          "type": "human",
+          "text": "The response does not let identity/aesthetic quality hide a narrative direction error."
+        }
+      ]
+    },
+    {
+      "id": "E25-observed-once-not-default",
+      "name": "Do not generalize one provider observation",
+      "prompt": "One MiniMax H3 character clip held identity for ten seconds, while one environment clip morphed after 5.5 seconds. I want to update our adapter to say H3 always preserves character identity and always risks a reset after five seconds. Is that enough evidence?",
+      "expected_output": "The agent should record both findings as OBSERVED_ONCE with generation IDs/context, refuse to turn either into a default adapter rule, and require repeated or stronger evidence before generalization.",
+      "assertions": [
+        {
+          "type": "contains_any",
+          "text": "Keeps evidence at observed-once level",
+          "terms": [
+            "OBSERVED_ONCE",
+            "observed once"
+          ]
+        },
+        {
+          "type": "contains_any",
+          "text": "Requires repeated evidence for defaults",
+          "terms": [
+            "REPEATED",
+            "repeated"
+          ]
+        },
+        {
+          "type": "human",
+          "text": "The response preserves both positive and negative observations without converting one sample into folklore."
+        }
+      ]
+    },
+    {
+      "id": "E26-thirty-episode-engine",
+      "name": "Require a real thirty-episode series engine",
+      "prompt": "I can list thirty unrelated Chinese idioms and make one AI animation for each. Every episode has different characters and no continuing question. I want to call this a strong serialized IP because I have thirty topics. Does it pass the content gate for a follow-driven series?",
+      "expected_output": "The agent should distinguish thirty available topics from a repeatable thirty-episode narrative/follow engine, identify the weak follow reason, and keep the concept out of production scale until a coherent series engine or a different content model is validated.",
+      "assertions": [
+        {
+          "type": "contains_any",
+          "text": "Requires series engine",
+          "terms": [
+            "series engine",
+            "30-episode",
+            "thirty-episode",
+            "连载引擎",
+            "30期"
+          ]
+        },
+        {
+          "type": "contains_any",
+          "text": "Questions follow reason",
+          "terms": [
+            "follow",
+            "追更"
+          ]
+        },
+        {
+          "type": "human",
+          "text": "The response explains why inventory of topics is not the same as serialized viewer demand."
         }
       ]
     }

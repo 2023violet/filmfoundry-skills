@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "creator-navigation.v1",
+  "title": "FilmFoundry Creator Navigation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "terminology_version", "actions", "primary_action", "parallel_actions"],
+  "properties": {
+    "schema_version": {"type": "string", "enum": ["creator-navigation.v1"]},
+    "terminology_version": {"type": "string", "enum": ["creator-terminology.v1"]},
+    "actions": {"type": "array", "items": {"$ref": "#/$defs/action"}},
+    "primary_action": {"anyOf": [{"$ref": "#/$defs/action"}, {"type": "null"}]},
+    "parallel_actions": {"type": "array", "items": {"$ref": "#/$defs/action"}}
+  },
+  "$defs": {
+    "source_ref": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source_id", "source_kind", "path", "pointer", "sha256", "authority_role", "version"],
+      "properties": {
+        "source_id": {"type": "string"}, "source_kind": {"type": "string"}, "path": {"type": "string"},
+        "pointer": {"type": "string"}, "sha256": {"type": "string"}, "authority_role": {"type": "string"},
+        "version": {"type": ["string", "null"]}
+      }
+    },
+    "provenance": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source_refs", "derivation", "rule_id"],
+      "properties": {
+        "source_refs": {"type": "array", "items": {"$ref": "#/$defs/source_ref"}},
+        "derivation": {"type": "string", "enum": ["DIRECT", "VALIDATED", "AGGREGATED"]},
+        "rule_id": {"type": "string"}
+      }
+    },
+    "action": {
+      "type": "object", "additionalProperties": false,
+      "required": ["action_id", "entity_id", "priority", "severity", "reason", "rule_id", "prerequisites", "support_boundary", "provenance"],
+      "properties": {
+        "action_id": {"type": "string"}, "entity_id": {"type": ["string", "null"]}, "priority": {"type": "integer"},
+        "severity": {"type": "string"}, "reason": {"type": "string"}, "rule_id": {"type": "string"},
+        "prerequisites": {"type": "array", "items": {"type": "string"}},
+        "support_boundary": {"type": "string"}, "provenance": {"$ref": "#/$defs/provenance"}
+      }
+    }
+  }
+}

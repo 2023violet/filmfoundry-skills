@@ -1,0 +1,1 @@
+Use a traceable **PARTIAL_SELECT**. Record source **in** 0.0 and source **out** 5.0 seconds, then write continuity from the selected out-point. The edit only needs those **5** seconds, so no retry is required.

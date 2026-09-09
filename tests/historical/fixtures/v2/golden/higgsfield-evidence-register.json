@@ -1,0 +1,31 @@
+{
+  "schema_version": "higgsfield-evidence.v1",
+  "provider": "higgsfield",
+  "register_id": "HIGGSFIELD_REGISTER",
+  "updated_at": "2026-09-07",
+  "evidence_policy": {
+    "default_behavior_minimum": "REPEATED",
+    "unverified_means": "No provider capability claim may unlock a route"
+  },
+  "capabilities": [
+    {
+      "capability_id": "HF_TEXT_TO_VIDEO",
+      "name": "text_to_video",
+      "surface": "higgsfield",
+      "route": "UNVERIFIED",
+      "evidence_level": "UNVERIFIED",
+      "evidence_ids": [],
+      "scope": "No exact provider surface/version evidence recorded"
+    },
+    {
+      "capability_id": "HF_IMAGE_TO_VIDEO",
+      "name": "image_to_video",
+      "surface": "higgsfield",
+      "route": "UNVERIFIED",
+      "evidence_level": "UNVERIFIED",
+      "evidence_ids": [],
+      "scope": "No exact provider surface/version evidence recorded"
+    }
+  ],
+  "evidence": []
+}

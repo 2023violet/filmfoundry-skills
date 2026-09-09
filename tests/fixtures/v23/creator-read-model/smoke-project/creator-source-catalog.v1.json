@@ -1,0 +1,16 @@
+{
+  "schema_version": "creator-source-catalog.v1",
+  "project_id": "SMOKE_PROJECT",
+  "runtime_path": "runtime/project-runtime.json",
+  "sources": [
+    {"source_id": "SRC_WORKSPACE", "source_kind": "workspace_manifest", "path": "workspace-manifest.v3.json", "path_base": "WORKSPACE_ROOT", "parser_id": "workspace-manifest-json", "schema_version": "workspace-manifest.v3", "authority_role": "CURRENT", "scope": "project", "required": true},
+    {"source_id": "SRC_NARRATIVE", "source_kind": "narrative_index", "path": "narrative-index.v1.json", "path_base": "WORKSPACE_ROOT", "parser_id": "narrative-index-json", "schema_version": "narrative-index.v1", "authority_role": "CURRENT", "scope": "project", "required": true},
+    {"source_id": "SRC_ASSETS", "source_kind": "asset_registry", "path": "sources/asset-registry.v3.json", "path_base": "RUNTIME_DIR", "parser_id": "asset-registry-json", "schema_version": "asset-registry.v3", "authority_role": "CURRENT", "scope": "project", "required": true},
+    {"source_id": "SRC_STATE", "source_kind": "production_state", "path": "sources/production-state.v3.json", "path_base": "RUNTIME_DIR", "parser_id": "production-state-json", "schema_version": "production-state.v3", "authority_role": "CURRENT", "scope": "project", "required": true},
+    {"source_id": "SRC_SHOT_ONE", "source_kind": "shot_spec", "path": "sources/shots/EP01_SH001.v3.json", "path_base": "RUNTIME_DIR", "parser_id": "shot-spec-json", "schema_version": "shot-spec.v3", "authority_role": "CURRENT", "scope": "EP01_SH001", "required": true},
+    {"source_id": "SRC_SHOT_TWO", "source_kind": "shot_spec", "path": "sources/shots/EP01_SH002.v3.json", "path_base": "RUNTIME_DIR", "parser_id": "shot-spec-json", "schema_version": "shot-spec.v3", "authority_role": "CURRENT", "scope": "EP01_SH002", "required": true},
+    {"source_id": "SRC_SHOT_THREE", "source_kind": "shot_spec", "path": "sources/shots/EP02_SH001.v3.json", "path_base": "RUNTIME_DIR", "parser_id": "shot-spec-json", "schema_version": "shot-spec.v3", "authority_role": "CURRENT", "scope": "EP02_SH001", "required": true},
+    {"source_id": "SRC_SHOT_FOUR", "source_kind": "shot_spec", "path": "sources/shots/EP02_SH002.v3.json", "path_base": "RUNTIME_DIR", "parser_id": "shot-spec-json", "schema_version": "shot-spec.v3", "authority_role": "CURRENT", "scope": "EP02_SH002", "required": true},
+    {"source_id": "SRC_CONTINUITY", "source_kind": "continuity_chain", "path": "continuity-chain.v1.json", "path_base": "WORKSPACE_ROOT", "parser_id": "continuity-chain-json", "schema_version": "continuity-chain.v1", "authority_role": "CURRENT", "scope": "project", "required": false}
+  ]
+}

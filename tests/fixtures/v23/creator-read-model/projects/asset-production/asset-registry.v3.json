@@ -1,0 +1,3 @@
+[
+  {"asset_id": "CHAR_TIDE", "asset_type": "character", "asset_class": "CANONICAL", "display_name": "Tide", "path": "media/tide-reference.txt", "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "width": 1000, "height": 1500, "aspect_ratio": 0.6666666667, "mode": "RGBA", "alpha": true, "profile": "CHARACTER_REFERENCE", "state": "CANDIDATE", "canonical_level": "CANONICAL", "reference_role": "identity", "does_not_control": "camera", "source": "fixture", "episode_scope": ["EPISODE_ONE"]}
+]

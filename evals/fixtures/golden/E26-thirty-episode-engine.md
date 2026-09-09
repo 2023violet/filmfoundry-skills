@@ -1,0 +1,1 @@
+Thirty topics are not a **30-episode series engine**. The **follow** / 追更 reason is weak because every episode resets. Define a repeatable **series engine** or validate a non-serialized content model before scale.

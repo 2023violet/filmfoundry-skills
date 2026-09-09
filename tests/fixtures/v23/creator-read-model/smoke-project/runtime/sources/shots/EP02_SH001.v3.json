@@ -1,0 +1,19 @@
+{
+  "shot_id": "EP02_SH001",
+  "generation_unit_id": "EP02_SH001_G01",
+  "edit_unit_ids": ["EP02_EDIT001"],
+  "generation_duration_seconds": 8,
+  "edit_target_duration_seconds": 5,
+  "narrative_goal": "Introduce Moss.",
+  "dominant_action": "Moss enters the workshop.",
+  "location": {"asset_id": "LOC_WORKSHOP"},
+  "initial_state": "Moss outside.",
+  "end_state": "Moss inside.",
+  "shot_size": "medium_wide",
+  "composition": "Entry at frame right.",
+  "camera": {"movement": "static", "axis": "screen-right"},
+  "transition_type": "hard_cut",
+  "reference_bindings": [{"slot": "character", "asset_id": "CHAR_MOSS", "role": "identity", "controls": "face", "does_not_control": "camera"}],
+  "failure_risks": ["identity drift"],
+  "quality_bar": "Entry is clear."
+}

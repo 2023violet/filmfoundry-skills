@@ -62,6 +62,10 @@ def test_root_skill_stays_compact_and_routes_by_stage():
     assert len(lines) < 500
     text = "\n".join(lines)
     for token in [
+        "Creative Mode",
+        "Commit Mode",
+        "Production Mode",
+        "Gate Mode",
         "Creative Brief",
         "Asset Passport",
         "Canonical Shot Spec",
@@ -70,6 +74,18 @@ def test_root_skill_stays_compact_and_routes_by_stage():
         "QC",
     ]:
         assert token in text
+
+
+def test_root_skill_routes_lightweight_creative_work_without_gate_escalation():
+    text = SKILL.read_text(encoding="utf-8")
+    assert "does not run full Runtime, media, provider, or index validation" in text
+    assert "CREATIVE_DRAFT" in text
+    assert "HARD_CANON_CONFLICT" in text
+    assert "references/40-work-modes.md" in text
+
+
+def test_mode_reference_exists():
+    assert (SKILL_DIR / "references/40-work-modes.md").is_file()
 
 
 def test_progressive_disclosure_files_exist():

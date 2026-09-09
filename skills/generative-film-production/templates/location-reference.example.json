@@ -1,0 +1,17 @@
+{
+  "location_id": "LOC_INN_ENTRANCE",
+  "preferred_view": "three-quarter view from the east gate",
+  "anchor_objects": [
+    "LOC_INN_GATE",
+    "LOC_INN_STONE_STEP",
+    "PROP_LANTERN"
+  ],
+  "camera_side": "north side of the entrance axis",
+  "light_sources": [
+    "moonlight from frame left",
+    "lantern practical near the door"
+  ],
+  "geometry_controls": "gate width, stone step count, door position, wall corner",
+  "does_not_control": "actor identity, acting, final crop, or provider motion behavior",
+  "extensions": {}
+}

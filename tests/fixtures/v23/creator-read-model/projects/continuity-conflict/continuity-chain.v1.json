@@ -1,0 +1,12 @@
+{
+  "schema_version": "continuity-chain.v1",
+  "chains": [
+    {
+      "chain_id": "CHAIN_NOTEBOOK",
+      "entity_id": "PROP_NOTEBOOK",
+      "edges": [
+        {"from_shot_id": "EP01_SH001", "to_shot_id": "EP01_SH002", "field": "notebook_state", "from_value": "open", "to_value": "closed"}
+      ]
+    }
+  ]
+}

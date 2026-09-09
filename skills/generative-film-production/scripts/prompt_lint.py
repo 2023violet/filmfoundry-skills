@@ -32,7 +32,7 @@ SOUP_TERMS = (
 )
 
 CAMERA_MOVE_PATTERNS = {
-    "push_in": r"\b(?:push[- ]?in|dolly in|camera pushes? in)\b|缓慢前推|镜头前推|推镜",
+    "push_in": r"\b(?:push[- ]?in|push(?:es)? in|dolly in|camera(?:\s+\w+){0,3}\s+push(?:es)? in)\b|缓慢前推|镜头前推|推镜",
     "pull_back": r"\b(?:pull[- ]?back|pulls? back|pull out|dolly out|camera pulls? back)\b|缓慢拉远|镜头拉远|拉镜",
     "orbit": r"\b(?:orbits?|orbiting|arc around|circle around)\b|环绕|刷锅",
     "pan": r"\bpan(?:s|ning)?\b|横摇",

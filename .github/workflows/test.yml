@@ -7,6 +7,8 @@ on:
 jobs:
   pytest:
     runs-on: ubuntu-latest
+    env:
+      SOURCE_DATE_EPOCH: "0"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -17,3 +19,11 @@ jobs:
       - run: python skills/generative-film-production/scripts/validate_shot_spec.py skills/generative-film-production/templates/shot-spec.example.json
       - run: python skills/generative-film-production/scripts/validate_asset_registry.py skills/generative-film-production/templates/asset-registry.example.csv
       - run: python scripts/validate_evals.py evals/evals.json
+      - run: python -m pip wheel . --no-deps --no-build-isolation --wheel-dir .dist
+      - run: python scripts/build_release_artifacts.py --out .dist
+      - run: >-
+          python scripts/check_clean_extraction.py
+          --wheel .dist/filmfoundry_skills-3.0.0-py3-none-any.whl
+          --archive .dist/filmfoundry-skills-v3.0.0.zip
+      - run: >-
+          python -c "import zipfile; from pathlib import Path; z=zipfile.ZipFile(Path('.dist/filmfoundry-skills-v3.0.0.zip')); names=z.namelist(); bad=[n for n in names if any(token in n.lower() for token in ('filmfoundry_v2','filmfoundry-v2','wucheng','雾城','docs/reports/'))]; raise SystemExit(f'archive boundary violations: {bad}') if bad else None"

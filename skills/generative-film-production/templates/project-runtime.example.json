@@ -1,0 +1,12 @@
+{
+  "project_id": "FILMFOUNDRY_DEMO",
+  "runtime_version": "1.2",
+  "asset_registry": "asset-registry.example.csv",
+  "axis_registry": "axis-registry.example.json",
+  "voice_registry": "voice-registry.example.json",
+  "production_state": "production-state.example.json",
+  "dependency_graph": "dependency-graph.example.json",
+  "model_profile": "model-profile.example.json",
+  "project_goal": "SERIES_BUSINESS",
+  "content_market_gate": "content-market-gate.example.json"
+}

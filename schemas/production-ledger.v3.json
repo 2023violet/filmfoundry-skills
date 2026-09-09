@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filmfoundry.dev/schemas/production-ledger.v3.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "ledger_id", "entities", "events"],
+  "properties": {
+    "schema_version": {"const": "production-ledger.v3"},
+    "ledger_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"},
+    "entities": {"type": "array", "items": {"$ref": "#/$defs/entity"}},
+    "events": {"type": "array", "items": {"$ref": "#/$defs/event"}},
+    "extensions": {"type": "object"}
+  },
+  "$defs": {
+    "entity": {"type": "object", "additionalProperties": false, "required": ["entity_id", "entity_type"], "properties": {"entity_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"}, "entity_type": {"type": "string", "minLength": 1}, "references": {"type": "object", "additionalProperties": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"}}, "extensions": {"type": "object"}}},
+    "event": {"type": "object", "additionalProperties": false, "required": ["event_id", "sequence", "occurred_at", "event_type", "entity_id", "actor", "previous_event_hash", "event_hash"], "properties": {"event_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"}, "sequence": {"type": "integer", "minimum": 1}, "occurred_at": {"type": "string", "format": "date-time"}, "event_type": {"type": "string", "minLength": 1}, "entity_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"}, "actor": {"type": "string", "minLength": 1}, "artifact_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"}, "parameters": {"type": "object"}, "retry_of": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"}, "retry_policy": {"type": "object", "additionalProperties": false, "required": ["variable_fields"], "properties": {"variable_fields": {"type": "array", "items": {"type": "string", "minLength": 1}}}}, "previous_event_hash": {"type": ["string", "null"], "pattern": "^[0-9a-fA-F]{64}$"}, "event_hash": {"type": "string", "pattern": "^[0-9a-fA-F]{64}$"}, "correction_of": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"}, "extensions": {"type": "object"}}}
+  }
+}

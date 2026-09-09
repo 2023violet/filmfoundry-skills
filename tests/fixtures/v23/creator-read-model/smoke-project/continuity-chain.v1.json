@@ -1,0 +1,12 @@
+{
+  "schema_version": "continuity-chain.v1",
+  "chains": [
+    {
+      "chain_id": "CHAIN_LAMP",
+      "entity_id": "PROP_LAMP",
+      "edges": [
+        {"from_shot_id": "EP01_SH002", "to_shot_id": "EP02_SH002", "field": "lamp_state", "from_value": "lit", "to_value": "lit"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "schema_version": "evidence-register.v2",
+  "sources": [
+    {
+      "source_id": "HIGGSFIELD_SKILLS_REPO",
+      "kind": "official_open_source_repository",
+      "location": "D:/study/Software/_research_higgsfield_skills",
+      "commit": "fb18134b4aabe99c4bf7ff01c8f4883400efc80d",
+      "retrieved_at": "2026-09-07",
+      "claims": ["skills are self-contained", "outputs chain explicitly", "model roles differ by workflow"],
+      "evidence_level": "PROJECT_VERIFIED",
+      "decision_impact": "workflow and adapter design"
+    },
+    {
+      "source_id": "HELL_GRIND_PROJECT",
+      "kind": "public_project_reference",
+      "location": "https://higgsfield.ai/@higgsfield.studio/projects/hell-grind",
+      "retrieved_at": "2026-09-07",
+      "claims": ["asset-first workflow", "identity/state variants", "spatial anchors", "one-variable retries"],
+      "evidence_level": "OBSERVED_ONCE",
+      "decision_impact": "creative guidance only"
+    },
+    {
+      "source_id": "VARMINTS_PROJECT",
+      "kind": "public_project_reference",
+      "location": "https://higgsfield.ai/@outrealproduction/projects/varmints-las-bodas-del-rio",
+      "retrieved_at": "2026-09-07",
+      "claims": [],
+      "evidence_level": "UNVERIFIED",
+      "decision_impact": "none"
+    },
+    {
+      "source_id": "NEUTRAL_GRAY_IDENTITY_GUIDANCE",
+      "kind": "community_tutorial_claim",
+      "location": "user supplied Higgsfield tutorial summary",
+      "retrieved_at": "2026-09-07",
+      "claims": ["neutral gray background may reduce competing visual detail"],
+      "evidence_level": "UNVERIFIED",
+      "decision_impact": "warning-level identity reference guidance"
+    }
+  ]
+}

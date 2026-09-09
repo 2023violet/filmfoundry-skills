@@ -94,7 +94,7 @@ def validate_transition(prev: dict[str, Any], nxt: dict[str, Any]) -> list[str]:
 
 
 def _read_two_rows(path: Path) -> tuple[dict[str, str], dict[str, str]]:
-    with path.open("r", encoding="utf-8", newline="") as fh:
+    with path.open("r", encoding="utf-8-sig", newline="") as fh:
         rows = list(csv.DictReader(fh))
     if len(rows) != 2:
         raise ValueError("continuity CLI expects exactly two adjacent ledger rows")

@@ -1,0 +1,15 @@
+[
+  {"fixture_id": "empty-project", "path": "projects/empty-project", "expected": {"seasons": 0, "episodes": 0, "assets": 0, "shots": 0, "continuity_chains": 0}},
+  {"fixture_id": "early-development", "path": "projects/early-development", "expected": {"seasons": 1, "episodes": 1, "assets": 0, "shots": 0, "continuity_chains": 0}},
+  {"fixture_id": "asset-production", "path": "projects/asset-production", "expected": {"seasons": 0, "episodes": 0, "assets": 1, "shots": 0, "continuity_chains": 0}},
+  {"fixture_id": "shot-production", "path": "projects/shot-production", "expected": {"seasons": 0, "episodes": 0, "assets": 0, "shots": 1, "continuity_chains": 0}},
+  {"fixture_id": "blocked-dependency", "path": "projects/blocked-dependency", "expected": {"seasons": 0, "episodes": 0, "assets": 0, "shots": 0, "continuity_chains": 0}},
+  {"fixture_id": "full-select", "path": "projects/full-select", "expected": {"seasons": 0, "episodes": 0, "assets": 0, "shots": 0, "continuity_chains": 0}},
+  {"fixture_id": "partial-select", "path": "projects/partial-select", "expected": {"seasons": 0, "episodes": 0, "assets": 0, "shots": 0, "continuity_chains": 0}},
+  {"fixture_id": "continuity-conflict", "path": "projects/continuity-conflict", "expected": {"seasons": 0, "episodes": 0, "assets": 0, "shots": 0, "continuity_chains": 1}},
+  {"fixture_id": "season-emotion", "path": "projects/season-emotion", "expected": {"seasons": 1, "episodes": 0, "assets": 0, "shots": 0, "continuity_chains": 0}},
+  {"fixture_id": "episode-emotion", "path": "projects/episode-emotion", "expected": {"seasons": 0, "episodes": 1, "assets": 0, "shots": 0, "continuity_chains": 0}},
+  {"fixture_id": "chinese-project", "path": "projects/chinese-project", "expected": {"seasons": 1, "episodes": 1, "assets": 0, "shots": 0, "continuity_chains": 0}},
+  {"fixture_id": "english-project", "path": "projects/english-project", "expected": {"seasons": 1, "episodes": 1, "assets": 0, "shots": 0, "continuity_chains": 0}},
+  {"fixture_id": "smoke-project", "path": "smoke-project", "expected": {"seasons": 1, "episodes": 2, "assets": 5, "shots": 4, "continuity_chains": 1}}
+]

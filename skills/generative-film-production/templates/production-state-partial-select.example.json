@@ -1,0 +1,28 @@
+{
+  "units": {
+    "SH001_G01": {
+      "design_status": "EDIT_READY",
+      "runtime_status": "EDIT_READY",
+      "spec_version": 1,
+      "asset_registry_version": 1,
+      "model_profile_version": 1,
+      "keyframe": {
+        "file": "SH001_KF_A_SELECT.png",
+        "qc": "PASS",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "video": {
+        "generation_id": "GEN_SH001_01",
+        "file": "SH001_source.mp4",
+        "selected": {
+          "file": "SH001_source.mp4",
+          "disposition": "PARTIAL_SELECT",
+          "source_duration_seconds": 10.125,
+          "in_seconds": 0.0,
+          "out_seconds": 5.0
+        }
+      },
+      "observed_state_written": true
+    }
+  }
+}

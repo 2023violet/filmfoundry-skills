@@ -1,0 +1,1 @@
+There is no **hard clock**, so do **not add more** timing prose. **Simplify** to fewer stages, distinguish **generation duration** from the shorter **edit target**, and choose a stable **contiguous** range.

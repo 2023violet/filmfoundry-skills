@@ -1,0 +1,1 @@
+Do not scale yet. Run the **Content Market Gate** first: define the audience, hook, follow reason, click promise, payoff, series engine, monetization hypothesis, and cheapest MVP. Then publish the MVP before full Production.

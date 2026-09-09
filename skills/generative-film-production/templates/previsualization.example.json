@@ -1,0 +1,12 @@
+{
+  "previsualization_id": "PREVIS_EP01_SH001",
+  "production_unit": "EP01_SH001_G01",
+  "duration_seconds": 3,
+  "state_alignment": "PASS",
+  "initial_state": "watcher stands frame right; lantern dark",
+  "end_state": "watcher remains frame right; gate stays readable",
+  "asset_id": "PREVIS_EP01_SH001",
+  "route": "SHORT_ESTABLISHMENT_PASS",
+  "observable_result": "one slow push-in preserves entrance geography",
+  "extensions": {}
+}

@@ -1,0 +1,5 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "https://filmfoundry.dev/schemas/asset-dependency-graph.v3.json",
+  "type": "object", "additionalProperties": false, "required": ["schema_version", "graph_id", "nodes", "edges"],
+  "properties": {"schema_version": {"const": "asset-dependency-graph.v3"}, "graph_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"}, "nodes": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"}}, "edges": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["source", "target", "relation"], "properties": {"source": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"}, "target": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"}, "relation": {"enum": ["DEPENDS_ON_APPROVAL", "STATE_VARIANT_OF", "DERIVED_FROM", "RESEMBLANCE_TARGET", "NARRATIVE_RELATION", "RECURS_IN", "MUST_PRECEDE"]}, "extensions": {"type": "object"}}}}, "extensions": {"type": "object"}}
+}

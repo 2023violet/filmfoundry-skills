@@ -1,0 +1,8 @@
+{
+  "schema_version": "creator-source-catalog.v1",
+  "project_id": "FULL_SELECT",
+  "runtime_path": "runtime.json",
+  "sources": [
+    {"source_id": "SRC_STATE", "source_kind": "production_state", "path": "production-state.v3.json", "path_base": "WORKSPACE_ROOT", "parser_id": "production-state-json", "schema_version": "production-state.v3", "authority_role": "CURRENT", "scope": "project", "required": true}
+  ]
+}

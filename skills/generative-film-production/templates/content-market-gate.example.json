@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.2",
+  "gate_mode": "REQUIRED",
+  "project_intent": "SERIES_BUSINESS",
+  "one_sentence_conflict": "A courier can move after the whole city freezes, but every rescue shortens the time before he freezes too.",
+  "audience": "16-35 short-form suspense and high-concept fantasy viewers",
+  "click_reason": "An impossible visual event is understandable immediately and creates a question that demands an answer.",
+  "hook_3s": "A crowded street freezes in place while one courier keeps moving.",
+  "viewer_payoff": "Each episode resolves one anomaly rule while revealing a larger serial mystery.",
+  "follow_reason": "The same protagonist and anomaly system escalate across episodes, with a cliffhanger that changes the next rule.",
+  "series_engine_30": "Thirty anomalies can be generated from the same rule system; each episode contains one local problem plus one step in the serial mystery.",
+  "monetization_route": "platform revenue first; sponsorship, licensing, and IP extensions only after audience validation",
+  "cheapest_mvp": {
+    "format": "45-60 second short-form episode",
+    "variants": 3,
+    "production_limit": "5-8 simple shots, one lead, no complex lip sync, one or two locations"
+  },
+  "ai_production_fit": "AI-native: visual anomaly, limited cast, voice-over-led narration, short clips, simple motion, controllable locations.",
+  "platform_hypothesis": "Use one short-form discovery platform for the first controlled test; repurpose only after a concept proves retention and follow intent.",
+  "decision": "MVP_ONLY",
+  "mvp_evidence": {
+    "status": "NOT_RUN",
+    "evidence_ids": [],
+    "success_criteria": "Declare project-specific retention, completion, follow, save/comment, cost, and production-time thresholds before publishing the MVP set.",
+    "result_summary": ""
+  }
+}

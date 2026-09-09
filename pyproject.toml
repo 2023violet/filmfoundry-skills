@@ -1,15 +1,16 @@
 [project]
 name = "filmfoundry-skills"
-version = "1.3.3"
+version = "3.0.0"
 description = "Production-oriented Agent Skills for model-agnostic AI filmmaking workflows"
 requires-python = ">=3.11"
 
 [project.scripts]
-ff = "filmfoundry_v2.cli:main"
+ff = "filmfoundry.cli:main"
 
 [tool.setuptools.packages.find]
-include = ["filmfoundry_v2*"]
+include = ["filmfoundry*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"
+norecursedirs = ["historical"]

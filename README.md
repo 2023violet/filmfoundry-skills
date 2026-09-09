@@ -1,151 +1,78 @@
 # FilmFoundry Skills
 
-**v3.0 core:** a provider-neutral creator-to-production system with typed Creator Read Models, lightweight work modes, deterministic renderers, validation, compilation, and evidence APIs.
-
-The active package is a clean break. Historical v1/v2 releases remain in Git
-history and are not accepted by the v3 package.
+FilmFoundry Skills is a general, creator-first toolkit for developing scripts and preparing visual production. It must work across projects; Wucheng is a downstream consumer, never a Core design branch.
 
 **Repository:** `filmfoundry-skills`  
 **Primary skill:** `generative-film-production`  
-**Version:** 3.0.0-rc1
+**Version:** 3.0.0
 
-开始使用：阅读[AI 视频全流程操作指南](docs/ai-video-production-guide-zh.md)。RC 评审和边界见[全面评分报告](docs/reports/2026-09-09-v3-rc-review.md)。
+## Current status
 
-FilmFoundry Skills is a production-oriented Agent Skill suite for AI filmmaking. v3.0 keeps the **Content-Market-First** front end while separating creative exploration from production and gate work, so a hook or prompt draft does not trigger full workspace and provider validation.
-The v3.0 core keeps the **format-agnostic visual-planning and edit-timeline layer** and hardens state alignment between Shot Specs and visual-control assets. Storyboards, first/last frames, keyframes, character sheets, scene sheets, and model-specific prompts are optional control artifacts chosen by production risk; none of them is the parent workflow. The v1.3.3 wording below is retained only as historical release context, not as an active compatibility contract.
+The repository has a local v3 technical RC and passing deterministic tests, but it is **not approved for publication**. A real from-zero script-creation trial showed that the current Skill is still too production-oriented: it can route a creative request, but it does not yet provide a concise, reusable script-creation workflow.
 
+The local `v3.0.0-rc1` tag is evidence of the earlier technical checkpoint only. It has not been pushed and must not be treated as product acceptance.
 
-## Status
-
-| Layer | Status |
+| Surface | Current evidence |
 |---|---|
-| Repository / Skill contract tests | **Static/TDD verified after release verification** |
-| Content Market Gate / runtime / shot / Select validators | **Deterministic validators included** |
-| Keyframe and provider structural prompt gates | **Deterministic lint only; not model obedience evidence** |
-| Authored eval fixtures | **Harness demonstrations only; not agent benchmark results** |
-| Fresh-context no-skill vs with-skill Agentic benchmark | **Pending** |
-| Real provider/model smoke tests | **Project-specific; not fabricated by this package** |
-| Real market MVP evidence | **Project-specific; not fabricated by this package** |
-| Real multi-project production validation | **Pending** |
+| Static contracts and deterministic validators | Verified locally |
+| Creator Read Model and renderer | Verified structurally |
+| Authored fixtures | Demonstrations, not an agent benchmark |
+| Fresh-context agentic benchmark | Pending |
+| Real from-zero creator trial | Product acceptance pending |
+| Provider-specific removal | Pending |
+| Multi-project creator validation | Pending |
 
-## Core idea
+## Product boundary
 
-> **Market before production. Spec before prompt. Evidence before trust. Runtime before memory.**
+FilmFoundry should help a creator:
 
-Commercial/creator route:
+1. turn an idea into a premise, logline, characters, dramatic rules, structure, draft, and revision;
+2. analyze an existing script, including emotion, causality, continuity, and production risk;
+3. prepare assets, images, prompts, and shot plans when the script is ready.
 
-```text
-Idea
-→ Content Market Gate
-→ Cheapest publishable MVP
-→ Market Evidence Review
-→ Production Approval
-→ Creative Brief
-→ Story / Asset / Shot Engineering
-→ Visual Control Gate (only when required)
-→ Model Profile + Adapter
-→ Generation
-→ Full or Partial Select
-→ Observed State
-→ Edit / Audio / Final QC
+External tools and people own video-provider calls, generation, downloads, and aesthetic video QC. The active implementation still contains older H3/provider execution and evidence surfaces; those are deprecated product debt and must be removed before release.
+
+## What remains valuable
+
+The v3 clean-break namespace, path safety, `UNKNOWN` / `INVALID` semantics, provenance, state alignment, deterministic serialization, Creator data model, and the Creative / Commit / Production / Gate boundary remain useful foundations. They do not by themselves prove that the Skill is pleasant or fast to create with.
+
+## Development
+
+```powershell
+python -m pytest -q
+python scripts/build_release_artifacts.py --out .dist
+python scripts/check_clean_extraction.py --wheel .dist/filmfoundry_skills-3.0.0-py3-none-any.whl --archive .dist/filmfoundry-skills-v3.0.0.zip
+git diff --check
 ```
 
-Non-market work such as a client-locked commission, pure art piece, portfolio study, or model-capability test may explicitly bypass the market gate with a recorded reason.
+`ff render` is read-only. A successful render is not a Gate decision and does not prove provider behavior, market performance, or creative quality.
 
-## Historical release notes (not active v3 behavior)
-
-### What changed in 1.3.3
-
-- Made CSV validators BOM-safe with `utf-8-sig`, including Asset Registry, aggregate Project Runtime asset loading, Selects Log, and Continuity Ledger. This fixes a real production integration failure where a valid Excel/Windows-style UTF-8 BOM made the first CSV header appear as `\ufeffasset_id`.
-- Added regression tests proving both standalone Asset Registry validation and aggregate Project Runtime validation accept BOM-prefixed registries.
-- No Canonical Shot Spec or provider behavior semantics changed.
-
-## What changed in 1.3.2
-
-- Added **Visual Control State Alignment**: an approved keyframe can be a partial authority and must not be used as a start/end frame when its visible state conflicts with the Shot Spec.
-- Added a state-audit template for comparing expected initial/end state against observed visual-control state before provider submission.
-- Clarified that **proxy smoke tests do not directly unlock a production route** when the production shot has different prop/location/state conditions.
-- Hardened First/Last guidance: authority pairs should isolate the intended transition and must not silently change unrelated locked states.
-- Corrected Picture Lock sequencing: timing-authoritative audio must be resolved before Picture Lock, while final SFX/music mix and subtitle export may finish after Picture Lock when they cannot change picture timing.
-
-## What changed in 1.3.1
-
-- Corrected the visual-planning layer to be **AI-video format agnostic**: comic, 3D animation, photoreal, ads, shorts, MV, and hybrid workflows share the same production architecture.
-- Added a generic **Visual Planning Layer**: use a single keyframe, first/last pair, storyboard board, continuity board, or no board at all according to the control problem.
-- Added **capability-scoped provider gates** so a shot may enter a pilot when its required model behaviors are evidenced, without waiting for unrelated global model tests.
-- Added an **Edit Timeline Contract**: Generation Units do not have to add up to final runtime, but every final episode must have explicit 100% timeline coverage before Picture Lock.
-- Clarified that **Picture Lock is an edit state**, not a synonym for static asset/keyframe readiness.
-- Added generic character/location reference-system templates that scale asset cost by recurrence and continuity risk instead of requiring three views/five expressions for every person.
-
-## 1.3.0 — superseded design note
-
-The short-lived 1.3.0 draft over-specialized the new visual-planning layer around comic / 漫剧 production. v1.3.1 retracts that specialization and preserves only the generally useful ideas: optional boards, reusable reference sheets, and board-level QC.
-
-## What changed in 1.2.0
-
-- Added a validated **Content Market Gate** for audience-growth, monetization, and repeatable-series projects.
-- Added `NO_GO`, `TRAFFIC_EXPERIMENT`, `MVP_ONLY`, `PRODUCTION_APPROVED`, and explicit `BYPASS` decisions.
-- Added a low-cost Market MVP loop with predeclared success criteria and dated evidence IDs.
-- Added AI-native content-design guidance: narrative engine before worldbuilding, strong hook/payoff/follow logic, and production-fit design.
-- Split provider source duration from required edit duration: `generation_duration_seconds` vs `edit_target_duration_seconds`.
-- Added traceable `PARTIAL_SELECT` support so a valid contiguous range can be used even when unused source footage fails later.
-- Added eyeline-critical shot/keyframe contracts to catch beautiful but narratively misdirected character frames.
-- Added model `behavior_observations` with evidence levels and source generation IDs; `OBSERVED_ONCE` cannot become a default adapter rule.
-- Added a controllability-budget reference to reduce long-prompt over-control, timing density, camera overload, and acting overload.
-- Updated QC to separate Prompt Compliance, Narrative Fitness, Identity/Continuity, Visual Quality, and Editability.
-- Expanded the adversarial eval suite from 18 to **26** cases.
-
-## Repository layout
+## Repository map
 
 ```text
 filmfoundry-skills/
-├── skills/generative-film-production/
-│   ├── SKILL.md
-│   ├── references/
-│   │   └── adapters/
-│   ├── templates/
-│   └── scripts/
-├── evals/
-├── scripts/
-├── tests/
-└── docs/
+├── filmfoundry/                         # Python contracts and CLI
+├── skills/generative-film-production/  # Primary Agent Skill
+├── schemas/                             # Active schemas
+├── evals/                               # Authored guardrail fixtures
+├── tests/                               # Deterministic regression tests
+├── docs/                                # User docs and repository evidence
+├── CURRENT_HANDOFF.md                   # Current repository handoff
+└── CHANGELOG.md                         # Version history
 ```
 
-## Install
+Start with [the documentation index](docs/README.md). Repository history is recorded in [CHANGELOG.md](CHANGELOG.md); it is not an active compatibility promise.
 
-Copy `skills/generative-film-production/` into the Agent Skills directory used by your runtime. Validators use Python 3.11+ standard library only; runtime templates use JSON/CSV so validation does not require PyYAML.
+## Release rule
 
-## Validate
+Do not publish a v3 release until all of the following are true:
 
-```bash
-python -m pytest -q
-python skills/generative-film-production/scripts/validate_content_market_gate.py \
-  skills/generative-film-production/templates/content-market-gate.example.json
-python skills/generative-film-production/scripts/validate_project_runtime.py \
-  skills/generative-film-production/templates/project-runtime.example.json
-python skills/generative-film-production/scripts/validate_shot_spec.py \
-  skills/generative-film-production/templates/shot-spec.example.json
-python skills/generative-film-production/scripts/validate_selects_log.py \
-  skills/generative-film-production/templates/selects-log.csv
-python scripts/validate_evals.py evals/evals.json
-```
-
-## Work-mode routing and Creator Dashboard
-
-Use `ff route --request "..." --format json` to select the lightest safe mode. Creative requests return draft labels without Runtime, media, or provider calls; Production and Gate are explicit boundaries.
-
-```bash
-ff route --request "给我三个 hook" --format json
-ff render --root path/to/project --out path/to/render --format json
-python scripts/benchmark_work_modes.py --format json
-```
-
-`ff render` is a read-only dashboard export. A successful render does not mean that Gate Mode or a provider route is approved; inspect `render-manifest.json` for coverage, warnings, blockers, and `data_status`.
-
-## Evidence boundary
-
-Static tests prove the package and deterministic contracts, not audience demand, video quality, provider obedience, or profitability. A prompt linter cannot prove a provider follows the prompt. An authored eval fixture is not a benchmark run. A Content Market Gate hypothesis is not market validation. Real dated publishing evidence and real model generations remain separate evidence layers.
+- provider-specific execution/evidence responsibilities are removed from the active Skill, code, tests, and user docs;
+- a concise from-zero script-creation workflow is implemented;
+- at least one fresh-context creator completes a real script with it and records friction honestly;
+- deterministic tests and clean extraction pass again;
+- the release commit and tag point to the exact reviewed contents.
 
 ## License
 
-MIT. See `LICENSE`.
+MIT. See [LICENSE](LICENSE).

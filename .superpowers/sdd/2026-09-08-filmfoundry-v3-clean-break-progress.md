@@ -1,5 +1,7 @@
 # FilmFoundry v3.0 clean-break progress
 
+> **Historical execution ledger:** The technical milestones below are preserved as evidence. They do not represent the current release decision; publication is paused after creator-first product review. Use `CURRENT_HANDOFF.md` for current work.
+
 Base: `b6f3f9d` on `codex/filmfoundry-v2.3-creator-read-model`; the curated RC implementation is committed as `811aca5` and tagged locally as `v3.0.0-rc1`. Later commits contain only release evidence and progress documentation; pre-existing `build/` remains untracked and untouched.
 
 - Task 0: execution plan and binding decisions recorded.

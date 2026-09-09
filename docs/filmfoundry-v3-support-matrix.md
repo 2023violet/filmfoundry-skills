@@ -1,5 +1,7 @@
 # FilmFoundry v3 Support Matrix
 
+> **Status — product reset:** This matrix records the current technical implementation. Rows concerning provider payloads, provider evidence, video generation, or video-quality gates describe deprecated product debt pending removal; they are not the intended release boundary.
+
 | Area | Status | Boundary |
 |---|---|---|
 | Workspace, asset, shot, prompt, state, graph contracts | CONTRACTED | Core validates structure and references. |

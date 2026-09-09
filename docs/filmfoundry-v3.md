@@ -1,5 +1,7 @@
 # FilmFoundry Skills v3.0 User Guide
 
+> **Status — product reset:** This guide describes the implemented technical surface, not an approved creator-first workflow. Publication is paused while the from-zero script path is added and provider-specific responsibilities are removed. See the repository `CURRENT_HANDOFF.md` for the current decision.
+
 FilmFoundry v3 is a provider-neutral contract layer for AI video production.
 It makes creative decisions inspectable and compilable without claiming that a
 provider, model, editor, or human reviewer has completed the work.

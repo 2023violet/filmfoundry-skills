@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased — creator-first product reset
+
+- Paused publication of the local v3 technical RC after a from-zero script trial exposed a missing reusable creator workflow.
+- Reaffirmed that FilmFoundry is general and project-neutral; Wucheng remains a downstream integration rather than a Core design target.
+- Narrowed the intended responsibility to script creation, analysis, revision, and visual-production preparation. Provider execution, video generation, and aesthetic video QC belong to people and external tools.
+- Marked the existing H3/provider execution and evidence surfaces for removal before the next release decision.
+- Added a current handoff, concise repository guidance, and a documentation index; historical reports remain checkpoint evidence rather than active product approval.
+
 ## 3.0.0-rc1 — 2026-09-09
 
 - Replaced the active `filmfoundry_v2` package with the canonical `filmfoundry` v3 package and removed the migration command and old schema acceptance.

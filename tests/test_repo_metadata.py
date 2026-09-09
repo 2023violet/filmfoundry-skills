@@ -24,6 +24,19 @@ def test_repo_has_release_metadata_and_ci():
         assert (ROOT / rel).is_file(), rel
 
 
+def test_ci_runs_v3_artifact_and_clean_extraction_gates():
+    workflow = (ROOT / ".github" / "workflows" / "test.yml").read_text(encoding="utf-8")
+    for token in (
+        "python -m pip wheel . --no-deps --no-build-isolation --wheel-dir .dist",
+        "python scripts/build_release_artifacts.py --out .dist",
+        "python scripts/check_clean_extraction.py",
+        "SOURCE_DATE_EPOCH: \"0\"",
+        "filmfoundry_skills-3.0.0-py3-none-any.whl",
+        "filmfoundry-skills-v3.0.0.zip",
+    ):
+        assert token in workflow
+
+
 def test_public_package_version_matches_v30_release_metadata():
     pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
     readme = (ROOT / "README.md").read_text(encoding="utf-8")

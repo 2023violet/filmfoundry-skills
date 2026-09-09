@@ -1,7 +1,18 @@
 # FilmFoundry clean handoff
 
 **Date:** 2026-09-10
+**Primary branch after handoff:** `main`
 **Source branch:** `codex/filmfoundry-v2.3-creator-read-model`
+
+## Main integration recovery
+
+On 2026-09-10, an attempted integration moved the v3 working files into the old `main` checkout without creating a Git merge. The old v1/v2 tree and new v3 tree coexisted, while the source v3 worktree appeared deleted.
+
+The recovery preserved the interrupted filesystem snapshot on local branch `rescue/filmfoundry-main-pre-repair-20260910` at commit `8fef9a6`. The v3 source worktree was restored, the documentation cleanup was committed as `8d361f9`, and the real two-parent integration merge was created as `af94d58`.
+
+The merge result deliberately removes the active `filmfoundry_v2` package, v2 schemas, v2 active fixtures/tests, and the old v2 guide. Historical v2 contract coverage remains under `tests/historical/`. The merge result passed 299 tests before this handoff update.
+
+This is a repository integration for AI handoff, not a product release. No new release tag or GitHub Release is authorized by this merge; the existing local `v3.0.0-rc1` tag remains historical technical evidence.
 **Observed HEAD before this documentation pass:** `79585a331d5d1ff536b769ec787770d59d6b8c26`
 
 ## Decision

@@ -24,11 +24,19 @@ _MODE_ALIASES: dict[str, WorkMode] = {
 }
 
 _CREATOR_SCRIPT_RE = re.compile(
-    r"从零|空白|想法|创意|故事|剧本|梗概|人物|情节|hook|idea|story|script|premise|logline|character|plot|draft|revise",
+    r"从零|空白|模糊想法|创意|创作(?:故事|剧本)|故事(?:片段|梗概|大纲|创作|开发)?|剧本|梗概|情节|"
+    r"人物(?:弧光|动机|塑造|小传|开发)|"
+    r"\b(?:hook|idea|seed|fragment|premise|outline|screenplay|script|story|logline|plot)\b|"
+    r"\b(?:a|my|this|existing|rough|first|script|screenplay)\s+draft\b|"
+    r"\b(?:develop|write|create|revise|rewrite)\b.{0,24}\b(?:story|script|screenplay|outline|premise|logline|plot|character)\b|"
+    r"\bcharacter\s+(?:arc|motivation|development|backstory)\b",
     re.IGNORECASE,
 )
 _EXISTING_SCRIPT_RE = re.compile(
-    r"已有剧本|现有剧本|分析剧本|修改剧本|修订剧本|existing script|script draft|revise|rewrite",
+    r"已有(?:剧本|初稿|草稿)|现有(?:剧本|初稿|草稿)|"
+    r"(?:分析|修改|修订|重写)(?:这个|这份|我的)?(?:剧本|初稿|草稿)|"
+    r"\bexisting\s+(?:script|screenplay|draft)\b|\b(?:script|screenplay)\s+draft\b|"
+    r"\b(?:analyze|analyse|revise|rewrite)\s+(?:(?:this|my|the|an)\s+)?(?:script|screenplay|draft)\b",
     re.IGNORECASE,
 )
 
@@ -119,7 +127,9 @@ def _references_for_request(mode: WorkMode, request: str) -> tuple[str, ...]:
     if mode in {MODE_CREATIVE, MODE_COMMIT} and _EXISTING_SCRIPT_RE.search(request):
         if "references/39-script-facts-and-emotion.md" not in references:
             references.append("references/39-script-facts-and-emotion.md")
-    if mode == MODE_CREATIVE and any(token in normalized for token in ("商业", "变现", "系列", "market", "monetiz")):
+    if mode == MODE_CREATIVE and any(
+        token in normalized for token in ("商业", "变现", "系列", "commercial", "market", "monetiz", "series")
+    ):
         references[0:0] = [
             "references/20-content-market-gate.md",
             "references/21-market-mvp.md",

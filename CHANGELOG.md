@@ -2,6 +2,7 @@
 
 ## Unreleased — creator-first product reset
 
+- Added a Chinese full-workflow user manual covering installation, creator entry states, seven script gates, revision, Commit, visual-production preparation, external handoff, validation, and executable runbooks.
 - Added the seven-gate creator-first script workflow from seed through reviewed revision.
 - Added an optional script-development workbook for long or cross-session creation without making it a short-workflow requirement.
 - Reduced default Creative routing to Work Modes plus the creator workflow, with market and script-analysis references loaded only when requested.

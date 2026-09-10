@@ -1,6 +1,6 @@
 # FilmFoundry AI 视频全流程操作指南
 
-> **状态说明：**空白创意请先使用 `skills/generative-film-production/references/41-creator-first-script-workflow.md`；本指南从剧本确认后的视觉生产准备开始。当前 v3 发布已暂停；在 fresh-context 证据和 Provider 职责清理完成前，请勿把本指南当成发布认可。
+> **状态说明：**完整用法先读 `docs/filmfoundry-skills-user-manual-zh.md`；空白创意使用 `skills/generative-film-production/references/41-creator-first-script-workflow.md`。本指南从剧本确认后的视觉生产准备开始。当前 v3 发布已暂停；在 fresh-context 证据和 Provider 职责清理完成前，请勿把本指南当成发布认可。
 
 本指南面向第一次做 AI 视频、又希望以后能重复生产的团队。它说明每一步该读什么、写什么、校验什么，以及哪些事情必须交给外部工具或人工完成。FilmFoundry 是生产契约和证据层，不是图片/视频/声音生成器。
 

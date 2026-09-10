@@ -4,6 +4,7 @@ This index separates current instructions from historical evidence. The reposito
 
 ## Current user documents
 
+- [FilmFoundry Skills 全流程使用手册](filmfoundry-skills-user-manual-zh.md) — 从安装、四种入口和七个创作 Gate，到视觉生产准备、外部交接与验证的公开第一入口。
 - [Creator-first script workflow](../skills/generative-film-production/references/41-creator-first-script-workflow.md) — the current starting point for a blank idea, outline, or draft.
 - [Creator-first trial protocol](../evals/creator-first-trial-protocol.md) — the fresh-context product-evidence procedure.
 - [FilmFoundry v3 technical guide](filmfoundry-v3.md) — documents the implemented v3 contracts and CLI. It is not yet the approved creator onboarding flow.

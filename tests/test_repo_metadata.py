@@ -54,3 +54,35 @@ def test_model_profile_template_exists_and_records_evidence_scope():
     text = path.read_text(encoding="utf-8").lower()
     for token in ["model", "provider", "verified", "strengths", "weaknesses", "reference", "timing", "identity"]:
         assert token in text
+
+
+def test_chinese_user_manual_is_public_and_covers_the_full_workflow():
+    manual_path = ROOT / "docs" / "filmfoundry-skills-user-manual-zh.md"
+    manual = manual_path.read_text(encoding="utf-8")
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    docs_index = (ROOT / "docs" / "README.md").read_text(encoding="utf-8")
+
+    assert "docs/filmfoundry-skills-user-manual-zh.md" in readme
+    assert "filmfoundry-skills-user-manual-zh.md" in docs_index
+    for heading in (
+        "## 1. 快速开始",
+        "## 2. 选择入口状态与工作模式",
+        "## 3. 从零完成剧本",
+        "## 4. 从现有材料继续",
+        "## 5. 保存进度与跨会话恢复",
+        "## 6. 确认创作决定",
+        "## 7. 剧本确认后的视觉生产准备",
+        "## 8. 外部工具交接",
+        "## 9. 验证与证据边界",
+        "## 10. 可直接执行的 Runbook",
+        "## 11. 常见错误与处理",
+        "## 12. 阶段完成检查表",
+    ):
+        assert heading in manual
+    for canonical_path in (
+        "references/40-work-modes.md",
+        "references/41-creator-first-script-workflow.md",
+        "templates/script-development-workbook.md",
+    ):
+        assert canonical_path in manual
+    assert "Provider 调用、视频生成、下载和审美 QC" in manual

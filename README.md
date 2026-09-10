@@ -66,7 +66,7 @@ filmfoundry-skills/
 └── CHANGELOG.md                         # Version history
 ```
 
-Start with [the documentation index](docs/README.md). Repository history is recorded in [CHANGELOG.md](CHANGELOG.md); it is not an active compatibility promise.
+Start with the [Chinese full-workflow user manual](docs/filmfoundry-skills-user-manual-zh.md), then use [the documentation index](docs/README.md) for technical and evidence references. Repository history is recorded in [CHANGELOG.md](CHANGELOG.md); it is not an active compatibility promise.
 
 ## Release rule
 

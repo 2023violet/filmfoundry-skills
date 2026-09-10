@@ -34,7 +34,7 @@ Wucheng is a downstream integration project. Do not add Wucheng identifiers, pat
 | Surface | Status | Evidence / action |
 |---|---|---|
 | Code | Pending | Technical v3 contracts exist; provider-specific product debt remains active. |
-| Docs | Changed and verified | Public status, creator workflow, trial protocol/report, documentation index, and this handoff are reconciled in this pass. |
+| Docs | Changed and verified | Public status, Chinese full-workflow manual, creator workflow, trial protocol/report, documentation index, and this handoff are reconciled in this pass. |
 | Runtime | Out of scope | FilmFoundry is a distributable Skill; downstream project Runtime remains project-owned. |
 | Rules | Changed and verified | `AGENTS.md` records current boundaries and verification commands. |
 | Memory | Changed and verified | A user-authorized correction note records the creator-first direction without editing machine-generated memory files. |

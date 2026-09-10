@@ -1,15 +1,15 @@
-# Creative Brief v1.2
+# Creative Brief
 
 - Project:
-- Market Gate ID / decision:
-- Market evidence status: `HYPOTHESIS` / `MVP_TESTING` / `MVP_PASS` / `BYPASS`
-- Audience:
-- Platform / Format hypothesis:
-- Duration range:
-- Purpose:
-- Point X:
-- Core message / story:
-- Emotional arc:
+- Entry source: `SEED_ACCEPTED` / `LOGLINE_ACCEPTED` / existing brief
+- Intended audience experience:
+- Format and target length:
+- Premise:
+- Accepted logline:
+- Protagonist change or deliberate non-change:
+- Dramatic rules:
+- Ending promise:
+- Market Gate ID / decision: optional unless commercial or repeatable-series work
 - Hard constraints:
-- Delivery specs:
+- Delivery specifications: optional until production preparation
 - Gate status: `DRAFT` / `BRIEF_LOCKED`

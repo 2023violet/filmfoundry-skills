@@ -7,9 +7,11 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def test_readme_uses_public_suite_and_repo_name():
     text = (ROOT / "README.md").read_text(encoding="utf-8")
+    pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
     assert "FilmFoundry Skills" in text
     assert "filmfoundry-skills" in text
     assert "generative-film-production" in text
+    assert 'description = "Creator-first script development and visual-production preparation Skills"' in pyproject
 
 
 def test_readme_distinguishes_verified_static_tests_from_pending_agentic_benchmark():
@@ -17,6 +19,8 @@ def test_readme_distinguishes_verified_static_tests_from_pending_agentic_benchma
     assert "static" in text and "verified" in text
     assert "agentic" in text and "pending" in text
     assert "fixtures" in text and "not" in text and "benchmark" in text
+    assert "provider-specific removal" in text and "pending" in text
+    assert "fresh-context" in text
 
 
 def test_repo_has_release_metadata_and_ci():

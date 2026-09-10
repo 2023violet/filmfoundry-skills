@@ -1,10 +1,10 @@
 # FilmFoundry Skills v3.0 User Guide
 
-> **Status — product reset:** This guide describes the implemented technical surface, not an approved creator-first workflow. Publication is paused while the from-zero script path is added and provider-specific responsibilities are removed. See the repository `CURRENT_HANDOFF.md` for the current decision.
+> **Status — product reset:** This guide describes the implemented technical surface and creator-first workflow contract, not an approved release. Publication is paused while fresh-context evidence is gathered and provider-specific responsibilities are removed. See the repository `CURRENT_HANDOFF.md` for the current decision.
 
-FilmFoundry v3 is a provider-neutral contract layer for AI video production.
-It makes creative decisions inspectable and compilable without claiming that a
-provider, model, editor, or human reviewer has completed the work.
+FilmFoundry starts with script creation or revision. It prepares generic visual-production handoffs only after the creative direction is accepted; provider calls and generated-media QC remain external.
+
+The v3 technical layer makes accepted creative decisions inspectable and compilable without claiming that a provider, model, editor, or human reviewer has completed the work.
 
 The v3 core owns Workspace Manifest, Asset Registry, Canonical Shot Spec,
 Prompt Markdown metadata, lifecycle transitions, reference graphs, and

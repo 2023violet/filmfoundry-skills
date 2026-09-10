@@ -8,7 +8,9 @@ FilmFoundry Skills is a general, creator-first toolkit for developing scripts an
 
 ## Current status
 
-The repository has a local v3 technical RC and passing deterministic tests, but it is **not approved for publication**. A real from-zero script-creation trial showed that the current Skill is still too production-oriented: it can route a creative request, but it does not yet provide a concise, reusable script-creation workflow.
+The repository has a local v3 technical RC and passing deterministic tests, but it is **not approved for publication**. The creator-first workflow contract is implemented; fresh-context product evidence and provider-surface removal remain release blockers.
+
+Blank-idea script work starts with `references/41-creator-first-script-workflow.md`; production references remain deferred until the creator accepts the script or explicitly requests production preparation.
 
 The local `v3.0.0-rc1` tag is evidence of the earlier technical checkpoint only. It has not been pushed and must not be treated as product acceptance.
 
@@ -17,8 +19,8 @@ The local `v3.0.0-rc1` tag is evidence of the earlier technical checkpoint only.
 | Static contracts and deterministic validators | Verified locally |
 | Creator Read Model and renderer | Verified structurally |
 | Authored fixtures | Demonstrations, not an agent benchmark |
-| Fresh-context agentic benchmark | Pending |
-| Real from-zero creator trial | Product acceptance pending |
+| Creator-first workflow contract | Implemented and deterministically verified |
+| Fresh-context creator trial | Agentic product evidence pending |
 | Provider-specific removal | Pending |
 | Multi-project creator validation | Pending |
 

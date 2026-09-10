@@ -2,6 +2,10 @@
 
 ## Unreleased — creator-first product reset
 
+- Added the seven-gate creator-first script workflow from seed through reviewed revision.
+- Added an optional script-development workbook for long or cross-session creation without making it a short-workflow requirement.
+- Reduced default Creative routing to Work Modes plus the creator workflow, with market and script-analysis references loaded only when requested.
+- Added the E27 authored guardrail and a separate fresh-context multi-turn trial protocol; fixtures remain non-benchmark evidence.
 - Paused publication of the local v3 technical RC after a from-zero script trial exposed a missing reusable creator workflow.
 - Reaffirmed that FilmFoundry is general and project-neutral; Wucheng remains a downstream integration rather than a Core design target.
 - Narrowed the intended responsibility to script creation, analysis, revision, and visual-production preparation. Provider execution, video generation, and aesthetic video QC belong to people and external tools.

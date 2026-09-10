@@ -1,7 +1,7 @@
 [project]
 name = "filmfoundry-skills"
 version = "3.0.0"
-description = "Production-oriented Agent Skills for model-agnostic AI filmmaking workflows"
+description = "Creator-first script development and visual-production preparation Skills"
 requires-python = ">=3.11"
 
 [project.scripts]

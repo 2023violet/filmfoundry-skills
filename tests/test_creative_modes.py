@@ -70,6 +70,12 @@ def test_creator_reference_selection_distinguishes_script_development_from_visua
         "I have a seed and need help developing it.": False,
         "Please rewrite this screenplay.": True,
         "Please analyze this existing draft.": True,
+        "Analyze my rough draft.": True,
+        "请修改这份初稿。": True,
+        "请修改这份初稿，然后做分镜。": True,
+        "Rewrite my rough draft, then make a storyboard.": True,
+        "Create a draft, then make a storyboard.": False,
+        "我有一个想法，帮我完善一下。": False,
         "请帮我完善这个人物弧光。": False,
     }
     for request, needs_script_facts in creator_cases.items():
@@ -82,8 +88,24 @@ def test_creator_reference_selection_distinguishes_script_development_from_visua
         "Design a character reference image.",
         "Create a storyboard for this approved scene.",
         "Rewrite this provider prompt draft.",
+        "Rewrite this prompt draft.",
+        "修改这份提示词草稿。",
+        "请为这个已确认场景制作故事板。",
+        "帮我做角色视觉创意和参考图。",
+        "Design character reference images based on this approved script.",
+        "Edit storyboard from script.",
+        "Revise storyboard from script.",
+        "Analyze storyboard from script.",
+        "Improve shot plan from screenplay.",
+        "Write a storyboard from the script.",
     ):
         assert "references/41-creator-first-script-workflow.md" not in route_request(request).references
+
+    for request in (
+        "Create a logline, then make a storyboard.",
+        "Develop the character arc, then create a character reference image.",
+    ):
+        assert "references/41-creator-first-script-workflow.md" in route_request(request).references
 
     market = route_request("Develop a commercial series story from a blank idea.")
     assert market.references[:3] == (

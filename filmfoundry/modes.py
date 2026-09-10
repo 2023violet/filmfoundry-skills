@@ -23,22 +23,53 @@ _MODE_ALIASES: dict[str, WorkMode] = {
     "验收": MODE_GATE,
 }
 
+_SCRIPT_DEVELOPMENT_ACTION_RE = re.compile(
+    r"(?:写|创作|开发|完善|修改|修订|分析|重写|构思|塑造).{0,20}(?:故事|剧本|初稿|草稿|梗概|大纲|情节|人物|角色)|"
+    r"(?:故事|剧本|初稿|草稿|梗概|大纲|情节|人物|角色).{0,20}(?:开发|完善|修改|修订|分析|重写)|"
+    r"\b(?:develop|write|create|revise|rewrite|analyze|analyse|edit|improve|finish)\b.{0,24}"
+    r"\b(?:story|script|screenplay|outline|premise|logline|plot|draft|character)\b",
+    re.IGNORECASE,
+)
+_STRONG_SCRIPT_DEVELOPMENT_ACTION_RE = re.compile(
+    r"(?:写|创作|开发|完善|修改|修订|分析|重写|构思)(?:一下)?(?:这个|这份|我的)?"
+    r"(?:故事|剧本|初稿|草稿|梗概|大纲|情节|人物弧光|人物动机|角色弧光)|"
+    r"\b(?:develop|write|create|revise|rewrite|analyze|analyse|edit|improve|finish)\s+"
+    r"(?:(?:a|an|the|this|my|our)\s+)?"
+    r"(?:story|script|screenplay|outline|premise|logline|plot|"
+    r"(?:(?:rough|first|existing)\s+)?draft|character arc|character motivation|character backstory)\b",
+    re.IGNORECASE,
+)
 _CREATOR_SCRIPT_RE = re.compile(
-    r"从零|空白|模糊想法|创意|创作(?:故事|剧本)|故事(?:片段|梗概|大纲|创作|开发)?|剧本|梗概|情节|"
+    r"从零|空白|模糊想法|"
+    r"(?:我)?(?:有|只有|目前有).{0,8}(?:想法|创意|故事片段|种子|梗概|大纲|初稿|草稿|剧本)|"
     r"人物(?:弧光|动机|塑造|小传|开发)|"
-    r"\b(?:hook|idea|seed|fragment|premise|outline|screenplay|script|story|logline|plot)\b|"
-    r"\b(?:a|my|this|existing|rough|first|script|screenplay)\s+draft\b|"
-    r"\b(?:develop|write|create|revise|rewrite)\b.{0,24}\b(?:story|script|screenplay|outline|premise|logline|plot|character)\b|"
-    r"\bcharacter\s+(?:arc|motivation|development|backstory)\b",
+    r"\b(?:i have|i've got|start(?:ing)? with)\b.{0,24}\b(?:idea|seed|fragment|premise|outline|draft|story|script|screenplay)\b|"
+    r"\b(?:hooks?|blank (?:idea|page)|story fragment|character arc|character motivation)\b|"
+    r"\b(?:story|script|screenplay|outline|premise|logline|plot|draft|character)\b.{0,24}"
+    r"\b(?:development|revision|rewrite|analysis)\b",
+    re.IGNORECASE,
+)
+_VISUAL_ARTIFACT_RE = re.compile(
+    r"故事板|分镜|角色(?:参考|视觉|设定图)|参考图|提示词|提示语|"
+    r"\b(?:storyboard|character reference|reference image|visual reference|shot plan|shot spec|asset|prompt)\b",
     re.IGNORECASE,
 )
 _EXISTING_SCRIPT_RE = re.compile(
     r"已有(?:剧本|初稿|草稿)|现有(?:剧本|初稿|草稿)|"
     r"(?:分析|修改|修订|重写)(?:这个|这份|我的)?(?:剧本|初稿|草稿)|"
     r"\bexisting\s+(?:script|screenplay|draft)\b|\b(?:script|screenplay)\s+draft\b|"
-    r"\b(?:analyze|analyse|revise|rewrite)\s+(?:(?:this|my|the|an)\s+)?(?:script|screenplay|draft)\b",
+    r"\b(?:analyze|analyse|revise|rewrite)\s+(?:(?:this|my|the|an)\s+)?"
+    r"(?:(?:existing|rough|first)\s+)?(?:script|screenplay|draft)\b",
     re.IGNORECASE,
 )
+
+
+def _is_creator_script_request(request: str) -> bool:
+    if _VISUAL_ARTIFACT_RE.search(request) and not (
+        _STRONG_SCRIPT_DEVELOPMENT_ACTION_RE.search(request) or _CREATOR_SCRIPT_RE.search(request)
+    ):
+        return False
+    return bool(_SCRIPT_DEVELOPMENT_ACTION_RE.search(request) or _CREATOR_SCRIPT_RE.search(request))
 
 _PROFILE_REFERENCES: dict[WorkMode, tuple[str, ...]] = {
     MODE_CREATIVE: (
@@ -122,7 +153,7 @@ def mode_output_contract(mode: WorkMode) -> tuple[str, ...]:
 def _references_for_request(mode: WorkMode, request: str) -> tuple[str, ...]:
     references = list(reference_profile(mode))
     normalized = request.lower()
-    if mode == MODE_CREATIVE and _CREATOR_SCRIPT_RE.search(request):
+    if mode == MODE_CREATIVE and _is_creator_script_request(request):
         references.insert(0, "references/41-creator-first-script-workflow.md")
     if mode in {MODE_CREATIVE, MODE_COMMIT} and _EXISTING_SCRIPT_RE.search(request):
         if "references/39-script-facts-and-emotion.md" not in references:

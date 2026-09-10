@@ -21,6 +21,7 @@ REQUIRED_REFERENCES = [
     "references/12-audio.md",
     "references/13-qc.md",
     "references/14-failure-recovery.md",
+    "references/41-creator-first-script-workflow.md",
 ]
 
 REQUIRED_ADAPTERS = [
@@ -44,6 +45,7 @@ REQUIRED_TEMPLATES = [
     "templates/generation-log.csv",
     "templates/selects-log.csv",
     "templates/qc-report.md",
+    "templates/script-development-workbook.md",
 ]
 
 
@@ -72,6 +74,7 @@ def test_root_skill_stays_compact_and_routes_by_stage():
         "Continuity",
         "Model Adapter",
         "QC",
+        "Creator-first script workflow",
     ]:
         assert token in text
 

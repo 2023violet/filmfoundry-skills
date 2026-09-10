@@ -20,6 +20,9 @@ def test_ambiguous_idea_routes_to_lightweight_creative_mode():
     assert decision.allow_source_writes is False
     assert "CREATIVE_DRAFT" in decision.output_labels
     assert "DEFERRED_CHECK" in decision.output_labels
+    assert "references/41-creator-first-script-workflow.md" in decision.references
+    assert "references/00-production-philosophy.md" not in decision.references
+    assert "references/22-ai-native-content-design.md" not in decision.references
     assert "references/09-prompt-compiler.md" not in decision.references
 
 

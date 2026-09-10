@@ -50,10 +50,10 @@ def test_v120_published_examples_pass_new_validators():
         assert result.returncode == 0, f"{script}: {result.stdout}{result.stderr}"
 
 
-def test_v120_eval_suite_has_26_cases_and_new_market_production_risks():
+def test_eval_suite_preserves_v120_cases_and_has_27_cases():
     data = json.loads((ROOT / "evals" / "evals.json").read_text(encoding="utf-8"))
     assert data["version"] == "3.0.0"
-    assert len(data["evals"]) == 26
+    assert len(data["evals"]) == 27
     ids = {case["id"] for case in data["evals"]}
     for prefix in (
         "E19-content-market-gate",

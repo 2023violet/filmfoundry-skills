@@ -869,6 +869,28 @@
           "text": "The response explains why inventory of topics is not the same as serialized viewer demand."
         }
       ]
+    },
+    {
+      "id": "E27-from-zero-script-entry",
+      "name": "Start a blank script with one creator question",
+      "prompt": "我想写一个八到十二分钟的短片，但目前只有想创作的愿望，没有故事、人物或世界观。请从零带我完成，不要假装我已经有制作方案。",
+      "expected_output": "The agent should identify the blank entry state, explain that it will guide the creator one decision at a time, and ask exactly one high-leverage question about the intended audience experience or core situation. It must not initialize production machinery.",
+      "assertions": [
+        {
+          "type": "contains_all",
+          "text": "Identifies the blank Creative entry state",
+          "terms": ["BLANK", "CREATIVE_DRAFT"]
+        },
+        {
+          "type": "not_contains",
+          "text": "Does not initialize production machinery",
+          "terms": ["Runtime", "provider", "Shot Spec", "视频生成"]
+        },
+        {
+          "type": "human",
+          "text": "The response asks exactly one material creator-facing question and waits instead of inventing the story."
+        }
+      ]
     }
   ]
 }

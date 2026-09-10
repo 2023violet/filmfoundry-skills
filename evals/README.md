@@ -1,6 +1,6 @@
 # FilmFoundry Agentic Evals
 
-`evals.json` contains 26 realistic behavior tests for `generative-film-production` v1.2.0.
+`evals.json` contains 27 realistic behavior tests for `generative-film-production` 3.0.0.
 
 v1.2 adds adversarial cases for Content Market Gate routing, cheapest-MVP restraint, no-monetization traffic experiments, partial-Select salvage, provider controllability over-timing, eyeline-critical keyframes, evidence overgeneralization, and the thirty-episode series engine.
 
@@ -23,3 +23,5 @@ Recommended external procedure:
 5. Compare failure modes and variance, not only average pass rate.
 
 The files under `fixtures/` are harness demonstrations only. They are deliberately authored examples, not LLM benchmark results. Keyword scores are smoke checks and can be gamed; they are never sufficient evidence of production quality.
+
+E27 is a single-turn authored guardrail for the blank-script entry. Only a completed run of `creator-first-trial-protocol.md` can supply current multi-turn product evidence. One completed run still does not prove creator speed or broad market fit.

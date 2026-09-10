@@ -1,6 +1,6 @@
 ---
 name: generative-film-production
-description: Use when planning, generating, reviewing, repairing, or finishing AI video, film, ads, music videos, product films, shorts, storyboards, recurring characters, multi-shot sequences, model-specific video prompts, continuity, or generative-video production workflows.
+description: Use when creating or revising scripts, developing stories and characters, or preparing assets, images, prompts, and shot plans for external visual-production tools.
 ---
 
 # Generative Film Production
@@ -12,6 +12,8 @@ description: Use when planning, generating, reviewing, repairing, or finishing A
 Use progressive disclosure: load only the references required by the current production stage. For multi-shot/recurring-asset projects, move current facts into the runtime artifacts instead of relying on a long Markdown plan.
 
 For a Chinese beginner-oriented walkthrough, start with `../../docs/ai-video-production-guide-zh.md`; this file remains the compact routing contract and the references hold the detailed decisions.
+
+FilmFoundry owns script creation, analysis, revision, and visual-production preparation. External tools and people own provider calls, video generation, downloads, and aesthetic video QC.
 
 ## Work modes
 
@@ -25,6 +27,10 @@ Route the request before loading project references. Use `references/40-work-mod
 | Ask whether something is ready, producible, publishable, or passes acceptance | **Gate Mode** | Run the complete capability-scoped validation and evidence review |
 
 Creative output is labeled `CREATIVE_DRAFT`, `ASSUMPTION`, `DEFERRED_CHECK`, or `HARD_CANON_CONFLICT`. A creative hypothesis never becomes Canon, Runtime, or Registry state without Commit Mode.
+
+## Creator-first script workflow
+
+When the creator has a blank idea, fragment, premise, outline, or draft, load `references/41-creator-first-script-workflow.md` first. Ask one question per turn and advance only the earliest unresolved creator gate. Do not load production, Runtime, provider, model-evidence, or video-QC references until the script is accepted or the creator explicitly asks for production preparation.
 
 ## Core invariants
 
@@ -61,6 +67,7 @@ Creative output is labeled `CREATIVE_DRAFT`, `ASSUMPTION`, `DEFERRED_CHECK`, or 
 
 | User state | Load |
 |---|---|
+| Blank idea, story fragment, outline, or draft needing development | `references/41-creator-first-script-workflow.md`; load `01`, `02`, or `39` only when its stage requires them |
 | Commercial/creator idea, monetization, repeatable series | `references/20-content-market-gate.md`, then `references/21-market-mvp.md`, `references/22-ai-native-content-design.md` |
 | Non-market idea / client-locked brief | `references/01-creative-brief.md` |
 | Script or narrative exists | `references/02-story-breakdown.md` |

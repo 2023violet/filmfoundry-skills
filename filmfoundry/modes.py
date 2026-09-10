@@ -23,12 +23,18 @@ _MODE_ALIASES: dict[str, WorkMode] = {
     "验收": MODE_GATE,
 }
 
+_CREATOR_SCRIPT_RE = re.compile(
+    r"从零|空白|想法|创意|故事|剧本|梗概|人物|情节|hook|idea|story|script|premise|logline|character|plot|draft|revise",
+    re.IGNORECASE,
+)
+_EXISTING_SCRIPT_RE = re.compile(
+    r"已有剧本|现有剧本|分析剧本|修改剧本|修订剧本|existing script|script draft|revise|rewrite",
+    re.IGNORECASE,
+)
+
 _PROFILE_REFERENCES: dict[WorkMode, tuple[str, ...]] = {
     MODE_CREATIVE: (
-        "references/00-production-philosophy.md",
-        "references/01-creative-brief.md",
-        "references/02-story-breakdown.md",
-        "references/22-ai-native-content-design.md",
+        "references/40-work-modes.md",
     ),
     MODE_COMMIT: (
         "references/01-creative-brief.md",
@@ -108,15 +114,17 @@ def mode_output_contract(mode: WorkMode) -> tuple[str, ...]:
 def _references_for_request(mode: WorkMode, request: str) -> tuple[str, ...]:
     references = list(reference_profile(mode))
     normalized = request.lower()
-    if mode in {MODE_CREATIVE, MODE_COMMIT} and ("剧本" in request or "script" in normalized):
+    if mode == MODE_CREATIVE and _CREATOR_SCRIPT_RE.search(request):
+        references.insert(0, "references/41-creator-first-script-workflow.md")
+    if mode in {MODE_CREATIVE, MODE_COMMIT} and _EXISTING_SCRIPT_RE.search(request):
         if "references/39-script-facts-and-emotion.md" not in references:
             references.append("references/39-script-facts-and-emotion.md")
-    if mode == MODE_CREATIVE and any(token in request for token in ("商业", "变现", "系列", "market", "monetiz")):
+    if mode == MODE_CREATIVE and any(token in normalized for token in ("商业", "变现", "系列", "market", "monetiz")):
         references[0:0] = [
             "references/20-content-market-gate.md",
             "references/21-market-mvp.md",
         ]
-    return tuple(references)
+    return tuple(dict.fromkeys(references))
 
 
 def _detected_mode(request: str) -> tuple[WorkMode, str]:

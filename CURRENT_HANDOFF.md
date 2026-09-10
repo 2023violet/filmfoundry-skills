@@ -17,7 +17,7 @@ This is a repository integration for AI handoff, not a product release. No new r
 
 ## Decision
 
-Pause publication. The repository contains a strong technical v3 foundation, but the product is not yet a successful creator-first Skill. A from-zero trial exposed the central gap: the Skill can route a script request to Creative Mode, yet it has no concise, reusable process for premise → logline → characters → dramatic rules → structure → draft → revision.
+Pause publication. The seven-gate instruction-first path from premise → logline → characters → dramatic rules → structure → draft → revision is now implemented, with minimal Creative routing and an optional workbook. An agent-controlled fresh-context rerun completed the behavior contract, but product evidence remains `INSUFFICIENT_EVIDENCE`: no real human creator supplied the decisions, human elapsed time was not measured, and no durable verbatim transcript was committed. See `docs/reports/2026-09-10-creator-first-fresh-context-trial.md`.
 
 The local annotated tag `v3.0.0-rc1` points to the earlier release checkpoint. It is local only and must not be pushed or presented as product approval.
 
@@ -34,7 +34,7 @@ Wucheng is a downstream integration project. Do not add Wucheng identifiers, pat
 | Surface | Status | Evidence / action |
 |---|---|---|
 | Code | Pending | Technical v3 contracts exist; provider-specific product debt remains active. |
-| Docs | Changed and verified | Public status, documentation index, historical banners, and this handoff are reconciled in this pass. |
+| Docs | Changed and verified | Public status, creator workflow, trial protocol/report, documentation index, and this handoff are reconciled in this pass. |
 | Runtime | Out of scope | FilmFoundry is a distributable Skill; downstream project Runtime remains project-owned. |
 | Rules | Changed and verified | `AGENTS.md` records current boundaries and verification commands. |
 | Memory | Changed and verified | A user-authorized correction note records the creator-first direction without editing machine-generated memory files. |
@@ -49,20 +49,20 @@ Wucheng is a downstream integration project. Do not add Wucheng identifiers, pat
 - Creator Source Catalog, Snapshot, Navigation, and render data model;
 - Creative / Commit / Production / Gate as a routing concept, with strict separation between draft and committed facts.
 
-These are implementation assets, not evidence that the creator workflow is fast, clear, or complete.
+These are implementation assets, not evidence that the creator workflow is fast for real human creators or broadly accepted.
 
 ## Required work before a release decision
 
-1. Write the creator-first contract: one question at a time, minimal context loading, explicit optional depth, and a complete from-zero script path.
-2. Remove H3/MiniMax/provider-specific execution, evidence ingestion, provider smoke, and video-quality gate responsibility from active Skill instructions, Python APIs, CLI, tests, templates, adapters, and user docs.
-3. Preserve only generic prompt and shot-planning output intended for handoff to external tools.
-4. Run a fresh-context trial on a genuinely blank project. Record time, references loaded, user interventions, missing steps, and whether a formal emotional map is produced when useful.
+1. Run the registered fresh-context protocol with a real human creator and a genuinely blank project. Preserve the verbatim transcript and record human elapsed time, references loaded, interventions, missing steps, and optional-depth use.
+2. Only after that trial passes, write a separate provider-surface classification and cleanup plan; do not mechanically delete active files during classification.
+3. Remove H3/MiniMax/provider-specific execution, evidence ingestion, provider smoke, and video-quality gate responsibility from active Skill instructions, Python APIs, CLI, tests, templates, adapters, and user docs.
+4. Preserve only generic prompt and shot-planning output intended for handoff to external tools.
 5. Re-run deterministic tests, active-surface scans, package builds, and clean extraction.
 6. Review the exact diff, create a deliberate release commit, and only then decide the version and tag. Do not reuse the existing local RC tag as approval.
 
 ## Verification baseline
 
-The last dated RC report recorded `299 passed`, clean extraction, and deterministic artifacts. That evidence predates this product reset and proves only the earlier technical checkpoint. Re-run it after the product-scope changes.
+The pre-implementation baseline recorded `299 passed`. The creator-first checkpoint adds deterministic routing/workflow/eval coverage and must be verified again on the final tree; package and clean-extraction success prove artifact structure only, not product acceptance or release readiness.
 
 ```powershell
 python -m pytest -q
@@ -88,4 +88,4 @@ The `filmfoundry-skills` main worktree and `filmfoundry-skills-v2` worktree both
 
 ## New-agent first action
 
-Do not start with Renderer, Projection, Provider smoke, packaging, or another architecture expansion. First inspect `skills/generative-film-production/SKILL.md` and its creative references against one concrete question: can a new creator complete a script from a blank idea without loading production machinery? Make that path work, test it in a fresh context, and only then revisit release readiness.
+Do not reimplement the creator workflow or start with Renderer, Projection, Provider smoke, packaging, or another architecture expansion. Run `evals/creator-first-trial-protocol.md` with a real human creator, measured human elapsed time, and a durable verbatim transcript. If and only if that product-evidence gate passes, prepare the separate provider-surface classification and cleanup plan; release remains paused.

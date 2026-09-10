@@ -7,7 +7,8 @@ FilmFoundry is a general, creator-first Skill for script development and visual-
 ## Current state
 
 - The local v3 technical RC is not approved for publication.
-- Product acceptance is blocked by the missing from-zero script-creation workflow.
+- The seven-gate instruction-first from-zero script workflow is implemented.
+- Product acceptance is blocked by missing human-led fresh-context evidence: the agent-controlled trial is `INSUFFICIENT_EVIDENCE` because it has no measured human elapsed time or durable verbatim transcript.
 - H3/provider execution, provider evidence ingestion, video generation, and video-quality gates are deprecated product surfaces pending removal.
 - Read `CURRENT_HANDOFF.md` before changing behavior or release state.
 

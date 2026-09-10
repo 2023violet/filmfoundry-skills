@@ -31,6 +31,8 @@ For the current gate: show the accepted facts, expose one blocking unknown, ask 
 
 Draft short work as a complete script after structure approval. Draft long work in creator-approved sections, carrying forward a concise decision recap. Revision preserves the creator’s intent unless the creator explicitly changes it.
 
+Before marking `REVISION_ACCEPTED`, compare the revised draft against every accepted revision decision. Check for wording that preserves a rejected idea under a synonym or softer formulation; do not claim a change is applied while an equivalent contradiction remains.
+
 ## Optional depth
 
 - Load Content Market Gate only for audience-growth, monetization, or repeatable-series goals.

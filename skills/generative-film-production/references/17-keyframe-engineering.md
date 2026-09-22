@@ -28,6 +28,23 @@ A frame-right character whose narrative target is frame-left but whose eyes/face
 
 Review identity, character count, state variant, wardrobe, prop state, location geometry, narrative target/eyeline, axis, screen side, composition, acting, anatomy/hands, lighting, and edit continuity. Reject before video generation on identity swaps, wrong state variants, wrong count, wrong eyeline/side logic, key prop errors, or architecture redesign.
 
+### Shot Spec alignment and subject–scene integration
+
+Before visual review, compare the compiled frame against the approved Shot Spec's
+initial state, shot size, camera move, action moment, and reference bindings. Record
+any intentional deviation as a human decision; do not silently replace a state with a
+more convenient portrait composition.
+
+For a frame that places a character into a location, run a subject–scene integration
+pass in addition to identity review. Check that the subject and environment share a
+plausible common light (direction, relative exposure, and color), coherent scale and
+occlusion, compatible focus/depth characteristics, and believable contact with
+surfaces, glass, props, or openings. Check the requested action moment, not only a
+clear face. If these checks fail, the frame is not an approved keyframe.
+
+The best-of-batch candidate is only the relative best until it passes the same
+approval bar as a standalone candidate. A batch may have no approved frame.
+
 Use `scripts/keyframe_prompt_lint.py` before expensive I2V generation.
 
 

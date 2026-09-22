@@ -3,13 +3,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from hashlib import sha256
-from typing import Any, Protocol
-
-from .report import ValidationReport
-
+from typing import Any, Mapping, Protocol
 
 @dataclass(frozen=True)
 class CompiledPayload:
+    """Compatibility envelope for a neutral handoff.
+
+    ``provider`` is always ``provider-neutral`` when produced by Core. External
+    adapters may wrap this envelope with their own target metadata.
+    """
     provider: str
     route: str
     parameters: dict[str, Any]
@@ -26,9 +28,7 @@ class CompiledPayload:
 class ProviderAdapter(Protocol):
     name: str
 
-    def compile(self, prompt: dict[str, Any], capability: dict[str, Any]) -> CompiledPayload: ...
-
-    def validate(self, payload: CompiledPayload) -> ValidationReport: ...
+    def translate(self, handoff: Any) -> Mapping[str, Any]: ...
 
 
 def hash_text(value: str) -> str:

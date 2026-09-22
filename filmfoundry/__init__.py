@@ -19,7 +19,27 @@ from .contracts import (
 from .report import ValidationIssue, ValidationReport
 from .adapters import CompiledPayload, ProviderAdapter
 from .validation import validate_workspace
-from .compiler import compile_canonical
+from .compiler import compile_canonical, compile_prompt
+from .handoff import (
+    HANDOFF_SECTIONS,
+    HANDOFF_STATUSES,
+    ProviderNeutralHandoff,
+    build_provider_neutral_handoff,
+    validate_provider_neutral_handoff,
+)
+from .profiles import (
+    ProjectProfile,
+    StyleProfile,
+    load_profile,
+    validate_project_profile,
+    validate_style_profile,
+)
+from .decision import (
+    CreatorDecisionBrief,
+    CreatorDecisionOption,
+    DecisionStatus,
+    build_creator_decision_brief,
+)
 from .visual_control import VisualControlPlan, parse_visual_control, validate_visual_control
 from .alignment import validate_visual_control_alignment
 from .experiments import record_experiment_result
@@ -73,14 +93,32 @@ from .creator_read_model import (
     translate_creator_term,
 )
 from .modes import (
+    LANE_FAST,
+    LANE_RECOVERY,
+    LANE_STANDARD,
+    LANE_STRICT,
     MODE_COMMIT,
     MODE_CREATIVE,
     MODE_GATE,
     MODE_PRODUCTION,
     ModeDecision,
+    ExecutionBudget,
+    ExecutionLane,
+    RiskLevel,
+    CreationGoal,
+    CreationGoalDecision,
+    GOAL_EXISTING_SCRIPT,
+    GOAL_FROM_ZERO_IDEA,
+    GOAL_GENERAL_CREATIVE,
+    GOAL_SCENE_ASSET,
+    GOAL_SHORT_VIDEO_TEST,
+    GOAL_SINGLE_SHOT_PROMPT,
+    GOAL_STYLE_EXPLORATION,
     mode_output_contract,
     reference_profile,
+    route_creation_goal,
     route_request,
+    execution_budget,
 )
 from .render import FORMAT_NAMES, VIEW_NAMES, render_read_model
 
@@ -105,6 +143,21 @@ __all__ = [
     "ProviderAdapter",
     "validate_workspace",
     "compile_canonical",
+    "compile_prompt",
+    "HANDOFF_SECTIONS",
+    "HANDOFF_STATUSES",
+    "ProviderNeutralHandoff",
+    "build_provider_neutral_handoff",
+    "validate_provider_neutral_handoff",
+    "ProjectProfile",
+    "StyleProfile",
+    "load_profile",
+    "validate_project_profile",
+    "validate_style_profile",
+    "CreatorDecisionBrief",
+    "CreatorDecisionOption",
+    "DecisionStatus",
+    "build_creator_decision_brief",
     "VisualControlPlan",
     "parse_visual_control",
     "validate_visual_control",
@@ -173,10 +226,28 @@ __all__ = [
     "MODE_CREATIVE",
     "MODE_GATE",
     "MODE_PRODUCTION",
+    "LANE_FAST",
+    "LANE_STANDARD",
+    "LANE_STRICT",
+    "LANE_RECOVERY",
     "ModeDecision",
+    "ExecutionBudget",
+    "ExecutionLane",
+    "RiskLevel",
+    "CreationGoal",
+    "CreationGoalDecision",
+    "GOAL_EXISTING_SCRIPT",
+    "GOAL_FROM_ZERO_IDEA",
+    "GOAL_GENERAL_CREATIVE",
+    "GOAL_SCENE_ASSET",
+    "GOAL_SHORT_VIDEO_TEST",
+    "GOAL_SINGLE_SHOT_PROMPT",
+    "GOAL_STYLE_EXPLORATION",
     "mode_output_contract",
     "reference_profile",
+    "route_creation_goal",
     "route_request",
+    "execution_budget",
     "FORMAT_NAMES",
     "VIEW_NAMES",
     "render_read_model",

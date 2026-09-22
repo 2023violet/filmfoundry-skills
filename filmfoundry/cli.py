@@ -15,6 +15,7 @@ from .creator_sources import discover_creator_sources
 from .creator_read_model import build_creator_read_model
 from .render import FORMAT_NAMES, render_read_model
 from .modes import route_request
+from .profiles import load_profile
 from . import (
     parse_prompt_metadata,
     validate_asset_registry,
@@ -176,19 +177,42 @@ def _cmd_compile(args: argparse.Namespace) -> int:
     try:
         prompt = _path_from_root(_root(args.root) if args.root else None, args.prompt)
         out = _path_from_root(_root(args.root) if args.root else None, args.out)
+        root = _root(args.root) if args.root else None
+        project_profile = load_profile(_path_from_root(root, args.project_profile), kind="project") if args.project_profile else None
+        style_profile = load_profile(_path_from_root(root, args.style_profile), kind="style") if args.style_profile else None
+        shot_spec = None
+        if args.shot_spec:
+            shot_spec = json.loads(_path_from_root(root, args.shot_spec).read_text(encoding="utf-8"))
+            if not isinstance(shot_spec, dict):
+                raise ValueError("shot spec must be a JSON object")
         if args.visual_control:
-            capability = {"route": args.provider, "snapshot_id": "CLI_UNVERIFIED", "parameters": {}}
             visual_control = _path_from_root(_root(args.root) if args.root else None, args.visual_control)
-            compiled = compile_canonical(prompt, args.provider, capability, visual_control)
+            compiled = compile_canonical(
+                prompt,
+                args.provider,
+                {},
+                visual_control,
+                project_profile=project_profile,
+                style_profile=style_profile,
+                shot_spec=shot_spec,
+            )
             payload = compiled.body
         else:
-            payload = compile_prompt(prompt, args.provider)
+            payload = compile_prompt(
+                prompt,
+                args.provider,
+                project_profile=project_profile,
+                style_profile=style_profile,
+                shot_spec=shot_spec,
+            )
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(payload, encoding="utf-8")
     except (OSError, PromptCompilationError, ValueError) as exc:
         _emit({"ok": False, "errors": [str(exc)]}, args.format)
         return 1
-    response = {"ok": True, "out": str(out), "provider": args.provider}
+    response = {"ok": True, "out": str(out), "handoff": "provider-neutral"}
+    if args.provider:
+        response["legacy_provider_argument_ignored"] = args.provider
     if args.visual_control:
         response.update({"visual_control_id": compiled.visual_control_id, "visual_control_hash": compiled.visual_control_hash, "input_hashes": compiled.input_hashes})
     _emit(response, args.format)
@@ -300,6 +324,16 @@ def _cmd_route(args: argparse.Namespace) -> int:
         "run_full_validation": decision.run_full_validation,
         "allow_provider_calls": decision.allow_provider_calls,
         "allow_source_writes": decision.allow_source_writes,
+        "goal": decision.goal,
+        "goal_route": list(decision.goal_route),
+        "required_profiles": list(decision.required_profiles),
+        "lane": decision.lane,
+        "risk_level": decision.risk_level,
+        "execution_budget": {
+            "max_blocking_decisions": decision.budget.max_blocking_decisions,
+            "max_internal_steps": decision.budget.max_internal_steps,
+            "max_auto_revisions": decision.budget.max_auto_revisions,
+        },
     }, args.format)
     return 0
 
@@ -324,12 +358,15 @@ def build_parser() -> argparse.ArgumentParser:
     index.add_argument("--format", choices=("text", "json"), default="text")
     index.set_defaults(func=_cmd_index)
 
-    compile_parser = sub.add_parser("compile", help="compile Prompt Markdown for a provider")
+    compile_parser = sub.add_parser("compile", help="compile Prompt Markdown into a Provider-neutral handoff")
     compile_parser.add_argument("--prompt", required=True)
-    compile_parser.add_argument("--provider", required=True)
+    compile_parser.add_argument("--provider", required=False, help="deprecated compatibility label; never used for Core compilation")
     compile_parser.add_argument("--out", required=True)
     compile_parser.add_argument("--root", required=False)
     compile_parser.add_argument("--visual-control", required=False)
+    compile_parser.add_argument("--project-profile", required=False)
+    compile_parser.add_argument("--style-profile", required=False)
+    compile_parser.add_argument("--shot-spec", required=False)
     compile_parser.add_argument("--format", choices=("text", "json"), default="text")
     compile_parser.set_defaults(func=_cmd_compile)
 

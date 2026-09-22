@@ -88,6 +88,10 @@ def test_route_cli_keeps_creative_requests_out_of_gate():
     assert payload["run_full_validation"] is False
     assert payload["allow_provider_calls"] is False
     assert payload["allow_source_writes"] is False
+    assert payload["lane"] == "FAST"
+    assert payload["risk_level"] == "R0"
+    assert payload["execution_budget"]["max_blocking_decisions"] == 1
+    assert payload["execution_budget"]["max_internal_steps"] == 4
 
 
 def test_route_cli_selects_production_and_gate_boundaries():
@@ -95,6 +99,10 @@ def test_route_cli_selects_production_and_gate_boundaries():
     gate = json.loads(run_ff("route", "--request", "是否可以发布", "--format", "json").stdout)
     assert production["mode"] == "PRODUCTION"
     assert production["run_full_validation"] is False
+    assert production["lane"] == "STANDARD"
     assert gate["mode"] == "GATE"
     assert gate["run_full_validation"] is True
-    assert gate["allow_provider_calls"] is True
+    assert gate["allow_provider_calls"] is False
+    assert gate["lane"] == "STRICT"
+    assert gate["risk_level"] == "R2"
+    assert gate["execution_budget"]["max_internal_steps"] == 10

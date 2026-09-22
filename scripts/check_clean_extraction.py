@@ -105,7 +105,7 @@ def main() -> int:
         if render.returncode:
             print(f"render failed:\n{render.stdout}\n{render.stderr}", file=sys.stderr)
             return render.returncode
-        assert json.loads((root / "render" / "render-manifest.json").read_text(encoding="utf-8"))["schema_version"] == "render-manifest.v2"
+        assert json.loads((root / "render" / "render-manifest.json").read_text(encoding="utf-8"))["schema_version"] == "render-manifest.v3"
         route = json.loads(run(checks[-1][1], cwd=root, env=env).stdout)
         assert route["mode"] == "CREATIVE"
         probe = run([sys.executable, "-c", "import filmfoundry; print(filmfoundry.__version__)"] , cwd=root, env=env)

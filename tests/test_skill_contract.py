@@ -22,6 +22,10 @@ REQUIRED_REFERENCES = [
     "references/13-qc.md",
     "references/14-failure-recovery.md",
     "references/41-creator-first-script-workflow.md",
+    "references/42-project-style-profiles.md",
+    "references/43-provider-neutral-handoff.md",
+    "references/44-failure-diagnosis.md",
+    "references/46-execution-evidence.md",
 ]
 
 REQUIRED_ADAPTERS = [
@@ -46,6 +50,9 @@ REQUIRED_TEMPLATES = [
     "templates/selects-log.csv",
     "templates/qc-report.md",
     "templates/script-development-workbook.md",
+    "templates/project-profile.example.json",
+    "templates/style-profile.example.json",
+    "templates/execution-evidence.md",
 ]
 
 
@@ -85,6 +92,17 @@ def test_root_skill_routes_lightweight_creative_work_without_gate_escalation():
     assert "CREATIVE_DRAFT" in text
     assert "HARD_CANON_CONFLICT" in text
     assert "references/40-work-modes.md" in text
+    assert "FAST" in text and "STANDARD" in text and "STRICT" in text
+    assert "one blocking decision" in text
+    assert "execution budget" in text.lower()
+    assert "references/46-execution-evidence.md" in text
+
+
+def test_root_skill_keeps_external_provider_execution_out_of_core():
+    text = SKILL.read_text(encoding="utf-8")
+    assert "Provider-neutral handoff" in text
+    assert "external tools own provider calls" in text
+    assert "provider smoke" in text.lower()
 
 
 def test_mode_reference_exists():
@@ -139,3 +157,24 @@ def test_reference_role_guidance_names_positive_and_negative_boundaries():
         text = (SKILL_DIR / rel).read_text(encoding="utf-8")
         assert "controls" in text
         assert "does_not_control" in text
+
+
+def test_keyframe_guidance_requires_shot_spec_alignment_before_visual_integration():
+    keyframe = (SKILL_DIR / "references/17-keyframe-engineering.md").read_text(encoding="utf-8")
+    assert "Shot Spec alignment" in keyframe
+    assert "subject–scene integration" in keyframe
+    assert "common light" in keyframe
+    assert "best-of-batch" in keyframe
+
+
+def test_prompt_compiler_requires_integration_pass_and_no_silent_state_drift():
+    compiler = (SKILL_DIR / "references/09-prompt-compiler.md").read_text(encoding="utf-8")
+    assert "state drift" in compiler
+    assert "integration pass" in compiler
+    assert "relative best" in compiler
+
+
+def test_root_skill_scopes_stress_diagnostics_to_declared_shot_risks():
+    text = SKILL.read_text(encoding="utf-8")
+    assert "optional stress diagnostic" in text
+    assert "Stress-test expensive recurring assets before video generation" not in text

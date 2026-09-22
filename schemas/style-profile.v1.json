@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filmfoundry.dev/schemas/style-profile.v1.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "visual_language": {"type": "string"},
+    "palette": {"type": "string"},
+    "texture": {"type": "string"},
+    "lighting": {"type": "string"},
+    "camera_behavior": {"type": "string"},
+    "motion_density": {"type": "string"},
+    "composition": {"type": "string"},
+    "profile_version": {"type": "string"},
+    "source": {"type": "string"},
+    "extensions": {"type": "object"}
+  }
+}

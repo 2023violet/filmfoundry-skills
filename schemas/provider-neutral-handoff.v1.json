@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filmfoundry.dev/schemas/provider-neutral-handoff.v1.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "handoff_id", "status", "sections", "provenance"],
+  "properties": {
+    "schema_version": {"const": "provider-neutral-handoff.v1"},
+    "handoff_id": {"type": "string", "minLength": 1},
+    "status": {"enum": ["DRAFT", "SPEC_RESOLVED", "EXTERNAL_ADAPTER_REQUIRED", "HUMAN_REVIEW", "READY_FOR_EXTERNAL_TOOL"]},
+    "sections": {"type": "object", "minProperties": 14},
+    "provenance": {"type": "object"}
+  }
+}

@@ -9,7 +9,7 @@
 把 `skills/generative-film-production/` 安装到你所使用的 Agent Skills 目录后，在每个工作会话的第一条任务中明确说明：
 
 ```text
-使用 generative-film-production。当前阶段是“建立角色资产”/“拆镜头”/“编译 H3 Prompt”等，请按 Skill 路由只读取本阶段需要的 references，并把输出写入指定项目目录。
+使用 generative-film-production。当前阶段是“建立角色资产”/“拆镜头”/“编译 Provider-neutral handoff”等，请按 Skill 路由只读取本阶段需要的 references，并把输出写入指定项目目录。
 ```
 
 不要把整套 references 一次性粘进对话。让 Agent 先读取项目入口和 Runtime，再按阶段加载一到三篇 reference；这样可以减少旧状态、模型经验和当前镜头事实混在一起。每次让 Agent 修改文件时，要求它返回：改动文件、校验命令、校验结果、仍未验证的假设。
@@ -20,7 +20,7 @@ Skill 的职责边界可以这样理解：
 |---|---|---|
 | 故事、镜头和资产是否说清楚 | 模板、字段、引用和状态校验 | 创作取舍、Canon 裁决 |
 | Prompt 是否结构完整 | metadata、章节、reference role、lint、编译 | 模型是否真的遵守 |
-| 图片/视频/声音是否生成 | Provider payload、能力证据记录、项目适配器 | 登录、API/网页操作、下载和媒体处理 |
+| 图片/视频/声音是否生成 | Provider-neutral handoff、结构校验、外部交接材料 | 登录、API/网页操作、下载和媒体处理 |
 | 画面是否好看、身份是否稳定 | QC 表和可回填证据 | 人工播放、比较、审美判断 |
 | 是否能交付发布 | 时间线、音频、字幕、编码检查入口 | NLE、编码器、平台上传和发布数据 |
 
@@ -62,7 +62,7 @@ Asset Passport / Registry
         ↓ asset_id + sha256
 Visual Control Plan ──→ Shot Spec
         ↓                  ↓
-Prompt Markdown ───────→ Provider payload
+Prompt Markdown ───────→ Provider-neutral handoff
                               ↓ 外部生成
 Generation record → Select + QC → Observed State → Edit Timeline
 ```
@@ -162,34 +162,23 @@ python -m filmfoundry validate --root <workspace> --stage shot --format json
 
 ```text
 python -m filmfoundry validate --root <workspace> --stage prompt --format json
-python -m filmfoundry compile --prompt <prompt.md> --provider minimax-h3 --out <payload.txt>
-python -m filmfoundry compile --prompt <prompt.md> --visual-control <plan.json> --provider minimax-h3 --out <payload.txt> --format json
+python -m filmfoundry compile --prompt <prompt.md> --out <handoff.md>
+python -m filmfoundry compile --prompt <prompt.md> --visual-control <plan.json> --out <handoff.md> --format json
 ```
 
 编译器只读取 Prompt 和视觉控制计划，输出 payload、引用槽和输入哈希，不回写 Canon、Prompt 或 Registry。
 
-## 7. 选 Provider 与做小样
+## 7. Provider-neutral handoff 与外部交接
 
-先读取 `16-model-evidence.md`、`29-capability-scoped-model-gates.md` 和对应 adapter。检查准确的 Provider surface、版本、参考数量、First/Last、音频、时长、画幅、语言、身份和手/道具行为证据。未知能力保持未知。
+FilmFoundry 在这里停止于 `Provider-neutral handoff`：它包含 Shot Spec、Project/Style Profile、参考图责任、状态、主动作、镜头、连续性、失败约束和验收检查。外部适配器可以把这份中间表示翻译为具体工具的字段，但不能改写故事、身份、状态、连续性或 Gate 结论。没有明确工具时，保持能力为 `UNKNOWN`，不要编造平台参数。
 
-对某个项目的 H3 当前切片：
+外部工具和人员负责登录、提交、生成、下载、播放审查及媒体证据。FilmFoundry 不运行 Provider smoke，不接管 Provider API，也不把一次生成结果提升为默认能力。需要回填时，只记录外部提供的任务 ID、工具/版本、输入哈希、输出文件、人工观察和证据等级。
 
-```text
-python <project-adapter>/scripts/build_visual_control_plan.py --root <project> --out <plan.json>
-python <project-adapter>/scripts/prepare_h3_vertical_slice.py --root <project> --visual-control <plan.json> --out <handoff.json>
-```
+失败时按最窄顺序检查：Shot Spec → reference role / Profile → subject–scene integration / state alignment → camera/action/timing load → 单变量 Prompt 或适配器调整。不要同时更换资产、Prompt、时长和工具。
 
-当前参数固定为 5 秒、768P、adaptive、`NONE`。这一步只生成执行卡，不调用付费 Provider。
+## 8. Select、QC 与观察状态
 
-## 8. 外部生成与记录
-
-外部工具执行后必须保存 generation ID、Provider/版本、Prompt 哈希、输入资产 ID、参数、输出媒体哈希和观察状态。新媒体先放 `09_新生成产出/review`。不要只凭聊天窗口截图宣布成功。
-
-首轮失败时，先判断是否已经有满足剪辑目标的连续范围；有则记录 `PARTIAL_SELECT`。必须重试时只改一个与失败假设相关的变量，保留其他输入不变。
-
-## 9. Select、QC 与观察状态
-
-编辑只接收通过审查的 FULL/PARTIAL Select。QC 分开记录 Prompt Compliance、Identity、Spatial Continuity、Scale、Physics、Camera、Editability 和 Aesthetic。状态按顺序推进：
+如果外部工具返回媒体，编辑只接收通过人工审查的 FULL/PARTIAL Select。QC 分开记录 Prompt Compliance、Identity、Spatial Continuity、Scale、Physics、Camera、Editability 和 Aesthetic。状态按顺序推进：
 
 ```text
 DRAFT → SPEC_RESOLVED → PREFLIGHT_PASS → READY_FOR_KF → KF_GENERATED
@@ -199,21 +188,13 @@ DRAFT → SPEC_RESOLVED → PREFLIGHT_PASS → READY_FOR_KF → KF_GENERATED
 
 `KF_QC_PASS` 不等于完整 Start/End Authority；先做 Visual Control State Alignment。`OBSERVED_ONCE` 不得提升成默认模型能力。
 
-回填 H3 外部材料（由项目适配器执行）：
-
-```text
-python <project-adapter>/scripts/ingest_h3_evidence.py --root <project> --mp4 <raw.mp4> --screenshot <settings.png> --generation-id <id> --out <evidence.json>
-```
-
-该脚本只记录哈希、参数和 `OBSERVED_ONCE`，不会自动 PASS、重试或解锁 E01/E02。
-
-## 10. 剪辑、音频、字幕与发布
+## 9. 剪辑、音频、字幕与发布
 
 读取 `11-editing.md`、`12-audio.md` 和 `30-edit-timeline-contract.md`。用 Edit Unit 覆盖最终时间线；文本、字幕、标准转场和精确时序尽量放确定性后期。声音 timing authority 确认后再锁画面。最终交付还要做目标 9:16/画幅、音频、字幕、编码、文件命名和发布证据检查。
 
 FilmFoundry 可以记录这些事实和证据，但不会替你操作 NLE、编码器或发布平台。
 
-## 11. 每镜头最小检查清单
+## 10. 每镜头最小检查清单
 
 - Canon/Shot 状态是否已锁定？
 - 资产是否有稳定 ID、真实哈希和正确 Profile？
@@ -226,11 +207,11 @@ FilmFoundry 可以记录这些事实和证据，但不会替你操作 NLE、编�
 - 是否记录 generation、Select、QC 和 observed state？
 - 最终镜头是否覆盖时间线、声音、字幕、画幅和交付要求？
 
-## 12. 项目当前推荐顺序
+## 11. 项目当前推荐顺序
 
 先用项目已有的锁定资产和 routed units 做一条技术切片，不改 Canon、不重做全套角色表。为一个代表性测试建立最小视觉控制计划，拿到真实 MP4、设置截图和 generation ID 后，登记一次观察，再决定是否扩大测试矩阵。任何路线升级都等待对应证据和 state alignment。
 
-## 13. 第一次创作的可复制清单
+## 12. 第一次创作的可复制清单
 
 第一次不要试图做完整一集。选择一个 5 秒左右、一个主体、一个地点、一个动作的镜头，按下面顺序完成：
 

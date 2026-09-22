@@ -8,7 +8,7 @@ FilmFoundry Skills is a general, creator-first toolkit for developing scripts an
 
 ## Current status
 
-The repository has a local v3 technical RC and passing deterministic tests, but it is **not approved for publication**. The creator-first workflow contract is implemented; fresh-context product evidence and provider-surface removal remain release blockers.
+The repository has a local v3 technical RC and passing deterministic tests, but it is **not approved for publication**. The creator-first workflow, adaptive execution lanes with soft budgets, and Provider-neutral handoff are implemented; fresh-context product evidence remains a release blocker.
 
 Blank-idea script work starts with `references/41-creator-first-script-workflow.md`; production references remain deferred until the creator accepts the script or explicitly requests production preparation.
 
@@ -18,11 +18,14 @@ The local `v3.0.0-rc1` tag is evidence of the earlier technical checkpoint only.
 |---|---|
 | Static contracts and deterministic validators | Verified locally |
 | Creator Read Model and renderer | Verified structurally |
+| Human Decision Brief and `Decision` view | Added; structural rendering verified |
+| Adaptive execution lanes and soft budgets | Implemented; route and CLI metadata verified |
 | Authored fixtures | Demonstrations, not an agent benchmark |
 | Creator-first workflow contract | Implemented and deterministically verified |
 | Fresh-context creator trial | Agentic product evidence pending |
-| Provider-specific removal | Pending |
-| Multi-project creator validation | Pending |
+| Provider-neutral Core boundary | Verified structurally; external adapter execution remains out of scope |
+| Provider-specific removal | Active execution removal completed; historical field classification pending |
+| Multi-project creator validation | Not requested in this pass |
 
 ## Product boundary
 
@@ -32,7 +35,7 @@ FilmFoundry should help a creator:
 2. analyze an existing script, including emotion, causality, continuity, and production risk;
 3. prepare assets, images, prompts, and shot plans when the script is ready.
 
-External tools and people own video-provider calls, generation, downloads, and aesthetic video QC. The active implementation still contains older H3/provider execution and evidence surfaces; those are deprecated product debt and must be removed before release.
+External tools and people own video-provider calls, generation, downloads, and aesthetic video QC. FilmFoundry emits a Provider-neutral handoff and does not run provider clients or smoke gates; historical evidence fields remain for external traceability only.
 
 ## What remains valuable
 
@@ -50,7 +53,7 @@ python scripts/check_clean_extraction.py --wheel .dist/filmfoundry_skills-3.0.0-
 git diff --check
 ```
 
-`ff render` is read-only. A successful render is not a Gate decision and does not prove provider behavior, market performance, or creative quality.
+`ff render` is read-only. Its `decision` view summarizes evidence-bound actions and risks for a human reviewer; it is not a creative approval, Gate decision, or proof of provider behavior, market performance, or visual quality.
 
 ## Repository map
 
@@ -72,7 +75,7 @@ Start with the [Chinese full-workflow user manual](docs/filmfoundry-skills-user-
 
 Do not publish a v3 release until all of the following are true:
 
-- provider-specific execution/evidence responsibilities are removed from the active Skill, code, tests, and user docs;
+- Provider-neutral compilation and external adapter boundaries remain intact;
 - a concise from-zero script-creation workflow is implemented;
 - at least one fresh-context creator completes a real script with it and records friction honestly;
 - deterministic tests and clean extraction pass again;

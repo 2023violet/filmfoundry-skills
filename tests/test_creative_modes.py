@@ -1,6 +1,10 @@
 from __future__ import annotations
 
 from filmfoundry.modes import (
+    LANE_FAST,
+    LANE_RECOVERY,
+    LANE_STANDARD,
+    LANE_STRICT,
     MODE_COMMIT,
     MODE_CREATIVE,
     MODE_GATE,
@@ -18,7 +22,14 @@ def test_ambiguous_idea_routes_to_lightweight_creative_mode():
     assert decision.run_full_validation is False
     assert decision.allow_provider_calls is False
     assert decision.allow_source_writes is False
+    assert decision.lane == LANE_FAST
+    assert decision.risk_level == "R0"
+    assert decision.budget.max_blocking_decisions == 1
+    assert decision.budget.max_internal_steps == 4
     assert "CREATIVE_DRAFT" in decision.output_labels
+    assert "OPEN" in decision.output_labels
+    assert "DEFERRED" in decision.output_labels
+    assert "NOOP" in decision.output_labels
     assert "DEFERRED_CHECK" in decision.output_labels
     assert "references/41-creator-first-script-workflow.md" in decision.references
     assert "references/00-production-philosophy.md" not in decision.references
@@ -33,6 +44,9 @@ def test_explicit_commit_routes_without_provider_or_full_gate():
     assert decision.run_full_validation is False
     assert decision.allow_provider_calls is False
     assert decision.allow_source_writes is False
+    assert decision.lane == LANE_STANDARD
+    assert decision.risk_level == "R1"
+    assert decision.budget.max_internal_steps == 6
     assert "COMMIT_SUMMARY" in decision.output_labels
 
 
@@ -44,6 +58,16 @@ def test_production_prompt_request_loads_production_checks_only():
     assert decision.allow_provider_calls is False
     assert set(decision.validators) == {"runtime", "state", "asset", "dependency"}
     assert "references/09-prompt-compiler.md" in decision.references
+    assert decision.lane == LANE_STANDARD
+    assert decision.risk_level == "R1"
+
+
+def test_provider_neutral_handoff_request_enters_production_and_loads_human_decision_reference():
+    decision = route_request("把第3个镜头整理成 Provider-neutral handoff，供导演评审")
+
+    assert decision.mode == MODE_PRODUCTION
+    assert decision.goal == "SINGLE_SHOT_PROMPT"
+    assert "references/45-human-decision-layer.md" in decision.references
 
 
 def test_release_readiness_routes_to_gate_mode():
@@ -51,9 +75,24 @@ def test_release_readiness_routes_to_gate_mode():
 
     assert decision.mode == MODE_GATE
     assert decision.run_full_validation is True
-    assert decision.allow_provider_calls is True
-    assert "provider-smoke" in decision.validators
-    assert "media-audit" in decision.validators
+    assert decision.allow_provider_calls is False
+    assert "provider-smoke" not in decision.validators
+    assert "media-audit" not in decision.validators
+    assert "handoff" in decision.validators
+    assert decision.lane == LANE_STRICT
+    assert decision.risk_level == "R2"
+    assert decision.budget.max_internal_steps == 10
+
+
+def test_explicit_strict_and_recovery_lanes_are_visible_in_routing():
+    strict = route_request("请严格逐项检查这个创作方向", explicit_mode="creative")
+    recovery = route_request("请做失败诊断并恢复这个 handoff", explicit_mode="production")
+
+    assert strict.lane == LANE_STRICT
+    assert strict.risk_level == "R2"
+    assert recovery.lane == LANE_RECOVERY
+    assert recovery.risk_level == "R1"
+    assert recovery.budget.max_internal_steps == 5
 
 
 def test_explicit_mode_is_deterministic_and_profiles_are_immutable_tuples():

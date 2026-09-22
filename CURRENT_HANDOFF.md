@@ -1,6 +1,6 @@
 # FilmFoundry clean handoff
 
-**Date:** 2026-09-10
+**Date:** 2026-09-22
 **Primary branch after handoff:** `main`
 **Source branch:** `codex/filmfoundry-v2.3-creator-read-model`
 
@@ -13,7 +13,79 @@ The recovery preserved the interrupted filesystem snapshot on local branch `resc
 The merge result deliberately removes the active `filmfoundry_v2` package, v2 schemas, v2 active fixtures/tests, and the old v2 guide. Historical v2 contract coverage remains under `tests/historical/`. The merge result passed 299 tests before this handoff update.
 
 This is a repository integration for AI handoff, not a product release. No new release tag or GitHub Release is authorized by this merge; the existing local `v3.0.0-rc1` tag remains historical technical evidence.
-**Observed HEAD before this documentation pass:** `79585a331d5d1ff536b769ec787770d59d6b8c26`
+**Observed HEAD at the 2026-09-10 handoff:** `79585a331d5d1ff536b769ec787770d59d6b8c26`
+
+## P0/P1 generalization implementation — 2026-09-21
+
+The requested implementation pass keeps the Core project/style/provider-neutral:
+
+- `filmfoundry.profiles` now provides minimal Project Profile and Style Profile
+  dataclasses, explicit `UNKNOWN` values, JSON loading, and structural validation.
+- `filmfoundry.modes.route_creation_goal` now routes from-zero ideas, existing
+  scripts, short-video tests, scene assets, style exploration, and single-shot
+  handoffs before selecting a work mode.
+- Prompt compilation now emits a deterministic Provider-neutral handoff. The old
+  provider argument is accepted only for compatibility and is ignored by Core.
+- Gate routing no longer authorizes provider calls or provider smoke/media-audit;
+  external adapters receive the handoff and own execution and returned-media review.
+- Provider-specific Python smoke adapters were removed from the active Core boundary;
+  external adapter references remain documentation-only translation surfaces.
+
+The requested five-case/multi-style regression matrix and P2 work were explicitly
+not implemented. Remaining release blockers are fresh human creator evidence and a
+final review of legacy provider evidence/runtime fields that are still representable
+for external handoff history.
+
+## Human decision layer implementation — 2026-09-21
+
+The creator-facing presentation gap was addressed without adding a second source
+of truth:
+
+- `filmfoundry.decision` derives an evidence-bound Decision Brief from the
+  existing Creator Read Model. It exposes the current question, recommendation,
+  operational options, locked facts, open risks, next action, and evidence IDs.
+- `ff render` now includes a deterministic `decision` view and emits
+  `render-manifest.v3`; this view is a review aid, not creative approval or a
+  provider/media-quality gate.
+- The active Skill now routes human review to
+  `references/45-human-decision-layer.md` and provides
+  `templates/creator-decision-brief.md`. Creative trade-offs must still be
+  proposed or accepted in the creator-first conversation rather than inferred
+  from runtime metadata.
+- A Provider-neutral handoff request now routes to Production mode instead of
+  remaining in Creative mode, while still keeping provider execution external.
+
+This improves human readability and routing, but it does not replace the required
+fresh-context trial with a real creator or decision-maker.
+
+## P0 adaptive execution lanes — 2026-09-22
+
+The creator workflow now separates interaction speed from Gate semantics:
+
+- `FAST/R0` batches reversible exploration into a small creator-readable package;
+- `STANDARD/R1` groups related creative decisions and asks only blocking questions;
+- `STRICT/R2` preserves Canon, acceptance, external-cost, and irreversible-action approval;
+- `RECOVERY/R1` diagnoses the narrowest failed layer and resumes from saved state.
+
+`filmfoundry.modes.route_request()` exposes the selected `lane` and `risk_level`, and
+the route CLI includes both fields. `OPEN`, `DEFERRED`, and `NOOP` make non-blocking
+unknowns and safe no-action outcomes explicit. This is a P0 workflow optimization,
+not evidence that human creator elapsed time has improved; the fresh-context trial
+and A/B measurement remain required before publication claims.
+
+## P1 execution evidence and soft budgets — 2026-09-22
+
+Each route now exposes a soft execution budget: maximum blocking decisions, internal
+steps, and automatic revisions. When a ceiling is reached, the workflow returns the
+current artifact as `DEFERRED` with a resume trigger instead of continuing a planning
+loop; a budget never bypasses a Strict Gate.
+
+`references/46-execution-evidence.md` and `templates/execution-evidence.md` define
+the cycle-level record. `evals/creator-first-trial-protocol.md` now compares the
+previous strict path against the adaptive path with the same fresh request, model,
+and blank-project state. This provides a measurement path, not a completed human
+benchmark; evidence remains `INSUFFICIENT_EVIDENCE` until a real creator supplies
+the transcript, elapsed time, interventions, and final artifacts.
 
 ## Decision
 
@@ -25,7 +97,10 @@ The local annotated tag `v3.0.0-rc1` points to the earlier release checkpoint. I
 
 FilmFoundry owns script creation, script analysis and revision, then asset/image/prompt/shot preparation. Humans and external tools own provider calls, video generation, downloads, and aesthetic video QC.
 
-Current code, tests, references, adapters, and guides still contain H3/MiniMax/provider compilation, execution evidence, smoke gates, and video-production responsibilities. These are known pending removals, not accepted v3 responsibilities.
+Historical schemas and external adapter references still mention provider evidence
+for traceability, but active Core compilation and routing do not execute providers or
+run provider smoke/media gates. Those external evidence fields are not accepted as
+Core product responsibilities.
 
 Wucheng is a downstream integration project. Do not add Wucheng identifiers, paths, counts, fixtures, or status rules to FilmFoundry Core. The separate Wucheng working tree is dirty and must remain untouched by this cleanup. A final read-only check observed 123 tracked deletions under its `99_归档` path; they pre-existed this FilmFoundry knowledge pass and their ownership is unresolved, so do not restore, stage, or delete anything there from this handoff.
 
@@ -55,8 +130,8 @@ These are implementation assets, not evidence that the creator workflow is fast 
 
 1. Run the registered fresh-context protocol with a real human creator and a genuinely blank project. Preserve the verbatim transcript and record human elapsed time, references loaded, interventions, missing steps, and optional-depth use.
 2. Only after that trial passes, write a separate provider-surface classification and cleanup plan; do not mechanically delete active files during classification.
-3. Remove H3/MiniMax/provider-specific execution, evidence ingestion, provider smoke, and video-quality gate responsibility from active Skill instructions, Python APIs, CLI, tests, templates, adapters, and user docs.
-4. Preserve only generic prompt and shot-planning output intended for handoff to external tools.
+3. Finish the read-only classification of remaining historical provider evidence/runtime fields; do not reintroduce execution into Core.
+4. Preserve only generic Prompt and shot-planning output intended for handoff to external tools.
 5. Re-run deterministic tests, active-surface scans, package builds, and clean extraction.
 6. Review the exact diff, create a deliberate release commit, and only then decide the version and tag. Do not reuse the existing local RC tag as approval.
 
@@ -88,4 +163,4 @@ The `filmfoundry-skills` main worktree and `filmfoundry-skills-v2` worktree both
 
 ## New-agent first action
 
-Do not reimplement the creator workflow or start with Renderer, Projection, Provider smoke, packaging, or another architecture expansion. Run `evals/creator-first-trial-protocol.md` with a real human creator, measured human elapsed time, and a durable verbatim transcript. If and only if that product-evidence gate passes, prepare the separate provider-surface classification and cleanup plan; release remains paused.
+Next action is the fresh-context creator trial in `evals/creator-first-trial-protocol.md`, with a real human creator, measured human elapsed time, and a durable verbatim transcript. Do not start the five-case matrix or P2 expansion; release remains paused until creator evidence is complete.

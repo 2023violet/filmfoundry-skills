@@ -24,4 +24,4 @@ Recommended external procedure:
 
 The files under `fixtures/` are harness demonstrations only. They are deliberately authored examples, not LLM benchmark results. Keyword scores are smoke checks and can be gamed; they are never sufficient evidence of production quality.
 
-E27 is a single-turn authored guardrail for the blank-script entry. Only a completed run of `creator-first-trial-protocol.md` can supply current multi-turn product evidence. One completed run still does not prove creator speed or broad market fit.
+E27 is a single-turn authored guardrail for the blank-script entry. The current `creator-first-trial-protocol.md` compares a strict baseline with the adaptive `FAST`/`STANDARD`/`STRICT` path and records cycle-level execution evidence. Only a completed human-led run with timing, interventions, and durable artifacts can supply current multi-turn product evidence. One completed run still does not prove broad market fit.

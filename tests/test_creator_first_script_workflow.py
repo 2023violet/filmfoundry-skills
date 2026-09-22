@@ -36,7 +36,9 @@ def test_creator_workflow_defines_the_complete_path_and_interaction_limits():
         "REVISION_ACCEPTED",
     ):
         assert stage in text
-    assert "one question per turn" in lower
+    assert "fast" in lower and "standard" in lower and "strict" in lower
+    assert "one blocking decision" in lower
+    assert "deferred" in lower
     assert "optional depth" in lower
     assert "fresh-context" in lower
 

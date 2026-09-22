@@ -10,9 +10,10 @@ from typing import Any, Iterable
 from urllib.parse import quote
 
 from .creator_read_model import CreatorReadModel
+from .decision import build_creator_decision_brief
 
 
-VIEW_NAMES = ("overview", "emotional-map", "story-map", "assets", "shots", "continuity")
+VIEW_NAMES = ("decision", "overview", "emotional-map", "story-map", "assets", "shots", "continuity")
 FORMAT_NAMES = ("html", "markdown", "svg")
 
 
@@ -50,6 +51,7 @@ def _views(model: CreatorReadModel) -> tuple[_View, ...]:
     navigation = data["navigation"]
     overview = snapshot["overview"]
     metrics = snapshot["metrics"]
+    decision = build_creator_decision_brief(model).to_dict()
     asset_rows = tuple(
         (_value(item.get("asset_id")), _value(item.get("asset_type")), _value(item.get("declared_state")), _value(item.get("observed_readiness")), _value(item.get("path")), _provenance_label(item))
         for item in snapshot.get("assets", [])
@@ -59,6 +61,28 @@ def _views(model: CreatorReadModel) -> tuple[_View, ...]:
         for item in snapshot.get("shots", [])
     )
     return (
+        _View(
+            "decision",
+            "Decision Brief",
+            ("section", "content"),
+            (
+                ("project", _value(decision.get("project_id"))),
+                ("phase", _value(decision.get("phase"))),
+                ("status", _value(decision.get("status"))),
+                ("question", _value(decision.get("question"))),
+                ("recommendation", _value(decision.get("recommendation"))),
+                ("options", " | ".join(
+                    f"{item.get('label', 'UNKNOWN')}: {item.get('consequence', 'UNKNOWN')}"
+                    + (" [recommended]" if item.get("recommended") else "")
+                    for item in decision.get("options", [])
+                    if isinstance(item, dict)
+                ) or "UNKNOWN"),
+                ("locked_facts", " | ".join(str(item) for item in decision.get("locked_facts", [])) or "UNKNOWN"),
+                ("open_risks", " | ".join(str(item) for item in decision.get("open_risks", [])) or "NONE"),
+                ("next_action", _value(decision.get("next_action"))),
+                ("evidence_refs", ", ".join(str(item) for item in decision.get("evidence_refs", [])) or "UNKNOWN"),
+            ),
+        ),
         _View("overview", "Creator Overview", ("field", "value"), tuple((key, _value(overview.get(key))) for key in ("project_id", "phase", "current_authority", "historical_authority")) + tuple((str(metric.get("metric_id")), _value(metric.get("value"))) for metric in metrics) + (("blockers", str(len(snapshot.get("blockers", [])))), ("warnings", str(sum(1 for blocker in snapshot.get("blockers", []) if blocker.get("severity") == "WARNING"))), ("primary_action", _value((navigation.get("primary_action") or {}).get("action_id")))),),
         _View("emotional-map", "Emotional Map", ("point_id", "production_unit", "emotion", "tension", "direction"), _rows(snapshot.get("emotion_points", []), ("beat_id", "production_unit", "primary_emotion", "tension_level", "direction"))),
         _View("story-map", "Story Map", ("node_id", "node_type", "display_name", "responsibility", "canon_source"), _rows(snapshot.get("narrative_nodes", []), ("node_id", "node_type", "display_name", "narrative_responsibility", "canon_source"))),
@@ -152,7 +176,7 @@ def render_read_model(model: CreatorReadModel, output_dir: Path, *, formats: tup
             path.write_text(content, encoding="utf-8", newline="\n")
             artifacts.append({"view": view.name, "format": fmt, "path": path.name, "sha256": hashlib.sha256(content.encode("utf-8")).hexdigest()})
     manifest = {
-        "schema_version": "render-manifest.v2",
+        "schema_version": "render-manifest.v3",
         "project_id": model.snapshot.project_id,
         "views": list(VIEW_NAMES),
         "formats": list(selected),

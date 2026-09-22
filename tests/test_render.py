@@ -22,7 +22,7 @@ def test_render_smoke_project_writes_all_views_and_stable_manifest(tmp_path: Pat
     second = render_read_model(model, tmp_path / "second")
 
     assert tuple(first["views"]) == VIEW_NAMES
-    assert first["schema_version"] == "render-manifest.v2"
+    assert first["schema_version"] == "render-manifest.v3"
     assert first["project_id"] == "SMOKE_PROJECT"
     assert first["formats"] == ["html", "markdown", "svg"]
     assert json.dumps(first, ensure_ascii=False, sort_keys=True) == json.dumps(second, ensure_ascii=False, sort_keys=True)
@@ -37,8 +37,11 @@ def test_render_keeps_unknown_distinct_and_rejects_unsafe_media_links(tmp_path: 
     manifest = render_read_model(model, tmp_path / "render")
 
     overview = (tmp_path / "render" / "overview.html").read_text(encoding="utf-8")
+    decision = (tmp_path / "render" / "decision.html").read_text(encoding="utf-8")
     assets = (tmp_path / "render" / "assets.html").read_text(encoding="utf-8")
     assert "UNKNOWN" in overview
+    assert "Decision Brief" in decision
+    assert "question" in decision
     assert 'href="media/moss-reference.txt"' in assets
     assert "../" not in overview
     assert 'href="../' not in assets

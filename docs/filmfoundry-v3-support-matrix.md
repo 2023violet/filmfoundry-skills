@@ -1,6 +1,6 @@
 # FilmFoundry v3 Support Matrix
 
-> **Status — product reset:** This matrix records the current technical implementation. Rows concerning provider payloads, provider evidence, video generation, or video-quality gates describe deprecated product debt pending removal; they are not the intended release boundary.
+> **Status — product reset:** This matrix records the current technical implementation. External provider execution, returned-media evidence, and video-quality gates remain outside the Skill; the Core boundary is the Provider-neutral handoff.
 
 | Area | Status | Boundary |
 |---|---|---|
@@ -12,7 +12,7 @@
 | Physics result cues | HUMAN_REVIEW | Force, material, weight, inertia, gravity, and observable result are representable; realism is not structurally proven. |
 | Previsualization route | UNVERIFIED | A short establishment pass may help some routes; no provider capability is assumed. |
 | Lens/FOV guidance with visible result | HUMAN_REVIEW | Numeric FOV must be paired with an observable framing result. |
-| Provider capability snapshot and dry-run compilation | ADAPTER_READY | No paid generation or API client is included in Core. |
+| Provider-neutral handoff compilation | CONTRACTED | Core emits deterministic handoff sections; an external adapter may translate them. |
 | Image/video/audio provider execution | EXTERNAL_REQUIRED | Requires the selected external provider. |
 | NLE, encoding, publishing | EXTERNAL_REQUIRED | Core records evidence only. |
 | Visual quality, identity consistency, aesthetic Select/QC | HUMAN_REVIEW | Structural validation cannot prove quality. |

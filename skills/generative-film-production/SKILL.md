@@ -13,7 +13,7 @@ Use progressive disclosure: load only the references required by the current pro
 
 For a Chinese beginner-oriented walkthrough, start with `../../docs/ai-video-production-guide-zh.md`; this file remains the compact routing contract and the references hold the detailed decisions.
 
-FilmFoundry owns script creation, analysis, revision, and visual-production preparation. External tools and people own provider calls, video generation, downloads, and aesthetic video QC.
+FilmFoundry owns script creation, analysis, revision, and visual-production preparation. Keep the Core project-neutral and style-neutral: project requirements belong in a Project Profile, visual choices belong in a Style Profile, and external tools own provider calls, generation, downloads, and aesthetic video QC. Present accepted facts through a human decision layer as well as machine contracts: decision-makers need the current question, recommendation, trade-offs, locked facts, risks, and next action without reading schemas.
 
 ## Work modes
 
@@ -23,14 +23,18 @@ Route the request before loading project references. Use `references/40-work-mod
 |---|---|---|
 | Explore hooks, story directions, emotions, or prompt drafts | **Creative Mode** | Load only declared creative references; does not run full Runtime, media, provider, or index validation |
 | Confirm a direction or write it into a formal brief/script | **Commit Mode** | Record the choice, assumptions, and Canon conflicts; no provider call or source mutation |
-| Compile a Shot Spec, asset binding, timeline, or provider payload | **Production Mode** | Run only relevant runtime, state, asset, and dependency checks |
-| Ask whether something is ready, producible, publishable, or passes acceptance | **Gate Mode** | Run the complete capability-scoped validation and evidence review |
+| Compile a Shot Spec, asset binding, timeline, or provider-neutral handoff | **Production Mode** | Run only relevant runtime, state, asset, and dependency checks |
+| Ask whether something is ready, producible, publishable, or passes acceptance | **Gate Mode** | Run the complete Core contract and handoff review; external media remains human evidence |
 
-Creative output is labeled `CREATIVE_DRAFT`, `ASSUMPTION`, `DEFERRED_CHECK`, or `HARD_CANON_CONFLICT`. A creative hypothesis never becomes Canon, Runtime, or Registry state without Commit Mode.
+Creative output is labeled `CREATIVE_DRAFT`, `ASSUMPTION`, `OPEN`, `DEFERRED`, `DEFERRED_CHECK`, `NOOP`, or `HARD_CANON_CONFLICT`. A creative hypothesis never becomes Canon, Runtime, or Registry state without Commit Mode.
 
 ## Creator-first script workflow
 
-When the creator has a blank idea, fragment, premise, outline, or draft, load `references/41-creator-first-script-workflow.md` first. Ask one question per turn and advance only the earliest unresolved creator gate. Do not load production, Runtime, provider, model-evidence, or video-QC references until the script is accepted or the creator explicitly asks for production preparation.
+When the creator has a blank idea, fragment, premise, outline, or draft, load `references/41-creator-first-script-workflow.md` first. Select the lightest safe execution lane before asking questions: `FAST` for reversible exploration, `STANDARD` for grouped creative decisions, `STRICT` for Canon/acceptance/external side effects, and `RECOVERY` for a declared failure diagnosis. Ask at most one blocking decision per turn; batch non-blocking alternatives into one creator-readable package. Do not load production, Runtime, provider, model-evidence, or video-QC references until the script is accepted or the creator explicitly asks for production preparation.
+
+Treat the route's execution budget as a soft stop: when the maximum blocking decisions, internal steps, or automatic revisions is reached, return the current result with `DEFERRED` and the resume trigger instead of continuing a low-value planning loop. Do not use a budget limit to bypass a Strict Gate.
+
+When another person must review or approve the work, load `references/45-human-decision-layer.md`. After each accepted Gate, show a compact decision card; use `templates/creator-decision-brief.md` only when a durable or multi-person review artifact is useful. A recommendation is not approval, and technical validation is not creative approval.
 
 ## Core invariants
 
@@ -41,7 +45,7 @@ When the creator has a blank idea, fragment, premise, outline, or draft, load `r
 5. Give every recurring asset one authoritative Asset Passport and versioned registry identity.
 6. Distinguish canonical assets, generic extras, and ephemeral one-off elements so process cost matches continuity risk.
 7. Give every reference an explicit intended role; do not assume a video model obeys semantic role language until the Model Profile has repeated evidence.
-8. Stress-test expensive recurring assets before video generation.
+8. Prepare only assets required by the approved shot scope; run an optional stress diagnostic only for a declared shot risk that the prompt and baseline references cannot control.
 9. Separate Narrative Shot, Generation Unit, and Edit Unit IDs.
 10. Design one dominant action per generative clip by default.
 11. Separate provider `generation_duration_seconds` from required `edit_target_duration_seconds`.
@@ -62,6 +66,8 @@ When the creator has a blank idea, fragment, premise, outline, or draft, load `r
 26. Treat an approved visual-control asset as potentially **partial authority**: before provider use, compare the visible state against the Shot Spec and require a **state-matched** start/end authority for every state the route claims to control.
 27. A **proxy smoke** result may prove a provider capability, but it does not directly unlock a production route when the production shot has materially different prop/location/state conditions.
 28. Do not treat a runtime state label as proof; validate state transitions and hard dependencies.
+29. Keep project variables, style variables, and provider syntax outside Core contracts.
+30. Compile provider-neutral decisions first; a provider adapter may translate syntax but may not redefine story, state, continuity, or Gate semantics.
 
 ## Route by current stage
 
@@ -70,6 +76,8 @@ When the creator has a blank idea, fragment, premise, outline, or draft, load `r
 | Blank idea, story fragment, outline, or draft needing development | `references/41-creator-first-script-workflow.md`; load `01`, `02`, or `39` only when its stage requires them |
 | Commercial/creator idea, monetization, repeatable series | `references/20-content-market-gate.md`, then `references/21-market-mvp.md`, `references/22-ai-native-content-design.md` |
 | Non-market idea / client-locked brief | `references/01-creative-brief.md` |
+| Project or delivery requirements must be declared | `references/42-project-style-profiles.md` |
+| Visual language must be declared or compared | `references/42-project-style-profiles.md` |
 | Script or narrative exists | `references/02-story-breakdown.md` |
 | Images/references exist | `references/03-reference-board.md` |
 | Character/product/location must recur | `references/04-asset-passport.md` then `references/05-asset-stress-test.md` |
@@ -86,11 +94,14 @@ When the creator has a blank idea, fragment, premise, outline, or draft, load `r
 | Need to verify a keyframe/First-Last pair actually matches shot state | `references/31-visual-control-state-alignment.md` |
 | Multi-shot continuity | `references/07-continuity-engine.md` |
 | I2V needs a stable visual start state | `references/17-keyframe-engineering.md` |
-| Need provider prompt | `references/08-video-spec.md`, `references/09-prompt-compiler.md`, `references/23-controllability-budget.md`, then one adapter |
+| Need provider-neutral prompt/handoff | `references/08-video-spec.md`, `references/09-prompt-compiler.md`, `references/43-provider-neutral-handoff.md`, `references/23-controllability-budget.md`; load one adapter only for an authorized external handoff |
+| A human needs to review, compare, or approve a direction | `references/45-human-decision-layer.md`; use `templates/creator-decision-brief.md` for a durable packet |
+| Need to measure lane speed, compare strict vs adaptive flow, or record a fresh-context trial | `references/46-execution-evidence.md`; use `templates/execution-evidence.md` |
 | Recurring dialogue / lip sync | `references/12-audio.md`, `references/18-voice-passport.md` |
 | Project has many units/dependencies | `references/15-runtime-contract.md` |
 | Model behavior is unknown or changing | `references/16-model-evidence.md` |
 | Generation is failing | `references/13-qc.md`, `references/14-failure-recovery.md` |
+| Generation or visual result is weak | `references/44-failure-diagnosis.md`, then the narrowest relevant production reference |
 | Clips are approved | `references/11-editing.md`, `references/12-audio.md` |
 | Whole project needs first principles | `references/00-production-philosophy.md` |
 
@@ -114,6 +125,17 @@ Project-level path:
 `TRAFFIC_EXPERIMENT` is valid when content is worth testing but monetization is unknown. `BYPASS` must be explicit for client-locked work, pure art, portfolio studies, or model-capability tests. Platform rules and monetization conditions are time-sensitive; research them fresh at execution time rather than freezing them into the skill.
 
 Use `references/20-content-market-gate.md`, `templates/content-market-gate.example.json`, and `scripts/validate_content_market_gate.py`.
+
+## Project and style boundary
+
+Create or update a Project Profile when the deliverable, medium, audience, duration,
+continuity level, or delivery format changes. Create or update a Style Profile when
+visual language, palette, texture, lighting, camera behavior, composition, or motion
+density changes. Do not create a new Core branch for either change. Load
+`references/42-project-style-profiles.md`.
+
+Project and Style Profiles are inputs to routing and compilation; they are not Canon
+and cannot override approved story facts, observed state, or Gate decisions.
 
 ## Production gates
 
@@ -183,15 +205,20 @@ Write planned state before generation, observed state after Select, then run nex
 
 ## Keyframe gate
 
-When I2V start-state quality is expensive, compile a keyframe from the resolved shot spec, then QC it before video. A keyframe is one still action moment, not a video timeline. Reject identity/count/state/prop/axis/location failures before H3/Kling/Veo/etc. For eyeline-critical shots, reject a beautiful frame if the subject visibly looks away from the narrative target.
+When I2V start-state quality is expensive, compile a keyframe from the resolved shot spec, then QC it before external video generation. A keyframe is one still action moment, not a video timeline. Reject identity/count/state/prop/axis/location failures before handoff. For eyeline-critical shots, reject a beautiful frame if the subject visibly looks away from the narrative target.
 
 Load `references/17-keyframe-engineering.md` and use `scripts/keyframe_prompt_lint.py`.
 
-## Choose a Model Adapter
+## Provider-neutral handoff and external adapters
 
 First inspect evidence for route support, duration, reference count/addressing, start/end frames, native audio, resolution, prompt-language behavior, timing adherence, identity behavior, hand/prop stability, and multi-character behavior. Unknown means **unknown**.
 
-Then load exactly one relevant adapter:
+Compile the Provider-neutral handoff first. Load exactly one relevant adapter only when
+the user explicitly requests an external-tool handoff and the exact provider surface is
+known. Adapters translate the handoff; they do not add story facts or silently promote
+unverified behavior.
+
+Available external adapters include:
 
 - `references/adapters/generic-t2v.md`
 - `references/adapters/generic-i2v.md`
@@ -214,7 +241,9 @@ If a provider's semantic role-binding behavior is not repeatedly verified, do no
 2. **R2 Minimal Reference** when multi-reference works but role semantics are uncertain.
 3. **R3 Precomposed Keyframe** when reference interference is high.
 
-For MiniMax H3, load the adapter, `references/adapters/minimax-h3-smoke-tests.md`, and the model-evidence reference before scaling.
+For any external tool, model evidence is owned by that tool's integration. The Skill
+may record a supplied evidence reference, but it does not run provider smoke or
+promote an external result into a Core Gate.
 
 ## Generation loop
 
@@ -247,6 +276,7 @@ Prefer production artifacts over prose-only advice:
 - Continuity Ledger / Observed State
 - Model Profile + evidence
 - Compiled Keyframe Prompt / Provider Prompt
+- Project Profile / Style Profile / Provider-neutral Handoff
 - Production State / Dependency Graph
 - Generation Log / Selects Log (FULL/PARTIAL) / QC Report
 
@@ -267,14 +297,14 @@ python scripts/validate_selects_log.py templates/selects-log.csv
 python scripts/validate_project_runtime.py templates/project-runtime.example.json
 ```
 
-Provider-specific gates:
+Provider-neutral checks:
 
 ```bash
 python scripts/keyframe_prompt_lint.py keyframe-prompt.txt
-python scripts/h3_prompt_lint.py h3-prompt.txt R2 UNVERIFIED
+python scripts/prompt_lint.py neutral-handoff.txt
 ```
 
-The linters validate FilmFoundry structure, not visual quality or provider obedience. Still-frame review cannot validate motion rhythm, seam quality, pacing, or audio sync.
+The linters validate FilmFoundry structure, not visual quality or external-tool obedience. Still-frame review cannot validate motion rhythm, seam quality, pacing, or audio sync.
 
 ## Common mistakes
 
@@ -293,6 +323,8 @@ The linters validate FilmFoundry structure, not visual quality or provider obedi
 | Dialogue timing invented before final voice | Let approved voice own timing when required |
 | Bad keyframe sent to video hoping it is fixed | Reject upstream and repair keyframe |
 | Runtime state manually jumps gates | Validate state transition and dependencies |
+| Project name or style label is used as a hidden rule | Declare it in the Project or Style Profile |
+| Provider syntax changes canonical intent | Repair the adapter output; keep the handoff and Shot Spec authoritative |
 | Retry rewrites everything | Single-variable retry tied to evidence |
 | Exact long text generated in-video | Prepare/reference or overlay in post |
 | Editor sees every generation | Editor consumes Selects only |

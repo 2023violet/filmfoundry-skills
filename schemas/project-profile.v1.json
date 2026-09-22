@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filmfoundry.dev/schemas/project-profile.v1.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "project_id": {"type": "string"},
+    "medium": {"type": "string"},
+    "audience": {"type": "string"},
+    "target_duration": {"type": "string"},
+    "production_scope": {"type": "string"},
+    "continuity_level": {"type": "string"},
+    "delivery_aspect": {"type": "string"},
+    "profile_version": {"type": "string"},
+    "source": {"type": "string"},
+    "extensions": {"type": "object"}
+  }
+}

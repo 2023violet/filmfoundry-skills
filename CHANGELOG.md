@@ -12,6 +12,14 @@
 - Narrowed the intended responsibility to script creation, analysis, revision, and visual-production preparation. Provider execution, video generation, and aesthetic video QC belong to people and external tools.
 - Marked the existing H3/provider execution and evidence surfaces for removal before the next release decision.
 - Added a current handoff, concise repository guidance, and a documentation index; historical reports remain checkpoint evidence rather than active product approval.
+- Added minimal Project Profile and Style Profile contracts with explicit `UNKNOWN` values, JSON examples, and schema files.
+- Added creation-goal routing for from-zero ideas, existing scripts, short-video tests, scene assets, style exploration, and single-shot handoffs.
+- Changed Core Prompt compilation to emit a deterministic Provider-neutral handoff; legacy provider CLI arguments are compatibility-only and ignored by Core.
+- Removed provider-specific smoke adapter classes from the active Python boundary and made Gate routing external-execution-free.
+- Added failure-diagnosis and handoff references, plus regression tests for the P0/P1 generalization boundary. The five-case/multi-style matrix and P2 expansion are intentionally deferred.
+- Added a human-facing Decision Brief projection and `Decision` dashboard view. It exposes the current question, evidence-bound recommendation, options, locked facts, open risks, and next action without changing Core story facts.
+- Added risk-adaptive creator execution lanes (`FAST`, `STANDARD`, `STRICT`, `RECOVERY`) with explicit `R0`/`R1`/`R2` routing, batched non-blocking decisions, `OPEN`/`DEFERRED`/`NOOP` draft states, and CLI-visible lane metadata. Strict Canon, handoff, and external-side-effect boundaries remain unchanged; fresh human speed evidence is still pending.
+- Added soft execution budgets per lane, `46-execution-evidence.md`, an execution-evidence template, and a strict-vs-adaptive fresh-context A/B protocol. Budgets stop low-value planning loops but do not relax Gate approval; measured human speed remains unverified.
 
 ## 3.0.0-rc1 — 2026-09-09
 

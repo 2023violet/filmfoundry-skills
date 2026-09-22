@@ -1,6 +1,6 @@
 # FilmFoundry Skills 全流程使用手册
 
-> **当前状态：**本手册覆盖从空白创意到剧本修订、再到通用视觉生产准备与外部工具交接的完整使用路径。FilmFoundry v3.0.0 尚未获正式发布批准；Provider 相关旧表面仍待后续独立清理。构建、渲染或静态测试通过不等于创作 Gate、媒体质量或 Release 通过。
+> **当前状态：**本手册覆盖从空白创意到剧本修订、再到通用视觉生产准备与外部工具交接的完整使用路径。FilmFoundry v3.0.0 尚未获正式发布批准；Provider 执行、视频生成、下载和审美 QC 属于外部工具与人员，历史 Provider 字段仍仅用于交接追溯。构建、渲染或静态测试通过不等于创作 Gate、媒体质量或 Release 通过。
 
 FilmFoundry 是一个通用、creator-first 的 Agent Skill。它帮助创作者形成故事、完成剧本、分析和修订文本，并把已经确认的创作决定整理成可交给外部视觉生产工具的资产、镜头和提示词准备材料。
 
@@ -14,8 +14,9 @@ FilmFoundry 不替创作者暗中决定故事，也不负责 Provider 调用、�
 2. 根 Skill：`skills/generative-film-production/SKILL.md`；
 3. 工作模式：`skills/generative-film-production/references/40-work-modes.md`；
 4. Creator-First 流程：`skills/generative-film-production/references/41-creator-first-script-workflow.md`；
-5. 当前阶段对应的单篇 reference 与 template；
-6. 本手册中的解释和示例。
+5. 人类决策层：`skills/generative-film-production/references/45-human-decision-layer.md`；
+6. 当前阶段对应的单篇 reference 与 template；
+7. 本手册中的解释和示例。
 
 不要一次加载整个 `references/` 目录。先判断当前阶段，再读取最少的必要文件。
 
@@ -30,7 +31,7 @@ FilmFoundry 不替创作者暗中决定故事，也不负责 Provider 调用、�
 首次会话可使用：
 
 ```text
-请使用 generative-film-production Skill。先判断当前工作模式和入口状态，只加载本阶段必需的 references。每轮最多问我一个会改变下游结果的实质问题；未经我确认，不要把创意草案写成正式事实，也不要进入 Provider 或视频生成。
+请使用 generative-film-production Skill。先判断当前工作模式、入口状态和执行车道，只加载本阶段必需的 references。可撤销探索先批量给我可比较的创作选项；只有阻塞性决定每轮最多问一个问题。未经我确认，不要把创意草案写成正式事实，也不要进入 Provider 或视频生成。
 ```
 
 从空白开始可直接说：
@@ -60,12 +61,12 @@ FilmFoundry 不替创作者暗中决定故事，也不负责 Provider 调用、�
 
 ```text
 提出请求
-  → Agent 判断 Work Mode 与入口状态
-  → 展示已确认事实
-  → 只暴露一个最高影响未知项
-  → 只问一个问题并等待
-  → 用户确认或纠正
-  → 进入下一 Gate
+  → Agent 判断 Work Mode、入口状态、执行车道与风险
+  → 读取最小上下文卡
+  → 批量生成创作包并运行局部检查
+  → 只暴露必要的阻塞性决策
+  → 用户选择、纠正或延期
+  → 按风险升级到 Commit / Strict Gate
   → 完成剧本与两轮修订
   → 用户明确接受后才进入视觉生产准备
 ```
@@ -96,7 +97,26 @@ FilmFoundry 不替创作者暗中决定故事，也不负责 Provider 调用、�
 | Creative | 探索、写作、分析、修订、比较方向 | 生成 `CREATIVE_DRAFT`、提出假设、逐门创作 | Provider call、全量验证、写 Canon/Runtime |
 | Commit | 用户明确选定或锁定创作方向 | 汇总选择、列出冲突、准备经授权的正式写入 | 静默写入、替用户裁决冲突、调用 Provider |
 | Production | 已确认内容转资产、Shot Spec、连续性和外部提示词材料 | 运行相关结构检查，生成通用交接材料 | 把结构通过说成媒体质量通过 |
-| Gate | 询问是否 ready、可生成、可交付或可发布 | 执行能力范围内的完整证据检查 | 把 `UNKNOWN`、render 或单次观察判为通过 |
+| Gate | 询问是否 ready、可生成、可交付或可发布 | 执行 Core 合同、依赖和 handoff 检查 | 调用 Provider，或把 `UNKNOWN`、render、单次观察判为通过 |
+
+### 2.3 执行车道与决策预算
+
+工作模式决定“这一轮允许做什么”，执行车道决定“这一轮需要多严格、需要问多少”。默认选择最轻的安全车道：
+
+| 车道 | 适用 | 行为 |
+|---|---|---|
+| `FAST / R0` | 可撤销的创意探索、草稿、多个方向比较 | 一次输出 2–3 个选项或一个小型创作包；不改 Canon；非阻塞未知记为 `OPEN` / `DEFERRED`；默认最多 4 个内部步骤、1 次自动修订 |
+| `STANDARD / R1` | 会影响下一阶段的成组创作决定 | 合并相邻问题；最多询问一个阻塞性决定；默认最多 6 个内部步骤、2 次自动修订 |
+| `STRICT / R2` | Canon、正式接受、外部成本、不可逆动作 | 保留完整 Gate、Provenance 和人类批准边界；默认最多 10 个内部步骤 |
+| `RECOVERY / R1` | 校验失败、矛盾或交接失败 | 只读最窄失败证据，修复最小失败层，从状态快照恢复；默认最多 5 个内部步骤 |
+
+“每轮最多一个问题”不再适用于所有创作草稿，而是指每轮最多一个阻塞性决定。可撤销内容应先生成可比较结果，只有会阻塞安全继续或影响 Canon 的决定才需要等待。
+
+这些是软预算，不是质量分数。达到预算时应交付当前结果，标记 `DEFERRED`，说明剩余工作和恢复触发条件；不能为了“用满预算”继续解释，也不能用预算限制跳过 Strict Gate。
+
+### 2.4 最小创作包
+
+快速车道的输出至少包含：目标、可比较选项、已知事实、假设、风险、已运行的检查、未决/延期项目和下一步。结果标记为 `CREATIVE_DRAFT`，不等于已接受事实。没有安全动作时可以返回 `NOOP`，并说明继续的触发条件。
 
 Creative Mode 固定保持：
 
@@ -109,7 +129,7 @@ allow_source_writes = false
 
 只有用户明确授权写入后，才能对指定文件采取写操作；工作模式本身不是写入授权。
 
-### 2.3 混合请求如何处理
+### 2.5 混合请求如何处理
 
 如果请求同时说“帮我想故事并直接生成视频”，先处理最小创作部分，并指出进入 Production 或外部生成前必须满足的边界。不能因为时间紧、领导要求或 Provider 名称出现在请求中，就跳过创作确认。
 
@@ -131,17 +151,16 @@ allow_source_writes = false
 | `DRAFT_ACCEPTED` | 完整剧本、无缺失场景、无 placeholder beat | 完整草稿 | 用分场提纲冒充成稿 |
 | `REVISION_ACCEPTED` | 意图/因果 pass 与人物/对白/连续性 pass | 修订稿、记录、decision diff | 声称已修改却保留同义残留 |
 
-### 3.2 每一轮的固定形状
+### 3.2 每一轮的形状
 
-Agent 应当：
+先根据执行车道选择交互形状：
 
-1. 重述已经接受的事实；
-2. 指出当前 Gate；
-3. 找出一个最可能推翻下游工作的未知项；
-4. 只问一个实质问题；
-5. 等待回答，不顺手跨越下一 Gate。
+- `FAST`：重述相关事实，给出 2–3 个真正不同的方向或一个小型创作包，列出假设和检查；没有阻塞项就直接交付，不等待逐项确认；
+- `STANDARD`：重述相关事实，合并相邻决策，列出一个阻塞性问题和非阻塞 `OPEN` / `DEFERRED` 项；
+- `STRICT`：重述全部相关已接受事实，指出当前 Gate、风险、选项后果和精确批准动作，然后等待；
+- `RECOVERY`：只读取失败层证据，提出最小修复并从状态快照恢复，不重新执行完整流程。
 
-如果创作者卡住，可以提供两到三个真正不同的选择，并给出推荐。选择题仍然只能解决当前一个问题。
+无论车道如何，不能静默覆盖已接受决定，不能把 `CREATIVE_DRAFT` 当作 Canon，也不能因“流程完整”而加载与当前目标无关的生产 references。
 
 ### 3.3 可选深度不是默认流程税
 
@@ -226,6 +245,25 @@ Agent 应当：
 ### 4.4 Revision 请求
 
 修订前先明确“必须保留什么”和“希望改变什么”。任何会改变结局、人物核心动机、视角或世界规则的修改都需要用户确认，不能作为润色静默发生。
+
+### 4.5 面向决策者的输出
+
+默认对话可以只给一张短决策卡；当导演、制片人、客户或其他人需要单独评审时，加载 `references/45-human-decision-layer.md`，并按需使用 `templates/creator-decision-brief.md`。
+
+决策卡必须按以下顺序呈现：
+
+1. 当前项目和阶段；
+2. 现在只需要决定的一件事；
+3. 推荐方向及其依据；
+4. 两到三个真实不同的选项，以及每个选项加强和牺牲的内容；
+5. 已锁定、不能静默覆盖的事实；
+6. 未决风险和会受影响的下游工作；
+7. 批准、拒绝或暂缓后的最小下一步；
+8. 来源、版本和证据状态。
+
+不要要求决策者先阅读 Gate 名称、schema 字段或 Provider 语法。技术校验、创作批准和外部媒体质量必须分开表达；render 成功不能写成“故事已通过”。
+
+`ff render` 生成的 `decision` 视图只提供基于来源证据的当前动作和风险。它不会从资产数量、运行时状态或校验结果推断艺术偏好；真正的创作选项必须在 Creator-First 对话中由创作者提出或确认。
 
 ---
 
@@ -400,7 +438,7 @@ FilmFoundry 的主动责任到“通用、可审查、可追踪的视觉生产�
 - reference roles 与 Visual Control Plan；
 - Canonical Shot Spec / Shot Card；
 - Continuity Ledger；
-- 编译后的通用 Prompt 或 Provider-neutral payload；
+- 编译后的 Provider-neutral handoff（Prompt 中间表示）；
 - 明确的未知项、风险和人工检查清单。
 
 ### 8.2 外部环节负责什么
@@ -413,7 +451,7 @@ Provider 调用、视频生成、下载和审美 QC 由外部工具与人员负�
 - 实际播放、节奏、身份稳定、动作可信度和视听审美判断；
 - NLE 剪辑、混音、字幕、编码、上传与发布。
 
-FilmFoundry 可以定义需要回填的证据字段，但不能把外部执行结果伪装成本地已完成事实。
+FilmFoundry 可以定义需要回填的证据字段，但不能运行 Provider、接管外部执行，或把外部结果伪装成本地已完成事实。
 
 ### 8.3 回填外部结果
 
@@ -485,19 +523,20 @@ python scripts/check_clean_extraction.py --wheel .dist/filmfoundry_skills-3.0.0-
 
 1. 发出固定开场请求；
 2. 确认 `BLANK` 与 Creative Mode；
-3. 每轮只回答当前一个问题；
-4. 逐个确认七个 Gate；
-5. 在 `STRUCTURE_ACCEPTED` 后要求完整剧本；
-6. 确认 `DRAFT_ACCEPTED`；
-7. 分别完成两轮修订；
-8. 检查 decision diff 后确认 `REVISION_ACCEPTED`；
-9. 需要保存时才写 Workbook 或剧本文件；
-10. 不自动进入 Production。
+3. 默认先进入 `FAST / R0`，一次生成可比较的故事方向和最小创作包；
+4. 只有阻塞性决定才提问，非阻塞内容记录为 `OPEN` / `DEFERRED`；
+5. 选定方向后进入 `STANDARD / R1`，合并完成相邻 Gate 的创作准备；
+6. 在 `STRUCTURE_ACCEPTED` 后要求完整剧本；
+7. 确认 `DRAFT_ACCEPTED`；
+8. 分别完成两轮修订；
+9. 检查 decision diff 后进入 `STRICT / R2`，确认 `REVISION_ACCEPTED`；
+10. 需要保存时才写 Workbook 或剧本文件；
+11. 不自动进入 Production。
 
 开场提示词：
 
 ```text
-我想写一部 8–12 分钟的中文短片，现在没有故事。请按 Creator-First 流程从 BLANK 开始，每轮只问一个会改变下游结果的问题。所有选择由我确认；完成结构后写完整剧本，再做意图/因果和人物/对白/连续性两轮修订。剧本接受前不要加载生产、Runtime、Provider 或视频 QC。
+我想写一部 8–12 分钟的中文短片，现在没有故事。请按 Creator-First 流程从 BLANK 开始，先用 FAST 车道给我 2–3 个可比较方向和一个最小创作包；只有阻塞性决定每轮最多问一个问题。所有进入 Canon 的选择由我确认；完成结构后写完整剧本，再做意图/因果和人物/对白/连续性两轮修订。剧本接受前不要加载生产、Runtime、Provider 或视频 QC。
 ```
 
 ### Runbook B：修订已有初稿
@@ -558,7 +597,8 @@ python scripts/check_clean_extraction.py --wheel .dist/filmfoundry_skills-3.0.0-
 | 错误 | 为什么不行 | 正确处理 |
 |---|---|---|
 | 空白请求直接给完整故事 | 静默替创作者越过所有 Gate | 从 `BLANK` 的一个高影响问题开始 |
-| 一次列十几个问题 | 让关键选择互相污染，创作者负担过高 | 每轮最多一个实质问题 |
+| 把所有草稿都做成逐问 Gate 审议 | 让可撤销探索承担不必要的流程税 | FAST 批量给出创作包，只有阻塞性决定才提问 |
+| 一次列十几个问题 | 让关键选择互相污染，创作者负担过高 | STANDARD/STRICT 最多展示一个阻塞性决定，其他列为 `OPEN` / `DEFERRED` |
 | 已有剧本仍从 seed 重做 | 丢弃现有成果 | 找最早未完成 Gate |
 | 商业分析成为所有项目必选 | 把条件深度变成流程税 | 只有商业/系列化目标才加载 |
 | 情绪图成为默认产物 | 静态格式不能替代故事需要 | 只有节奏/对白/音乐问题需要时创建 |
@@ -581,7 +621,8 @@ python scripts/check_clean_extraction.py --wheel .dist/filmfoundry_skills-3.0.0-
 ### 剧本创作完成
 
 - [ ] 入口状态已正确识别；
-- [ ] 每轮最多一个实质问题；
+- [ ] FAST/Standard 阶段只询问必要的阻塞性决定；
+- [ ] Strict 阶段的 Canon、验收和外部动作均有明确批准；
 - [ ] 七个 Gate 均由创作者确认或明确拒绝；
 - [ ] 完整剧本无缺失场景和 placeholder beat；
 - [ ] 已完成意图/因果修订；

@@ -7,18 +7,27 @@ from typing import Any, Mapping
 
 from . import parse_prompt_metadata, validate_prompt_markdown
 from .adapters import CompiledPayload, hash_text
+from .handoff import build_provider_neutral_handoff
+from .profiles import ProjectProfile, StyleProfile
 
 
 class PromptCompilationError(ValueError):
     """Raised when Prompt Markdown cannot be compiled."""
 
 
-def compile_prompt(prompt_path: str | Path, provider: str) -> str:
-    """Compile canonical prompt metadata into a deterministic provider payload.
+def compile_prompt(
+    prompt_path: str | Path,
+    provider: str | None = None,
+    *,
+    project_profile: ProjectProfile | Mapping[str, Any] | None = None,
+    style_profile: StyleProfile | Mapping[str, Any] | None = None,
+    shot_spec: Mapping[str, Any] | None = None,
+) -> str:
+    """Compile Prompt Markdown into a deterministic Provider-neutral handoff.
 
-    Provider clients remain outside FilmFoundry. The payload is intentionally
-    plain text and contains the canonical facts in a stable order so adapters
-    can translate it without mutating the source Markdown.
+    ``provider`` is retained as a deprecated compatibility argument for callers
+    on the old CLI.  It is intentionally ignored: provider syntax belongs to an
+    external adapter and never enters the Core handoff.
     """
     path = Path(prompt_path)
     text = path.read_text(encoding="utf-8")
@@ -26,40 +35,33 @@ def compile_prompt(prompt_path: str | Path, provider: str) -> str:
     if errors:
         raise PromptCompilationError("; ".join(errors))
     metadata: dict[str, Any] = parse_prompt_metadata(text)
-    lines = [
-        "# FilmFoundry provider payload",
-        f"provider: {provider}",
-        "contract: prompt.v3",
-        f"prompt_id: {metadata['prompt_id']}",
-        f"prompt_type: {metadata['prompt_type']}",
-        f"production_unit: {metadata['production_unit']}",
-    ]
-    ordered = (
-        "visual_fact", "output_profile", "start_state", "end_state", "subjects",
-        "dominant_action", "camera", "continuity_locks", "references", "forbidden", "acceptance",
-    )
-    for field in ordered:
-        if field not in metadata:
-            continue
-        value = metadata[field]
-        lines.append(f"\n[{field}]")
-        if isinstance(value, (dict, list)):
-            lines.append(json.dumps(value, ensure_ascii=False, sort_keys=True))
-        else:
-            lines.append(str(value))
-    return "\n".join(lines) + "\n"
+    return build_provider_neutral_handoff(
+        metadata,
+        project_profile=project_profile,
+        style_profile=style_profile,
+        shot_spec=shot_spec,
+    ).to_markdown()
 
 
 def compile_canonical(
     prompt_path: str | Path,
-    provider: str,
-    capability: dict[str, Any],
+    provider: str | None = None,
+    capability: dict[str, Any] | None = None,
     visual_control_path: str | Path | None = None,
     context_paths: Mapping[str, str | Path] | None = None,
     production_ledger_event_ids: tuple[str, ...] = (),
     requirement_report_path: str | Path | None = None,
+    project_profile: ProjectProfile | Mapping[str, Any] | None = None,
+    style_profile: StyleProfile | Mapping[str, Any] | None = None,
+    shot_spec: Mapping[str, Any] | None = None,
 ) -> CompiledPayload:
-    """Return the structured, provider-neutral compilation contract."""
+    """Return the structured, Provider-neutral compilation contract.
+
+    The legacy ``provider`` and ``capability`` parameters are accepted only to
+    keep old integrations readable.  They no longer change the handoff body or
+    authorize a provider call.
+    """
+    capability = capability or {}
     path = Path(prompt_path)
     text = path.read_text(encoding="utf-8")
     errors = validate_prompt_markdown(text)
@@ -118,7 +120,12 @@ def compile_canonical(
             raise PromptCompilationError("; ".join(issue.message for issue in report.errors))
         context_sections.append((name, value))
         input_hashes[name] = hash_text(context_text)
-    body = compile_prompt(path, provider)
+    body = compile_prompt(
+        path,
+        project_profile=project_profile,
+        style_profile=style_profile,
+        shot_spec=shot_spec,
+    )
     for name, value in context_sections:
         body += f"\n[{name}]\n{json.dumps(value, ensure_ascii=False, sort_keys=True)}\n"
     if visual_control is not None:
@@ -133,11 +140,11 @@ def compile_canonical(
                 body += f"\n[{field}]\n{json.dumps(visual_control[field], ensure_ascii=False, sort_keys=True)}\n"
         body += "[visual_control_hash]\n" + str(visual_control_hash) + "\n"
     return CompiledPayload(
-        provider=provider,
-        route=str(capability.get("route", "UNSPECIFIED")),
-        parameters=dict(capability.get("parameters", {})),
+        provider="provider-neutral",
+        route="NEUTRAL_HANDOFF",
+        parameters={},
         reference_slots=tuple(str(item["slot"]) for item in metadata.get("references", [])),
-        capability_snapshot_id=str(capability.get("snapshot_id", "UNVERIFIED")),
+        capability_snapshot_id="NOT_APPLICABLE",
         body=body,
         input_hashes={**input_hashes, **({"visual_control": visual_control_hash} if visual_control_hash else {})},
         visual_control_id=visual_control_id,

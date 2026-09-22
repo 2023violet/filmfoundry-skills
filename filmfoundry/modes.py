@@ -10,7 +10,30 @@ MODE_CREATIVE = "CREATIVE"
 MODE_COMMIT = "COMMIT"
 MODE_PRODUCTION = "PRODUCTION"
 MODE_GATE = "GATE"
+LANE_FAST = "FAST"
+LANE_STANDARD = "STANDARD"
+LANE_STRICT = "STRICT"
+LANE_RECOVERY = "RECOVERY"
 WorkMode = Literal["CREATIVE", "COMMIT", "PRODUCTION", "GATE"]
+ExecutionLane = Literal["FAST", "STANDARD", "STRICT", "RECOVERY"]
+RiskLevel = Literal["R0", "R1", "R2"]
+
+GOAL_FROM_ZERO_IDEA = "FROM_ZERO_IDEA"
+GOAL_EXISTING_SCRIPT = "EXISTING_SCRIPT"
+GOAL_SHORT_VIDEO_TEST = "SHORT_VIDEO_TEST"
+GOAL_SCENE_ASSET = "SCENE_ASSET"
+GOAL_STYLE_EXPLORATION = "STYLE_EXPLORATION"
+GOAL_SINGLE_SHOT_PROMPT = "SINGLE_SHOT_PROMPT"
+GOAL_GENERAL_CREATIVE = "GENERAL_CREATIVE"
+CreationGoal = Literal[
+    "FROM_ZERO_IDEA",
+    "EXISTING_SCRIPT",
+    "SHORT_VIDEO_TEST",
+    "SCENE_ASSET",
+    "STYLE_EXPLORATION",
+    "SINGLE_SHOT_PROMPT",
+    "GENERAL_CREATIVE",
+]
 
 _MODE_ALIASES: dict[str, WorkMode] = {
     "creative": MODE_CREATIVE,
@@ -63,6 +86,24 @@ _EXISTING_SCRIPT_RE = re.compile(
     re.IGNORECASE,
 )
 
+_SHORT_VIDEO_RE = re.compile(r"短视频|试片|three[- ]second hook|short[- ]form|short video|reel|tiktok", re.IGNORECASE)
+_SCENE_ASSET_RE = re.compile(r"场景资产|地点资产|location asset|scene asset|environment asset", re.IGNORECASE)
+_STYLE_RE = re.compile(r"风格探索|视觉风格|style exploration|visual style|style variants?", re.IGNORECASE)
+_SHOT_PROMPT_RE = re.compile(r"单镜头|镜头 prompt|提示词|shot prompt|single[- ]shot|shot spec|provider[- ]neutral|provider payload|payload|编译", re.IGNORECASE)
+_FROM_ZERO_RE = re.compile(r"从零|空白创意|模糊想法|blank idea|from scratch|new idea|premise", re.IGNORECASE)
+_HUMAN_DECISION_RE = re.compile(
+    r"决策|评审|批准|选哪个|decision brief|recommendation|trade[- ]?off|approve|review",
+    re.IGNORECASE,
+)
+_STRICT_LANE_RE = re.compile(
+    r"严格|逐项|全量|正式验收|strict|full[- ]?check|release review|final approval",
+    re.IGNORECASE,
+)
+_RECOVERY_LANE_RE = re.compile(
+    r"失败诊断|校验失败|恢复流程|修复验证|failure diagnosis|validation failure|recover(?:y)?",
+    re.IGNORECASE,
+)
+
 
 def _is_creator_script_request(request: str) -> bool:
     if _VISUAL_ARTIFACT_RE.search(request) and not (
@@ -91,14 +132,22 @@ _PROFILE_REFERENCES: dict[WorkMode, tuple[str, ...]] = {
         "references/13-qc.md",
         "references/14-failure-recovery.md",
         "references/15-runtime-contract.md",
-        "references/16-model-evidence.md",
-        "references/29-capability-scoped-model-gates.md",
         "references/30-edit-timeline-contract.md",
+        "references/43-provider-neutral-handoff.md",
+        "references/44-failure-diagnosis.md",
     ),
 }
 
 _OUTPUT_LABELS: dict[WorkMode, tuple[str, ...]] = {
-    MODE_CREATIVE: ("CREATIVE_DRAFT", "ASSUMPTION", "DEFERRED_CHECK", "HARD_CANON_CONFLICT"),
+    MODE_CREATIVE: (
+        "CREATIVE_DRAFT",
+        "ASSUMPTION",
+        "OPEN",
+        "DEFERRED",
+        "DEFERRED_CHECK",
+        "NOOP",
+        "HARD_CANON_CONFLICT",
+    ),
     MODE_COMMIT: ("COMMIT_SUMMARY", "CANON_CONFLICT", "DEFERRED_CHECK"),
     MODE_PRODUCTION: ("PRODUCTION_ARTIFACT", "VALIDATION_RESULT", "DEFERRED_CHECK"),
     MODE_GATE: ("GATE_RESULT", "BLOCKER", "ACTION"),
@@ -108,8 +157,19 @@ _VALIDATORS: dict[WorkMode, tuple[str, ...]] = {
     MODE_CREATIVE: (),
     MODE_COMMIT: ("canon-conflict",),
     MODE_PRODUCTION: ("runtime", "state", "asset", "dependency"),
-    MODE_GATE: ("runtime", "state", "asset", "dependency", "provider-smoke", "media-audit"),
+    # Gate validates FilmFoundry-owned contracts only.  Provider execution,
+    # generated media, and aesthetic review stay with the external tool/human.
+    MODE_GATE: ("runtime", "state", "asset", "dependency", "handoff"),
 }
+
+
+@dataclass(frozen=True)
+class ExecutionBudget:
+    """Soft interaction limits used to stop low-value planning loops."""
+
+    max_blocking_decisions: int
+    max_internal_steps: int
+    max_auto_revisions: int
 
 
 @dataclass(frozen=True)
@@ -124,6 +184,76 @@ class ModeDecision:
     run_full_validation: bool
     allow_provider_calls: bool
     allow_source_writes: bool
+    goal: CreationGoal = GOAL_GENERAL_CREATIVE
+    goal_route: tuple[str, ...] = ()
+    required_profiles: tuple[str, ...] = ()
+    lane: ExecutionLane = LANE_FAST
+    risk_level: RiskLevel = "R0"
+    budget: ExecutionBudget = ExecutionBudget(1, 4, 1)
+
+
+@dataclass(frozen=True)
+class CreationGoalDecision:
+    """The smallest route for the user's current creative objective."""
+
+    goal: CreationGoal
+    route: tuple[str, ...]
+    reason: str
+    required_profiles: tuple[str, ...]
+
+
+def route_creation_goal(request: str) -> CreationGoalDecision:
+    """Route by objective before selecting a work mode or loading references."""
+    if not isinstance(request, str):
+        raise TypeError("request must be a string")
+    if _EXISTING_SCRIPT_RE.search(request):
+        return CreationGoalDecision(
+            GOAL_EXISTING_SCRIPT,
+            ("script_analysis", "revision", "production_preparation"),
+            "an existing script or draft is the declared source",
+            ("project",),
+        )
+    if _SHORT_VIDEO_RE.search(request):
+        return CreationGoalDecision(
+            GOAL_SHORT_VIDEO_TEST,
+            ("hook", "beat_map", "keyframes", "motion_prompt", "end_frame_check"),
+            "the request targets a short-form proof or test",
+            ("project", "style"),
+        )
+    if _SCENE_ASSET_RE.search(request):
+        return CreationGoalDecision(
+            GOAL_SCENE_ASSET,
+            ("shot_demand_matrix", "location_identity", "shot_bound_derivatives"),
+            "the request targets a scene or location asset",
+            ("project", "style"),
+        )
+    if _STYLE_RE.search(request):
+        return CreationGoalDecision(
+            GOAL_STYLE_EXPLORATION,
+            ("style_profile", "controlled_variants", "human_select"),
+            "the request compares a visual language",
+            ("style",),
+        )
+    if _SHOT_PROMPT_RE.search(request):
+        return CreationGoalDecision(
+            GOAL_SINGLE_SHOT_PROMPT,
+            ("shot_spec", "references", "constraints", "provider_neutral_handoff"),
+            "the request targets one shot handoff",
+            ("project", "style"),
+        )
+    if _FROM_ZERO_RE.search(request) or _is_creator_script_request(request):
+        return CreationGoalDecision(
+            GOAL_FROM_ZERO_IDEA,
+            ("premise", "logline", "characters", "structure"),
+            "the request starts from an undeveloped idea",
+            ("project",),
+        )
+    return CreationGoalDecision(
+        GOAL_GENERAL_CREATIVE,
+        ("clarify_goal",),
+        "the request does not yet declare a narrower creative objective",
+        (),
+    )
 
 
 def _normalize_mode(value: str | None) -> WorkMode | None:
@@ -165,6 +295,13 @@ def _references_for_request(mode: WorkMode, request: str) -> tuple[str, ...]:
             "references/20-content-market-gate.md",
             "references/21-market-mvp.md",
         ]
+    goal = route_creation_goal(request)
+    if any(profile in goal.required_profiles for profile in ("project", "style")):
+        references.append("references/42-project-style-profiles.md")
+    if goal.goal in {GOAL_SINGLE_SHOT_PROMPT, GOAL_SCENE_ASSET, GOAL_SHORT_VIDEO_TEST}:
+        references.append("references/43-provider-neutral-handoff.md")
+    if _HUMAN_DECISION_RE.search(request):
+        references.append("references/45-human-decision-layer.md")
     return tuple(dict.fromkeys(references))
 
 
@@ -174,9 +311,40 @@ def _detected_mode(request: str) -> tuple[WorkMode, str]:
         return MODE_GATE, "readiness or release language requests a complete gate"
     if re.search(r"定下来|写入.*剧本|转成正式|敲定|commit|lock|finali[sz]e|make official", normalized):
         return MODE_COMMIT, "the user is committing a selected creative direction"
-    if re.search(r"payload|编译|shot spec|生产.*(?:prompt|提示词)|可用.*(?:prompt|提示词)", normalized):
+    if re.search(
+        r"payload|编译|handoff|provider[- ]neutral|shot spec|single[- ]shot|单镜头|"
+        r"生产.*(?:prompt|提示词)|可用.*(?:prompt|提示词)",
+        normalized,
+    ):
         return MODE_PRODUCTION, "the user requests a production artifact or compiled payload"
     return MODE_CREATIVE, "the request is exploratory or does not ask for production readiness"
+
+
+def _execution_lane(mode: WorkMode, request: str) -> tuple[ExecutionLane, RiskLevel]:
+    """Choose the lightest safe interaction lane for the selected work mode."""
+    if _RECOVERY_LANE_RE.search(request):
+        return LANE_RECOVERY, "R1"
+    if _STRICT_LANE_RE.search(request) or mode == MODE_GATE:
+        return LANE_STRICT, "R2"
+    if mode in {MODE_COMMIT, MODE_PRODUCTION}:
+        return LANE_STANDARD, "R1"
+    return LANE_FAST, "R0"
+
+
+_EXECUTION_BUDGETS: dict[ExecutionLane, ExecutionBudget] = {
+    LANE_FAST: ExecutionBudget(max_blocking_decisions=1, max_internal_steps=4, max_auto_revisions=1),
+    LANE_STANDARD: ExecutionBudget(max_blocking_decisions=1, max_internal_steps=6, max_auto_revisions=2),
+    LANE_STRICT: ExecutionBudget(max_blocking_decisions=1, max_internal_steps=10, max_auto_revisions=1),
+    LANE_RECOVERY: ExecutionBudget(max_blocking_decisions=1, max_internal_steps=5, max_auto_revisions=1),
+}
+
+
+def execution_budget(lane: ExecutionLane) -> ExecutionBudget:
+    """Return the soft default budget for one execution lane."""
+    try:
+        return _EXECUTION_BUDGETS[lane]
+    except KeyError as exc:
+        raise ValueError(f"unsupported execution lane: {lane}") from exc
 
 
 def route_request(request: str, *, explicit_mode: str | None = None) -> ModeDecision:
@@ -187,6 +355,7 @@ def route_request(request: str, *, explicit_mode: str | None = None) -> ModeDeci
     reason = "explicit mode selected by the user"
     if mode is None:
         mode, reason = _detected_mode(request)
+    lane, risk_level = _execution_lane(mode, request)
     return ModeDecision(
         mode=mode,
         reason=reason,
@@ -194,8 +363,14 @@ def route_request(request: str, *, explicit_mode: str | None = None) -> ModeDeci
         validators=_VALIDATORS[mode],
         output_labels=mode_output_contract(mode),
         run_full_validation=mode == MODE_GATE,
-        allow_provider_calls=mode == MODE_GATE,
+        allow_provider_calls=False,
         allow_source_writes=False,
+        goal=(goal := route_creation_goal(request)).goal,
+        goal_route=goal.route,
+        required_profiles=goal.required_profiles,
+        lane=lane,
+        risk_level=risk_level,
+        budget=execution_budget(lane),
     )
 
 
@@ -204,9 +379,27 @@ __all__ = [
     "MODE_CREATIVE",
     "MODE_GATE",
     "MODE_PRODUCTION",
+    "LANE_FAST",
+    "LANE_STANDARD",
+    "LANE_STRICT",
+    "LANE_RECOVERY",
+    "GOAL_EXISTING_SCRIPT",
+    "GOAL_FROM_ZERO_IDEA",
+    "GOAL_GENERAL_CREATIVE",
+    "GOAL_SCENE_ASSET",
+    "GOAL_SHORT_VIDEO_TEST",
+    "GOAL_SINGLE_SHOT_PROMPT",
+    "GOAL_STYLE_EXPLORATION",
+    "CreationGoal",
+    "CreationGoalDecision",
+    "ExecutionBudget",
+    "ExecutionLane",
+    "RiskLevel",
     "ModeDecision",
     "WorkMode",
+    "execution_budget",
     "mode_output_contract",
     "reference_profile",
     "route_request",
+    "route_creation_goal",
 ]
